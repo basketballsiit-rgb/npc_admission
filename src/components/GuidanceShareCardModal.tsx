@@ -312,16 +312,22 @@ export default function GuidanceShareCardModal({
                   <span className="w-2.5 h-3 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]" />
                 </div>
 
-                {/* 1. TOP HEADER: PROMINENT & BEAUTIFUL COLLEGE LOGO BADGE */}
+                {/* 1. TOP HEADER: PROMINENT & BEAUTIFUL COLLEGE LOGO BADGE (WHITE CIRCLE BACKGROUND) */}
                 <div className="relative z-10 px-4 pt-3.5 pb-1 flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
-                    {/* Enlarged Elegant College Crest Badge */}
-                    <div className="w-13 h-13 rounded-full bg-white p-0.5 border-2 border-amber-400 shadow-lg ring-2 ring-amber-300/60 flex items-center justify-center shrink-0">
+                    {/* College Crest Badge with Pure White Circular Background */}
+                    <div className="w-12 h-12 rounded-full bg-white p-0.5 border-2 border-amber-400 shadow-md ring-2 ring-amber-300/60 flex items-center justify-center shrink-0 overflow-hidden">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
-                        src={assetUrl("/npc-logo.jpg")}
+                        src={assetUrl("/npc-logo-circle.png")}
                         alt="NPC Logo"
-                        className="w-full h-full object-contain"
+                        className="w-full h-full object-contain rounded-full"
+                        onError={(e) => {
+                          const el = e.currentTarget;
+                          if (!el.src.includes("/npc-logo.png")) {
+                            el.src = assetUrl("/npc-logo.png");
+                          }
+                        }}
                       />
                     </div>
                     <div>

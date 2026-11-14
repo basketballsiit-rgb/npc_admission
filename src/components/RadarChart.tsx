@@ -20,10 +20,10 @@ export default function RadarChart({
 }: RadarChartProps) {
   const [hoveredKey, setHoveredKey] = useState<DepartmentKey | null>(null);
 
-  // SVG Dimension
-  const size = 380;
+  // SVG Dimension with wide safety margin to prevent label clipping
+  const size = 440;
   const center = size / 2;
-  const radius = 130; // Radius for 100%
+  const radius = 115; // Safe radius ensuring labels at ratio 1.25 stay inside 440px viewBox
 
   // Concentric levels (3, 6, 9, 12, 15)
   const levels = [0.2, 0.4, 0.6, 0.8, 1.0];
@@ -146,7 +146,7 @@ export default function RadarChart({
                         : "fill-white font-black drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]"
                       : isHovered
                       ? "fill-[#1E3A8A] font-black"
-                      : "fill-slate-700 font-bold"
+                      : "fill-[#0F172A] font-black text-[13px]"
                   }`}
                 >
                   {dept.shortName}
@@ -155,14 +155,14 @@ export default function RadarChart({
                   x={x}
                   y={y + 8}
                   textAnchor={textAnchor}
-                  className={`text-[10px] font-mono font-bold ${
+                  className={`text-[11px] font-mono font-bold ${
                     theme === "dark"
                       ? isHovered
                         ? "fill-emerald-300 font-black"
                         : "fill-amber-300 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]"
                       : isHovered
                       ? "fill-amber-600 font-black"
-                      : "fill-slate-400"
+                      : "fill-[#1E3A8A] font-black"
                   }`}
                 >
                   {score}/{maxScore} ({pct}%)

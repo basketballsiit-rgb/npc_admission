@@ -35,9 +35,10 @@ echo "=== 📦 Installing NPM Packages ==="
 npm install --prefer-offline --no-audit --no-fund
 
 # 5. ซิงค์ฐานข้อมูล Prisma
-echo "=== 🗄️ Prisma Generate & DB Push ==="
+echo "=== 🗄️ Prisma Generate & DB Push & Seed ==="
 npx prisma generate
 npx prisma db push --accept-data-loss || true
+node prisma/seed.js || true
 
 # 6. Build Next.js Production
 echo "=== ⚡ Building Next.js Application ==="

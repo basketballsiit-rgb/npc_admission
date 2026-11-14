@@ -47,6 +47,7 @@ if [ "$LOCAL" != "$REMOTE" ]; then
     # 2. ซิงค์ Prisma & ติดตั้งแพ็กเกจ
     npx prisma generate >> deploy.log 2>&1
     npx prisma db push --accept-data-loss >> deploy.log 2>&1
+    node prisma/seed.js >> deploy.log 2>&1
 
     # 3. Build Next.js Production
     echo "$(date): [Build] Running npm run build..." >> deploy.log

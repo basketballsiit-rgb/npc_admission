@@ -378,29 +378,29 @@ export default function GuidanceShareCardModal({
                   </div>
                 </div>
 
-                {/* 4. CENTER SHOWCASE: 3D MASCOT HERO + COMPACT RADAR CHART (NO NUMBERS) */}
+                {/* 4. CENTER SHOWCASE: 3D MASCOT HERO + COMPACT RADAR CHART (NO NUMBERS, NO HINT TEXT) */}
                 <div className="relative z-10 px-4 py-1 flex-1 flex flex-col items-center justify-center space-y-1">
                   {/* 3D Mascot Character */}
-                  <div className="flex flex-col items-center">
+                  <div className="flex flex-col items-center shrink-0">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={assetUrl(`/images/mascots/${mascotType}.png`)}
                       alt="3D Mascot Hero"
-                      className="w-28 h-28 object-contain drop-shadow-[0_6px_12px_rgba(0,0,0,0.3)] transform hover:scale-105 transition-transform"
+                      className="w-20 h-20 object-contain drop-shadow-[0_4px_10px_rgba(0,0,0,0.3)] transform hover:scale-105 transition-transform"
                     />
-                    <div className="w-24 h-2.5 bg-black/15 rounded-full blur-xs -mt-1" />
+                    <div className="w-18 h-2 bg-black/15 rounded-full blur-xs -mt-1" />
                   </div>
 
-                  {/* Radar Chart (Clean, White card, ONLY DEPT NAMES, NO NUMBERS) */}
-                  <div className="w-full bg-white/95 p-2 rounded-2xl border-2 border-white shadow-md flex items-center justify-center">
-                    <div className="w-full scale-[0.78] -my-6">
-                      <RadarChart
-                        scores={result.scores}
-                        maxScore={15}
-                        theme="light"
-                        hideScores={true}
-                      />
-                    </div>
+                  {/* Compact Radar Chart (Clean, White card, ONLY DEPT NAMES, NO GRAY HINT TEXT) */}
+                  <div className="w-full max-w-[340px] bg-white/95 p-1.5 rounded-2xl border-2 border-white shadow-md flex items-center justify-center overflow-hidden">
+                    <RadarChart
+                      scores={result.scores}
+                      maxScore={15}
+                      theme="light"
+                      hideScores={true}
+                      hideHint={true}
+                      containerClassName="max-w-[260px]"
+                    />
                   </div>
                 </div>
 

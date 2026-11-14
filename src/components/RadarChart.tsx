@@ -9,6 +9,8 @@ interface RadarChartProps {
   highlightDept?: DepartmentKey;
   theme?: "light" | "dark";
   hideScores?: boolean;
+  hideHint?: boolean;
+  containerClassName?: string;
 }
 
 const AXIS_KEYS: DepartmentKey[] = ["AUTO", "ELEC", "TRON", "IT", "ACC", "MKT"];
@@ -19,6 +21,8 @@ export default function RadarChart({
   highlightDept,
   theme = "light",
   hideScores = false,
+  hideHint = false,
+  containerClassName,
 }: RadarChartProps) {
   const [hoveredKey, setHoveredKey] = useState<DepartmentKey | null>(null);
 
@@ -64,7 +68,7 @@ export default function RadarChart({
 
   return (
     <div className="w-full flex flex-col items-center">
-      <div className="relative w-full max-w-[380px] aspect-square flex items-center justify-center">
+      <div className={`relative w-full ${containerClassName || "max-w-[380px]"} aspect-square flex items-center justify-center`}>
         <svg
           viewBox={`0 0 ${size} ${size}`}
           className="w-full h-full overflow-visible select-none drop-shadow-xs"
@@ -229,9 +233,11 @@ export default function RadarChart({
         )}
       </div>
 
-      <div className="text-center text-[11px] text-slate-400 mt-1">
-        * แตะหรือชี้ที่มุมของกราฟใยแมงมุมเพื่อดูคะแนนรายแผนกวิชา
-      </div>
+      {!hideHint && !hideScores && (
+        <div className="text-center text-[11px] text-slate-400 mt-1">
+          * แตะหรือชี้ที่มุมของกราฟใยแมงมุมเพื่อดูคะแนนรายแผนกวิชา
+        </div>
+      )}
     </div>
   );
 }

@@ -2,6 +2,7 @@
 
 import { Suspense, useEffect, useState, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
+import { apiUrl } from "@/lib/basepath";
 import {
   Users,
   Search,
@@ -102,8 +103,8 @@ function ApplicationsContent() {
   const fetchFilterOptions = async () => {
     try {
       const [roundRes, progRes] = await Promise.all([
-        fetch("/api/rounds"),
-        fetch("/api/programs"),
+        fetch(apiUrl("/api/rounds")),
+        fetch(apiUrl("/api/programs")),
       ]);
       if (roundRes.ok) {
         const roundData = await roundRes.json();
@@ -134,7 +135,7 @@ function ApplicationsContent() {
       params.set("sortBy", sortBy);
       params.set("sortOrder", sortOrder);
 
-      const res = await fetch(`/api/admin/applications?${params.toString()}`);
+      const res = await fetch(apiUrl(`/api/admin/applications?${params.toString()}`));
       if (!res.ok) throw new Error("ไม่สามารถโหลดรายชื่อผู้สมัครได้");
       const json = await res.json();
       if (json.success) {
@@ -190,7 +191,7 @@ function ApplicationsContent() {
     try {
       setIsUpdating(true);
       setActionSuccessMsg(null);
-      const res = await fetch("/api/admin/applications", {
+      const res = await fetch(apiUrl("/api/admin/applications"), {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

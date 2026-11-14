@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { apiUrl } from "@/lib/basepath";
 import {
   Users,
   CheckCircle2,
@@ -82,7 +83,7 @@ export default function AdminDashboardPage() {
     try {
       setLoading(true);
       setError(null);
-      const res = await fetch("/api/admin/dashboard");
+      const res = await fetch(apiUrl("/api/admin/dashboard"));
       if (!res.ok) {
         throw new Error("ไม่สามารถโหลดข้อมูลสถิติได้");
       }

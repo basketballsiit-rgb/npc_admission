@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { apiUrl } from "@/lib/basepath";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import {
@@ -180,7 +181,7 @@ function StatusContent() {
 
     setVerifying(true);
     try {
-      const res = await fetch("/api/applications/verify", {
+      const res = await fetch(apiUrl("/api/applications/verify"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -262,7 +263,7 @@ function StatusContent() {
         guardianPhone: editGuardianPhone.trim(),
       };
 
-      const res = await fetch(`/api/applications/${appData.id}`, {
+      const res = await fetch(apiUrl(`/api/applications/${appData.id}`), {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -331,7 +332,7 @@ function StatusContent() {
         guardianPhone: extGuardianPhone.trim(),
       };
 
-      const res = await fetch(`/api/applications/${appData.id}`, {
+      const res = await fetch(apiUrl(`/api/applications/${appData.id}`), {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

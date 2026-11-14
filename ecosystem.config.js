@@ -12,6 +12,7 @@ module.exports = {
       env: {
         NODE_ENV: "production",
         PORT: 3007,
+        NEXT_PUBLIC_BASE_PATH: "/npc_admission",
       },
     },
   ],

@@ -1,10 +1,10 @@
 import "dotenv/config";
-import { prisma } from "./src/lib/prisma";
-import { GET as getPrograms } from "./src/app/api/programs/route";
-import { GET as getRounds } from "./src/app/api/rounds/route";
-import { POST as postApplication } from "./src/app/api/applications/route";
-import { GET as getStatus } from "./src/app/api/applications/status/route";
-import { POST as postRollover } from "./src/app/api/admin/rollover/route";
+import { prisma } from "../src/lib/prisma";
+import { GET as getPrograms } from "../src/app/api/programs/route";
+import { GET as getRounds } from "../src/app/api/rounds/route";
+import { POST as postApplication } from "../src/app/api/applications/route";
+import { GET as getStatus } from "../src/app/api/applications/status/route";
+import { POST as postRollover } from "../src/app/api/admin/rollover/route";
 
 const GREEN = "\x1b[32m";
 const RED = "\x1b[31m";
@@ -221,7 +221,7 @@ async function runTests() {
       roundId: quotaRound.id,
       programId: quotaProgram.id,
       cidEncrypted: "encrypted",
-      cidHash: (await import("./src/lib/security")).hashCID(validCID2),
+      cidHash: (await import("../src/lib/security")).hashCID(validCID2),
       cidMasked: "1-55XX-XXXXX-78-6",
       prefix: "นางสาว",
       firstName: "สมหญิง",

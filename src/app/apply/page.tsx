@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { apiUrl } from "@/lib/basepath";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import {
@@ -121,8 +122,8 @@ function ApplyForm() {
     async function loadData() {
       try {
         const [progRes, roundRes] = await Promise.all([
-          fetch("/api/programs"),
-          fetch("/api/rounds"),
+          fetch(apiUrl("/api/programs")),
+          fetch(apiUrl("/api/rounds")),
         ]);
         const progData = await progRes.json();
         const roundData = await roundRes.json();
@@ -195,7 +196,7 @@ function ApplyForm() {
 
     // Pre-check duplicate in current round
     try {
-      const checkRes = await fetch(`/api/applications/status?cid=${cleanCID}`);
+      const checkRes = await fetch(apiUrl(`/api/applications/status?cid=${cleanCID}`));
       const checkData = await checkRes.json();
 
       if (checkRes.status === 200 && checkData.data) {
@@ -276,7 +277,7 @@ function ApplyForm() {
     setErrorMsg(null);
 
     try {
-      const response = await fetch("/api/applications", {
+      const response = await fetch(apiUrl("/api/applications"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

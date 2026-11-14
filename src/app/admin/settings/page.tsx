@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { apiUrl } from "@/lib/basepath";
 import {
   Settings,
   Calendar,
@@ -76,7 +77,7 @@ export default function AdminSettingsPage() {
     try {
       setLoading(true);
       setErrorMsg(null);
-      const res = await fetch("/api/admin/settings");
+      const res = await fetch(apiUrl("/api/admin/settings"));
       if (!res.ok) throw new Error("ไม่สามารถโหลดการตั้งค่าได้");
       const json = await res.json();
       if (json.success) {
@@ -105,7 +106,7 @@ export default function AdminSettingsPage() {
   const handleSwitchYear = async (yearId: string) => {
     try {
       setSaving(true);
-      const res = await fetch("/api/admin/settings", {
+      const res = await fetch(apiUrl("/api/admin/settings"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "SWITCH_ACTIVE_YEAR", yearId }),
@@ -128,7 +129,7 @@ export default function AdminSettingsPage() {
     if (!newYearInput.trim()) return;
     try {
       setSaving(true);
-      const res = await fetch("/api/admin/settings", {
+      const res = await fetch(apiUrl("/api/admin/settings"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -155,7 +156,7 @@ export default function AdminSettingsPage() {
   const handleToggleProgram = async (program: ProgramQuota) => {
     try {
       const updatedStatus = !program.isOpen;
-      const res = await fetch("/api/admin/settings", {
+      const res = await fetch(apiUrl("/api/admin/settings"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -184,7 +185,7 @@ export default function AdminSettingsPage() {
     name: string
   ) => {
     try {
-      const res = await fetch("/api/admin/settings", {
+      const res = await fetch(apiUrl("/api/admin/settings"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -209,7 +210,7 @@ export default function AdminSettingsPage() {
     if (!editRound) return;
     try {
       setSaving(true);
-      const res = await fetch("/api/admin/settings", {
+      const res = await fetch(apiUrl("/api/admin/settings"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -243,7 +244,7 @@ export default function AdminSettingsPage() {
   const handlePreviewRollover = async () => {
     try {
       setRolloverLoading(true);
-      const res = await fetch("/api/admin/rollover");
+      const res = await fetch(apiUrl("/api/admin/rollover"));
       const json = await res.json();
       if (json.success) {
         setRolloverPreview(json);
@@ -269,7 +270,7 @@ export default function AdminSettingsPage() {
 
     try {
       setRolloverLoading(true);
-      const res = await fetch("/api/admin/rollover", {
+      const res = await fetch(apiUrl("/api/admin/rollover"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

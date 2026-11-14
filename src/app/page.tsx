@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { apiUrl } from "@/lib/basepath";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import CountdownTimer from "@/components/CountdownTimer";
@@ -136,8 +137,8 @@ export default function Home() {
     async function fetchData() {
       try {
         const [programsRes, roundsRes] = await Promise.all([
-          fetch("/api/programs"),
-          fetch("/api/rounds"),
+          fetch(apiUrl("/api/programs")),
+          fetch(apiUrl("/api/rounds")),
         ]);
         const programsData = await programsRes.json();
         const roundsData = await roundsRes.json();

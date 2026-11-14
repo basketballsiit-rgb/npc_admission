@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
+import { apiUrl } from "@/lib/basepath";
 import {
   LayoutDashboard,
   Users,
@@ -47,7 +48,7 @@ export default function AdminLayout({
     let isMounted = true;
     const checkAuth = async () => {
       try {
-        const res = await fetch("/api/admin/auth/me");
+        const res = await fetch(apiUrl("/api/admin/auth/me"));
         if (!res.ok) {
           router.replace("/admin/login");
           return;
@@ -74,7 +75,7 @@ export default function AdminLayout({
 
   const handleLogout = async () => {
     try {
-      await fetch("/api/admin/auth/logout", { method: "POST" });
+      await fetch(apiUrl("/api/admin/auth/logout"), { method: "POST" });
     } finally {
       router.push("/admin/login");
     }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { apiUrl } from "@/lib/basepath";
 import {
   FileSpreadsheet,
   Download,
@@ -43,8 +44,8 @@ export default function AdminExportPage() {
       try {
         setLoading(true);
         const [rRes, pRes] = await Promise.all([
-          fetch("/api/rounds"),
-          fetch("/api/programs"),
+          fetch(apiUrl("/api/rounds")),
+          fetch(apiUrl("/api/programs")),
         ]);
         if (rRes.ok) {
           const rJson = await rRes.json();
@@ -73,7 +74,7 @@ export default function AdminExportPage() {
     params.set("format", format);
 
     // Open download url directly
-    window.location.href = `/api/admin/export?${params.toString()}`;
+    window.location.href = apiUrl(`/api/admin/export?${params.toString()}`);
 
     setTimeout(() => {
       setDownloadingFormat(null);

@@ -12,7 +12,7 @@
     "db:seed": "tsx prisma/seed.ts",
     "db:studio": "prisma studio",
     "test:security": "tsx src/lib/security.test.ts",
-    "test:api": "tsx test-api.ts"
+    "test:api": "tsx scratch/test-api.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",

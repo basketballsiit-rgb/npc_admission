@@ -8,6 +8,7 @@ interface RadarChartProps {
   maxScore?: number;
   highlightDept?: DepartmentKey;
   theme?: "light" | "dark";
+  hideScores?: boolean;
 }
 
 const AXIS_KEYS: DepartmentKey[] = ["AUTO", "ELEC", "TRON", "IT", "ACC", "MKT"];
@@ -17,6 +18,7 @@ export default function RadarChart({
   maxScore = 15,
   highlightDept,
   theme = "light",
+  hideScores = false,
 }: RadarChartProps) {
   const [hoveredKey, setHoveredKey] = useState<DepartmentKey | null>(null);
 
@@ -137,9 +139,10 @@ export default function RadarChart({
               >
                 <text
                   x={x}
-                  y={y - 7}
+                  y={hideScores ? y : y - 7}
                   textAnchor={textAnchor}
-                  className={`text-[12px] ${
+                  dominantBaseline={hideScores ? "central" : "auto"}
+                  className={`text-[13px] ${
                     theme === "dark"
                       ? isHovered
                         ? "fill-amber-300 font-black"
@@ -151,22 +154,24 @@ export default function RadarChart({
                 >
                   {dept.shortName}
                 </text>
-                <text
-                  x={x}
-                  y={y + 8}
-                  textAnchor={textAnchor}
-                  className={`text-[11px] font-mono font-bold ${
-                    theme === "dark"
-                      ? isHovered
-                        ? "fill-emerald-300 font-black"
-                        : "fill-amber-300 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]"
-                      : isHovered
-                      ? "fill-amber-600 font-black"
-                      : "fill-[#1E3A8A] font-black"
-                  }`}
-                >
-                  {score}/{maxScore} ({pct}%)
-                </text>
+                {!hideScores && (
+                  <text
+                    x={x}
+                    y={y + 8}
+                    textAnchor={textAnchor}
+                    className={`text-[11px] font-mono font-bold ${
+                      theme === "dark"
+                        ? isHovered
+                          ? "fill-emerald-300 font-black"
+                          : "fill-amber-300 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]"
+                        : isHovered
+                        ? "fill-amber-600 font-black"
+                        : "fill-[#1E3A8A] font-black"
+                    }`}
+                  >
+                    {score}/{maxScore} ({pct}%)
+                  </text>
+                )}
               </g>
             );
           })}

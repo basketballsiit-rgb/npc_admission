@@ -205,6 +205,60 @@ npx tsx scratch/e2e-test-step5.ts
 
 ---
 
+## 🔄 ระบบ CI/CD และการ Deploy สู่เซิร์ฟเวอร์จริงอัตโนมัติ (Automated Deployment Pipeline)
+
+ระบบได้รับการออกแบบตามสถาปัตยกรรมเดียวกับระบบ **NPC SmartFlow (`npc_smartflow`)** และ **NPC PhotoSync (`npc_photosync`)** ของวิทยาลัยสารพัดช่างน่าน:
+
+```
+[เครื่องผู้พัฒนา / XAMPP]
+        │
+   (แก้ไขไฟล์และกดเซฟ)
+        │
+   [auto_push.js / start_autopush.bat]
+        │
+   (git commit & git push origin main)
+        ▼
+   [GitHub Repository] (basketballsiit-rgb/npc_admission)
+        │
+   (GitHub Actions Trigger: .github/workflows/deploy.yml)
+        ▼
+   [Production Server: /var/www/npc_admission]
+        ├── SSH Connect (appleboy/ssh-action)
+        ├── Git Fetch & Hard Reset to origin/main
+        ├── npm install & npx prisma generate & db push
+        ├── npm run build (Next.js Production Build)
+        └── PM2 Reload (ecosystem.config.js - Port 3007)
+```
+
+### 1. วิธีเปิดระบบบันทึกและส่งขึ้นเซิร์ฟเวอร์อัตโนมัติ (Local Auto-Push)
+บนเครื่องทำงานของคุณ (Windows):
+- ดับเบิลคลิกไฟล์ **`start_autopush.bat`** (หรือพิมพ์คำสั่ง `node auto_push.js`)
+- ระบบจะคอยเฝ้าดูโฟลเดอร์โปรเจกต์ เมื่อคุณแก้ไขและบันทึกไฟล์ โค้ดจะถูก Commit และ Push ขึ้น GitHub อัตโนมัติ พร้อมกระตุ้นให้เซิร์ฟเวอร์ทำการ Deploy ทันที
+
+### 2. การตั้งค่า GitHub Secrets (ทำเพียงครั้งเดียวใน GitHub Repo)
+ไปที่ GitHub Repository -> **Settings** -> **Secrets and variables** -> **Actions** และระบุค่า:
+- `SERVER_IP`: หมายเลข IP ของเซิร์ฟเวอร์วิทยาลัย
+- `SERVER_USER`: บัญชีผู้ใช้ SSH (เช่น `root`)
+- `SERVER_SSH_KEY`: Private Key สำหรับเชื่อมต่อ SSH
+- `SERVER_PASSWORD`: รหัสผ่าน SSH (หากไม่ได้ใช้ Key อย่างเดียว)
+
+*(หากได้ตั้งค่าในระดับ Organization หรือเหมือนกับ `npc_smartflow` แล้ว ระบบจะสามารถเชื่อมต่อได้ทันที)*
+
+### 3. การควบคุม Process บนเซิร์ฟเวอร์จริง (PM2)
+บนเซิร์ฟเวอร์วิทยาลัย ระบบจะรันผ่าน **PM2 Process Manager** ด้วยไฟล์ `ecosystem.config.js`:
+```bash
+# ตรวจสอบสถานะการทำงาน
+pm2 status
+
+# ดูบันทึกการทำงานแบบ Real-time
+pm2 logs npc_admission
+
+# สั่งรีสตาร์ตระบบด้วยตนเอง
+pm2 restart npc_admission
+```
+
+---
+
 ## 🗺️ แผนผังเส้นทางของระบบ (Application Routes Map)
 
 | เส้นทาง (Path) | ประเภท | รายละเอียดการทำงาน |
@@ -224,5 +278,6 @@ npx tsx scratch/e2e-test-step5.ts
 
 **วิทยาลัยสารพัดช่างน่าน (Nan Polytechnic College)**  
 สำนักงานคณะกรรมการการอาชีวศึกษา กระทรวงศึกษาธิการ  
-ที่อยู่: ตำบลในเวียง อำเภอเมืองน่าน จังหวัดน่าน 55000  
-โทรศัพท์: 054-710-238 | เว็บไซต์: [www.npc.ac.th](http://www.npc.ac.th)
+ที่อยู่: 150 ถนนสุมนเทวราช ตำบลในเวียง อำเภอเมืองน่าน จังหวัดน่าน 55000  
+โทรศัพท์: 054-710367, 054-772520 | โทรสาร (Fax): 054-772520  
+เว็บไซต์: [www.npc.ac.th](https://www.npc.ac.th)

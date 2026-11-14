@@ -1,0 +1,103 @@
+name: Deploy NPC Admission to College Server
+
+# Trigger workflow on push to main branch or manual trigger
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Connect to server via SSH and Deploy
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.SERVER_IP }}
+        username: ${{ secrets.SERVER_USER }}
+        key: ${{ secrets.SERVER_SSH_KEY }}
+        password: ${{ secrets.SERVER_PASSWORD }}
+        timeout: 120s
+        command_timeout: 20m
+        script: |
+          echo "=== 🚀 Starting NPC_Admission Deployment ==="
+          TARGET_DIR="/var/www/npc_admission"
+
+          # 1. ตรวจสอบโฟลเดอร์โปรเจกต์ หากยังไม่มีให้ clone มาไว้ที่ /var/www/npc_admission
+          if [ ! -d "$TARGET_DIR" ]; then
+            echo "Directory $TARGET_DIR does not exist. Cloning repository..."
+            git clone https://github.com/basketballsiit-rgb/npc_admission.git "$TARGET_DIR"
+          fi
+
+          cd "$TARGET_DIR"
+
+          # 2. ตั้งค่า Path สำหรับ Node.js (รองรับโครงสร้างเซิร์ฟเวอร์วิทยาลัยสารพัดช่างน่าน)
+          if [ -d "/root/.nvm/versions/node/v20.20.2/bin" ]; then
+            export PATH="/root/.nvm/versions/node/v20.20.2/bin:$PATH"
+          fi
+
+          echo "Node version: $(node -v 2>/dev/null || echo 'not found in current path')"
+          echo "NPM version: $(npm -v 2>/dev/null || echo 'not found in current path')"
+
+          # 3. ดึงโค้ดล่าสุดจาก GitHub main branch
+          echo "📥 Pulling latest changes from GitHub main branch..."
+          git config --global --add safe.directory "$TARGET_DIR" || true
+          git remote set-url origin https://github.com/basketballsiit-rgb/npc_admission.git || true
+          git fetch origin main --force
+          git reset --hard origin/main
+
+          # 4. ตรวจสอบไฟล์ .env บน Server
+          if [ ! -f ".env" ] && [ -f ".env.example" ]; then
+            echo "⚠️ .env not found, copying from .env.example..."
+            cp .env.example .env
+          fi
+
+          # 5. ติดตั้ง Dependencies และ Generate Prisma Client
+          echo "📦 Installing npm dependencies..."
+          npm install --prefer-offline --no-audit --no-fund
+
+          echo "🗄️ Generating Prisma Client & Syncing Database..."
+          npx prisma generate
+          npx prisma db push --accept-data-loss || true
+
+          # 6. Build Next.js Production Assets
+          echo "⚡ Building Next.js application..."
+          export NODE_OPTIONS="--max-old-space-size=1536"
+          npm run build
+
+          # 7. รีสตาร์ตแอปพลิเคชันผ่าน PM2 (พอร์ต 3007)
+          echo "🔄 Restarting Next.js server with PM2..."
+          set +e
+
+          if [ -d "/root/.nvm/versions/node/v20.20.2/bin" ]; then
+            export PATH="/root/.nvm/versions/node/v20.20.2/bin:$PATH"
+          fi
+
+          if which pm2 > /dev/null 2>&1; then
+            PM2_CMD="pm2"
+          elif [ -x "/root/.nvm/versions/node/v20.20.2/bin/pm2" ]; then
+            PM2_CMD="/root/.nvm/versions/node/v20.20.2/bin/pm2"
+          else
+            PM2_CMD="npx pm2"
+          fi
+
+          echo "Using PM2 command: $PM2_CMD"
+          $PM2_CMD restart npc_admission 2>/dev/null || $PM2_CMD start ecosystem.config.js
+          $PM2_CMD save
+
+          # รอให้ Next.js เริ่มต้นการทำงาน
+          sleep 5
+
+          echo "=== PM2 STATUS ==="
+          $PM2_CMD status
+
+          echo "=== LISTENING PORTS ==="
+          ss -tlpn 2>/dev/null | grep -E "3007|3006|3005|nginx" || netstat -tlpn 2>/dev/null | grep -E "3007|3006|3005|nginx" || true
+
+          echo "=== LOCAL CURL PORT 3007 ==="
+          curl -I -s --connect-timeout 5 http://127.0.0.1:3007 || echo "CURL to 127.0.0.1:3007 failed"
+
+          echo "=== PM2 RECENT LOGS ==="
+          $PM2_CMD logs npc_admission --lines 25 --nostream
+
+          echo "✅ Deploy NPC Admission สำเร็จเรียบร้อยแล้ว!"

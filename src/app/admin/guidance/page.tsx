@@ -21,6 +21,10 @@ import {
   ArrowUpRight,
   Share2,
   Zap,
+  Trash2,
+  AlertTriangle,
+  X,
+  Check,
 } from "lucide-react";
 import { DEPARTMENTS, DepartmentKey, STUDY_MODES, SPECIAL_INTERESTS } from "@/lib/guidance-config";
 
@@ -70,6 +74,61 @@ export default function AdminGuidancePage() {
   const [data, setData] = useState<GuidanceData | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [deleting, setDeleting] = useState(false);
+  const [confirmModal, setConfirmModal] = useState<{
+    open: boolean;
+    type: "single" | "batch" | "all";
+    targetId?: string;
+    targetLabel?: string;
+  } | null>(null);
+  const [notification, setNotification] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
+
+  const showNotification = (text: string, type: "success" | "error" = "success") => {
+    setNotification({ text, type });
+    setTimeout(() => setNotification(null), 4000);
+  };
+
+  const handleExecuteDelete = async () => {
+    if (!confirmModal) return;
+
+    try {
+      setDeleting(true);
+      let payload: Record<string, unknown> = {};
+      if (confirmModal.type === "all") {
+        payload = { all: true };
+      } else if (confirmModal.type === "batch") {
+        payload = { ids: selectedIds };
+      } else if (confirmModal.type === "single" && confirmModal.targetId) {
+        payload = { id: confirmModal.targetId };
+      }
+
+      const res = await fetch(apiUrl("/api/admin/guidance"), {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const json = await res.json();
+      if (!res.ok || !json.success) {
+        showNotification(json.message || "เกิดข้อผิดพลาดในการลบข้อมูล", "error");
+        return;
+      }
+
+      showNotification(json.message || "ลบข้อมูลเรียบร้อยแล้ว", "success");
+      setConfirmModal(null);
+      setSelectedIds([]);
+      await fetchData();
+    } catch (err) {
+      console.error("Delete failed:", err);
+      showNotification("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์", "error");
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   const fetchData = async () => {
     try {
@@ -370,9 +429,35 @@ export default function AdminGuidancePage() {
         </div>
       </div>
 
+      {/* Notification Toast */}
+      {notification && (
+        <div
+          className={`p-4 rounded-2xl border text-xs font-bold flex items-center justify-between transition-all animate-in fade-in slide-in-from-top-2 ${
+            notification.type === "success"
+              ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+              : "bg-rose-50 text-rose-800 border-rose-200"
+          }`}
+        >
+          <div className="flex items-center gap-2">
+            {notification.type === "success" ? (
+              <Check className="w-4 h-4 text-emerald-600" />
+            ) : (
+              <AlertTriangle className="w-4 h-4 text-rose-600" />
+            )}
+            <span>{notification.text}</span>
+          </div>
+          <button
+            onClick={() => setNotification(null)}
+            className="text-slate-400 hover:text-slate-600 p-1"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
+
       {/* Recent Assessment Logs Table */}
       <div className="bg-white rounded-3xl border border-slate-200/90 shadow-xs overflow-hidden space-y-4 p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
           <div>
             <h3 className="font-bold text-slate-900 text-sm flex items-center gap-2">
               <Clock className="w-4 h-4 text-[#1E3A8A]" />
@@ -382,15 +467,52 @@ export default function AdminGuidancePage() {
               ไม่แสดงข้อมูลระบุตัวบุคคล เก็บเฉพาะผลคะแนนเพื่อการสถิติ
             </p>
           </div>
-          <span className="text-xs text-slate-400">
-            แสดง {recentLogs.length} รายการล่าสุด
-          </span>
+          
+          <div className="flex items-center gap-2 flex-wrap">
+            {selectedIds.length > 0 && (
+              <button
+                onClick={() => setConfirmModal({ open: true, type: "batch" })}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold shadow-sm transition"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>ลบที่เลือก ({selectedIds.length})</span>
+              </button>
+            )}
+            {recentLogs.length > 0 && (
+              <button
+                onClick={() => setConfirmModal({ open: true, type: "all" })}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl text-xs font-bold transition"
+                title="ล้างข้อมูลผลการประเมินทั้งหมด"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>ล้างประวัติทั้งหมด</span>
+              </button>
+            )}
+            <span className="text-xs text-slate-400 ml-1">
+              แสดง {recentLogs.length} รายการล่าสุด
+            </span>
+          </div>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs">
             <thead>
               <tr className="bg-slate-50 text-slate-600 font-bold border-b border-slate-200/70">
+                <th className="py-2.5 px-3 w-8 text-center">
+                  <input
+                    type="checkbox"
+                    aria-label="เลือกทั้งหมด"
+                    checked={recentLogs.length > 0 && selectedIds.length === recentLogs.length}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedIds(recentLogs.map((l) => l.id));
+                      } else {
+                        setSelectedIds([]);
+                      }
+                    }}
+                    className="rounded border-slate-300 text-[#1E3A8A] focus:ring-[#1E3A8A] cursor-pointer"
+                  />
+                </th>
                 <th className="py-2.5 px-3">วัน-เวลา</th>
                 <th className="py-2.5 px-3">วุฒิ</th>
                 <th className="py-2.5 px-3">โรงเรียนเดิม</th>
@@ -400,12 +522,13 @@ export default function AdminGuidancePage() {
                 <th className="py-2.5 px-3">อันดับ 2</th>
                 <th className="py-2.5 px-3 text-center">แชร์การ์ด</th>
                 <th className="py-2.5 px-3 text-center">กดสมัครเรียน</th>
+                <th className="py-2.5 px-3 text-center w-16">จัดการ</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 font-medium">
               {recentLogs.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="py-8 text-center text-slate-400">
+                  <td colSpan={11} className="py-8 text-center text-slate-400">
                     ยังไม่มีข้อมูลผลการประเมินในระบบ
                   </td>
                 </tr>
@@ -413,9 +536,30 @@ export default function AdminGuidancePage() {
                 recentLogs.map((log) => {
                   const dept1 = DEPARTMENTS[log.recommendedDept1 as DepartmentKey];
                   const dept2 = DEPARTMENTS[log.recommendedDept2 as DepartmentKey];
+                  const isChecked = selectedIds.includes(log.id);
 
                   return (
-                    <tr key={log.id} className="hover:bg-slate-50/60 transition">
+                    <tr
+                      key={log.id}
+                      className={`transition ${
+                        isChecked ? "bg-rose-50/40" : "hover:bg-slate-50/60"
+                      }`}
+                    >
+                      <td className="py-2.5 px-3 text-center">
+                        <input
+                          type="checkbox"
+                          aria-label={`เลือกรายการ ${log.id}`}
+                          checked={isChecked}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedIds([...selectedIds, log.id]);
+                            } else {
+                              setSelectedIds(selectedIds.filter((id) => id !== log.id));
+                            }
+                          }}
+                          className="rounded border-slate-300 text-[#1E3A8A] focus:ring-[#1E3A8A] cursor-pointer"
+                        />
+                      </td>
                       <td className="py-2.5 px-3 text-slate-500 font-mono text-[11px]">
                         {new Date(log.createdAt).toLocaleString("th-TH", {
                           dateStyle: "short",
@@ -483,6 +627,24 @@ export default function AdminGuidancePage() {
                           <span className="text-slate-400 text-[11px]">-</span>
                         )}
                       </td>
+                      <td className="py-2.5 px-3 text-center">
+                        <button
+                          onClick={() =>
+                            setConfirmModal({
+                              open: true,
+                              type: "single",
+                              targetId: log.id,
+                              targetLabel: `${dept1?.shortName || log.recommendedDept1} (${
+                                log.currentEducation === "ม.3" ? "ปวช." : "ปวส."
+                              }) วันที่ ${new Date(log.createdAt).toLocaleDateString("th-TH")}`,
+                            })
+                          }
+                          className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition inline-flex items-center justify-center"
+                          title="ลบรายการนี้"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </td>
                     </tr>
                   );
                 })
@@ -491,6 +653,64 @@ export default function AdminGuidancePage() {
           </table>
         </div>
       </div>
+
+      {/* Confirmation Modal */}
+      {confirmModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 space-y-4 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center shrink-0 border border-rose-100">
+                <AlertTriangle className="w-6 h-6" />
+              </div>
+              <div>
+                <h4 className="font-black text-slate-900 text-base">
+                  {confirmModal.type === "all"
+                    ? "ยืนยันล้างข้อมูลผลการประเมินทั้งหมด?"
+                    : confirmModal.type === "batch"
+                    ? `ยืนยันลบข้อมูลที่เลือก (${selectedIds.length} รายการ)?`
+                    : "ยืนยันการลบผลการประเมินนี้?"}
+                </h4>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  {confirmModal.type === "all"
+                    ? "ข้อมูลบันทึกสถิติและคะแนนแนะแนวทั้งหมดจะถูกลบออกจากฐานข้อมูลอย่างถาวร"
+                    : confirmModal.type === "batch"
+                    ? "รายการที่เลือกจะถูกลบออกจากฐานข้อมูลอย่างถาวร ไม่สามารถกู้คืนได้"
+                    : `ต้องการลบรายการ: ${confirmModal.targetLabel || ""} หรือไม่?`}
+                </p>
+              </div>
+            </div>
+
+            <div className="pt-2 flex items-center justify-end gap-2.5 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => setConfirmModal(null)}
+                disabled={deleting}
+                className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition"
+              >
+                ยกเลิก
+              </button>
+              <button
+                type="button"
+                onClick={handleExecuteDelete}
+                disabled={deleting}
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold shadow-md shadow-rose-600/20 transition disabled:opacity-50"
+              >
+                {deleting ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>กำลังลบข้อมูล...</span>
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>ยืนยันลบข้อมูล</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

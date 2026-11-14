@@ -138,3 +138,63 @@ export async function GET(request: Request) {
     );
   }
 }
+
+export async function DELETE(request: Request) {
+  try {
+    const session = await getAdminSessionFromRequest(request);
+    if (!session) {
+      return NextResponse.json(
+        { success: false, error: "UNAUTHORIZED", message: "กรุณาเข้าสู่ระบบก่อนใช้งาน" },
+        { status: 401 }
+      );
+    }
+
+    const body = await request.json().catch(() => ({}));
+    const { id, ids, all } = body;
+
+    // 1. ลบทั้งหมด (Clear all logs)
+    if (all === true) {
+      const result = await prisma.guidanceAssessmentLog.deleteMany({});
+      return NextResponse.json({
+        success: true,
+        message: `ลบข้อมูลผลการประเมินทั้งหมด (${result.count} รายการ) เรียบร้อยแล้ว`,
+        deletedCount: result.count,
+      });
+    }
+
+    // 2. ลบหลายรายการที่เลือก (Batch delete)
+    if (Array.isArray(ids) && ids.length > 0) {
+      const result = await prisma.guidanceAssessmentLog.deleteMany({
+        where: { id: { in: ids } },
+      });
+      return NextResponse.json({
+        success: true,
+        message: `ลบข้อมูลผลการประเมินที่เลือก (${result.count} รายการ) เรียบร้อยแล้ว`,
+        deletedCount: result.count,
+      });
+    }
+
+    // 3. ลบรายการเดียวตาม ID (Single record delete)
+    if (id && typeof id === "string") {
+      await prisma.guidanceAssessmentLog.delete({
+        where: { id },
+      });
+      return NextResponse.json({
+        success: true,
+        message: "ลบรายการผลการประเมินเรียบร้อยแล้ว",
+        deletedCount: 1,
+      });
+    }
+
+    return NextResponse.json(
+      { success: false, error: "BAD_REQUEST", message: "กรุณาระบุรายการที่ต้องการลบ" },
+      { status: 400 }
+    );
+  } catch (error) {
+    console.error("Error in DELETE /api/admin/guidance:", error);
+    return NextResponse.json(
+      { success: false, error: "INTERNAL_ERROR", message: "เกิดข้อผิดพลาดในการลบข้อมูลผลการประเมิน" },
+      { status: 500 }
+    );
+  }
+}

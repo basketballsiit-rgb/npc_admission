@@ -1,6 +1,6 @@
 import { Building2, Phone, MapPin, Globe, Shield, Printer } from "lucide-react";
 import Link from "next/link";
-import Image from "next/image";
+import { assetUrl } from "@/lib/basepath";
 
 export default function Footer() {
   return (
@@ -11,12 +11,19 @@ export default function Footer() {
           <div className="space-y-3">
             <div className="flex items-center gap-3">
               <div className="relative w-10 h-10 rounded-full overflow-hidden border border-amber-400/80 shadow-xs flex-shrink-0 bg-white">
-                <Image
-                  src="/npc-logo.jpg"
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={assetUrl("/npc-logo.jpg")}
                   alt="ตราสัญลักษณ์ วิทยาลัยสารพัดช่างน่าน"
                   width={40}
                   height={40}
                   className="w-full h-full object-cover"
+                  onError={(e) => {
+                    const el = e.currentTarget;
+                    if (!el.src.includes("/npc_admission")) {
+                      el.src = "/npc_admission/npc-logo.jpg";
+                    }
+                  }}
                 />
               </div>
               <span className="font-bold text-white text-base">วิทยาลัยสารพัดช่างน่าน</span>

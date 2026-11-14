@@ -3,8 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
-import { apiUrl } from "@/lib/basepath";
+import { apiUrl, assetUrl } from "@/lib/basepath";
 import { Lock, User, ShieldCheck, ArrowLeft, Eye, EyeOff, Loader2 } from "lucide-react";
 
 export default function AdminLoginPage() {
@@ -49,13 +48,19 @@ export default function AdminLoginPage() {
         {/* Header */}
         <div className="text-center space-y-3">
           <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-amber-400/90 shadow-lg shadow-indigo-950/20 mx-auto bg-white flex items-center justify-center">
-            <Image
-              src="/npc-logo.jpg"
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={assetUrl("/npc-logo.jpg")}
               alt="ตราสัญลักษณ์ วิทยาลัยสารพัดช่างน่าน"
               width={64}
               height={64}
               className="w-full h-full object-cover"
-              priority
+              onError={(e) => {
+                const el = e.currentTarget;
+                if (!el.src.includes("/npc_admission")) {
+                  el.src = "/npc_admission/npc-logo.jpg";
+                }
+              }}
             />
           </div>
           <div>

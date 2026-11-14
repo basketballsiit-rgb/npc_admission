@@ -2,9 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import { apiUrl } from "@/lib/basepath";
+import { apiUrl, assetUrl } from "@/lib/basepath";
 import {
   LayoutDashboard,
   Users,
@@ -128,12 +127,19 @@ export default function AdminLayout({
       <header className="md:hidden bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between sticky top-0 z-40 shadow-sm">
         <div className="flex items-center gap-2.5">
           <div className="relative w-8 h-8 rounded-full overflow-hidden border border-amber-400/80 shadow-xs flex-shrink-0 bg-white">
-            <Image
-              src="/npc-logo.jpg"
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={assetUrl("/npc-logo.jpg")}
               alt="ตราสัญลักษณ์ วิทยาลัยสารพัดช่างน่าน"
               width={32}
               height={32}
               className="w-full h-full object-cover"
+              onError={(e) => {
+                const el = e.currentTarget;
+                if (!el.src.includes("/npc_admission")) {
+                  el.src = "/npc_admission/npc-logo.jpg";
+                }
+              }}
             />
           </div>
           <span className="font-bold text-sm text-slate-900">ระบบรับสมัคร (เจ้าหน้าที่)</span>
@@ -157,12 +163,19 @@ export default function AdminLayout({
           {/* Logo & Brand */}
           <div className="flex items-center gap-3 pb-5 border-b border-slate-100">
             <div className="relative w-11 h-11 rounded-full overflow-hidden border-2 border-amber-400/90 shadow-md shadow-slate-900/10 flex-shrink-0 bg-white">
-              <Image
-                src="/npc-logo.jpg"
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={assetUrl("/npc-logo.jpg")}
                 alt="ตราสัญลักษณ์ วิทยาลัยสารพัดช่างน่าน"
                 width={44}
                 height={44}
                 className="w-full h-full object-cover"
+                onError={(e) => {
+                  const el = e.currentTarget;
+                  if (!el.src.includes("/npc_admission")) {
+                    el.src = "/npc_admission/npc-logo.jpg";
+                  }
+                }}
               />
             </div>
             <div>

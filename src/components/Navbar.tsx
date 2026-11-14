@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { assetUrl } from "@/lib/basepath";
 import {
   GraduationCap,
   ClipboardList,
@@ -31,13 +31,19 @@ export default function Navbar() {
           {/* Logo & College Brand */}
           <Link href="/" className="flex items-center gap-3 group">
             <div className="relative w-12 h-12 rounded-full overflow-hidden shadow-md shadow-slate-900/15 border-2 border-amber-400/90 group-hover:scale-105 transition-transform flex-shrink-0 bg-white">
-              <Image
-                src="/npc-logo.jpg"
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={assetUrl("/npc-logo.jpg")}
                 alt="ตราสัญลักษณ์ วิทยาลัยสารพัดช่างน่าน"
                 width={48}
                 height={48}
                 className="w-full h-full object-cover"
-                priority
+                onError={(e) => {
+                  const el = e.currentTarget;
+                  if (!el.src.includes("/npc_admission")) {
+                    el.src = "/npc_admission/npc-logo.jpg";
+                  }
+                }}
               />
             </div>
             <div>

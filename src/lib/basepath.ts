@@ -18,3 +18,12 @@ export function apiUrl(path: string): string {
   const cleanPath = path.startsWith("/") ? path : `/${path}`;
   return `${base}${cleanPath}`;
 }
+
+/**
+ * Prefix a static asset (like logo, images) with the base path to avoid Next.js image proxy issues.
+ */
+export function assetUrl(path: string): string {
+  const base = getClientBasePath();
+  const cleanPath = path.startsWith("/") ? path : `/${path}`;
+  return `${base}${cleanPath}`;
+}

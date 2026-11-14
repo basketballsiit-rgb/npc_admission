@@ -7,6 +7,7 @@ interface RadarChartProps {
   scores: Record<DepartmentKey, number>;
   maxScore?: number;
   highlightDept?: DepartmentKey;
+  theme?: "light" | "dark";
 }
 
 const AXIS_KEYS: DepartmentKey[] = ["AUTO", "ELEC", "TRON", "IT", "ACC", "MKT"];
@@ -15,6 +16,7 @@ export default function RadarChart({
   scores,
   maxScore = 15,
   highlightDept,
+  theme = "light",
 }: RadarChartProps) {
   const [hoveredKey, setHoveredKey] = useState<DepartmentKey | null>(null);
 
@@ -70,7 +72,7 @@ export default function RadarChart({
             cx={center}
             cy={center}
             r={radius}
-            fill="#F8FAFC"
+            fill={theme === "dark" ? "rgba(255, 255, 255, 0.05)" : "#F8FAFC"}
             className="transition-colors"
           />
 
@@ -80,7 +82,7 @@ export default function RadarChart({
               key={`grid-${idx}`}
               points={pts}
               fill="none"
-              stroke="#E2E8F0"
+              stroke={theme === "dark" ? "rgba(255, 255, 255, 0.25)" : "#E2E8F0"}
               strokeWidth={idx === levels.length - 1 ? 1.5 : 1}
               strokeDasharray={idx < levels.length - 1 ? "3 3" : undefined}
             />
@@ -96,7 +98,7 @@ export default function RadarChart({
                 y1={center}
                 x2={x}
                 y2={y}
-                stroke="#CBD5E1"
+                stroke={theme === "dark" ? "rgba(255, 255, 255, 0.3)" : "#CBD5E1"}
                 strokeWidth={1}
               />
             );
@@ -105,8 +107,8 @@ export default function RadarChart({
           {/* Data Filled Polygon */}
           <polygon
             points={polygonPath}
-            fill="rgba(30, 58, 138, 0.22)"
-            stroke="#1E3A8A"
+            fill={theme === "dark" ? "rgba(245, 158, 11, 0.38)" : "rgba(30, 58, 138, 0.22)"}
+            stroke={theme === "dark" ? "#F59E0B" : "#1E3A8A"}
             strokeWidth={2.5}
             strokeLinejoin="round"
             className="transition-all duration-300"
@@ -137,8 +139,14 @@ export default function RadarChart({
                   x={x}
                   y={y - 7}
                   textAnchor={textAnchor}
-                  className={`text-[12px] font-bold ${
-                    isHovered ? "fill-[#1E3A8A] font-black" : "fill-slate-700"
+                  className={`text-[12px] ${
+                    theme === "dark"
+                      ? isHovered
+                        ? "fill-amber-300 font-black"
+                        : "fill-white font-black drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]"
+                      : isHovered
+                      ? "fill-[#1E3A8A] font-black"
+                      : "fill-slate-700 font-bold"
                   }`}
                 >
                   {dept.shortName}
@@ -148,7 +156,13 @@ export default function RadarChart({
                   y={y + 8}
                   textAnchor={textAnchor}
                   className={`text-[10px] font-mono font-bold ${
-                    isHovered ? "fill-amber-600 font-black" : "fill-slate-400"
+                    theme === "dark"
+                      ? isHovered
+                        ? "fill-emerald-300 font-black"
+                        : "fill-amber-300 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]"
+                      : isHovered
+                      ? "fill-amber-600 font-black"
+                      : "fill-slate-400"
                   }`}
                 >
                   {score}/{maxScore} ({pct}%)

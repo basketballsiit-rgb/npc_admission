@@ -5,7 +5,6 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const level = searchParams.get("level") || "ปวช.";
-    const code = searchParams.get("code") || "";
 
     const activeYear =
       (await prisma.academicYear.findFirst({
@@ -13,33 +12,28 @@ export async function GET(request: Request) {
       })) || (await prisma.academicYear.findFirst({ orderBy: { year: "desc" } }));
 
     if (!activeYear) {
-      return NextResponse.json({ success: true, items: [], totalAmount: 0 });
+      return NextResponse.json({ success: true, amount: 0, note: "" });
     }
 
-    // ดึงรายการค่าใช้จ่ายที่ตรงกับระดับชั้น และ (เป็นรายการทั่วไป programCode IS NULL หรือ ตรงกับรหัสสาขา)
-    const items = await prisma.initialExpenseItem.findMany({
+    // ดึงค่าใช้จ่ายแรกเข้าของระดับชั้นที่เลือก
+    const item = await prisma.initialExpenseItem.findFirst({
       where: {
         academicYearId: activeYear.id,
         level: level,
         isActive: true,
-        OR: [{ programCode: null }, { programCode: "" }, ...(code ? [{ programCode: code }] : [])],
       },
-      orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
     });
 
-    const totalAmount = items.reduce((sum, item) => sum + item.amount, 0);
+    const defaultAmount = level === "ปวช." ? 0 : 3500;
+    const amount = item ? item.amount : defaultAmount;
+    const note = item?.note || (level === "ปวช." ? "เรียนฟรี 15 ปีตามนโยบายรัฐบาล (ค่าเล่าเรียน 0 บาท)" : "กู้ยืม กยศ. ได้เต็มจำนวน");
 
     return NextResponse.json({
       success: true,
       year: activeYear.year,
       level,
-      code,
-      items,
-      totalAmount,
-      noteScholarship:
-        level === "ปวช."
-          ? "วิทยาลัยสารพัดช่างน่าน สนับสนุนนโยบายเรียนฟรี 15 ปีอย่างมีคุณภาพ ค่าเล่าเรียนฟรีตลอดหลักสูตร มีเฉพาะค่าอุปกรณ์และประกันอุบัติเหตุแรกเข้า"
-          : "ระดับ ปวส. สามารถยื่นกู้ยืมกองทุนเงินให้กู้ยืมเพื่อการศึกษา (กยศ.) ได้เต็มจำนวน และระบบทวิภาคีมีเบี้ยเลี้ยงรายได้ระหว่างเรียน",
+      amount,
+      note,
     });
   } catch (error) {
     console.error("Error in GET /api/expenses:", error);

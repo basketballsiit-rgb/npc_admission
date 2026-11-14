@@ -26,28 +26,44 @@ export async function GET(request: Request) {
     }
 
     if (!year) {
-      return NextResponse.json({ success: true, items: [], years: [] });
+      return NextResponse.json({
+        success: true,
+        currentYear: null,
+        allYears: [],
+        expenses: {
+          pvc: 0,
+          pvs: 0,
+          pvsDual: 0,
+        },
+      });
     }
 
     const allYears = await prisma.academicYear.findMany({ orderBy: { year: "desc" } });
 
+    // Fetch expense items for the year
     const items = await prisma.initialExpenseItem.findMany({
       where: { academicYearId: year.id },
-      orderBy: [{ level: "asc" }, { sortOrder: "asc" }, { createdAt: "asc" }],
+      orderBy: [{ level: "asc" }, { sortOrder: "asc" }],
     });
 
-    const programs = await prisma.programQuota.findMany({
-      where: { academicYearId: year.id },
-      orderBy: [{ level: "asc" }, { code: "asc" }],
-      select: { code: true, name: true, level: true },
-    });
+    // Extract single simple initial expense numbers per level
+    const pvcItem = items.find((i) => i.level === "ปวช.");
+    const pvsItem = items.find((i) => i.level === "ปวส.");
+    const pvsDualItem = items.find((i) => i.level === "ปวส.ทวิภาคี");
 
     return NextResponse.json({
       success: true,
       currentYear: year,
       allYears,
       items,
-      programs,
+      expenses: {
+        pvc: pvcItem ? pvcItem.amount : 0,
+        pvs: pvsItem ? pvsItem.amount : 0,
+        pvsDual: pvsDualItem ? pvsDualItem.amount : 0,
+        pvcNote: pvcItem?.note || "เรียนฟรี 15 ปีตามนโยบายรัฐบาล",
+        pvsNote: pvsItem?.note || "กู้ยืม กยศ. ได้เต็มจำนวน",
+        pvsDualNote: pvsDualItem?.note || "ฝึกงานสถานประกอบการ มีเบี้ยเลี้ยงและรายได้",
+      },
     });
   } catch (error) {
     console.error("Error in GET /api/admin/expenses:", error);
@@ -58,6 +74,7 @@ export async function GET(request: Request) {
   }
 }
 
+// POST: Save/Update simple initial expense amounts per level
 export async function POST(request: Request) {
   try {
     const session = await getAdminSessionFromRequest(request);
@@ -69,108 +86,74 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { academicYearId, level, programCode, itemName, amount, note, sortOrder, isActive } = body;
+    const { academicYearId, pvc, pvs, pvsDual, pvcNote, pvsNote, pvsDualNote } = body;
 
-    if (!academicYearId || !level || !itemName) {
+    if (!academicYearId) {
       return NextResponse.json(
-        { success: false, error: "VALIDATION_ERROR", message: "กรุณาระบุข้อมูลที่จำเป็นให้ครบถ้วน" },
+        { success: false, error: "VALIDATION_ERROR", message: "กรุณาระบุปีการศึกษา" },
         { status: 400 }
       );
     }
 
-    const item = await prisma.initialExpenseItem.create({
-      data: {
-        academicYearId,
-        level,
-        programCode: programCode ? String(programCode).trim() : null,
-        itemName: String(itemName).trim(),
-        amount: Number(amount) || 0,
-        note: note ? String(note).trim() : null,
-        sortOrder: Number(sortOrder) || 0,
-        isActive: isActive !== undefined ? Boolean(isActive) : true,
+    const levelsConfig = [
+      {
+        level: "ปวช.",
+        amount: Number(pvc) || 0,
+        note: pvcNote ? String(pvcNote).trim() : "เรียนฟรี 15 ปีตามนโยบายรัฐบาล",
       },
-    });
+      {
+        level: "ปวส.",
+        amount: Number(pvs) || 0,
+        note: pvsNote ? String(pvsNote).trim() : "กู้ยืม กยศ. ได้เต็มจำนวน",
+      },
+      {
+        level: "ปวส.ทวิภาคี",
+        amount: Number(pvsDual) || 0,
+        note: pvsDualNote ? String(pvsDualNote).trim() : "ฝึกงานสถานประกอบการ มีเบี้ยเลี้ยงและรายได้",
+      },
+    ];
 
-    return NextResponse.json({ success: true, item });
+    for (const cfg of levelsConfig) {
+      const existing = await prisma.initialExpenseItem.findFirst({
+        where: {
+          academicYearId,
+          level: cfg.level,
+        },
+      });
+
+      if (existing) {
+        await prisma.initialExpenseItem.update({
+          where: { id: existing.id },
+          data: {
+            itemName: "ค่าใช้จ่ายแรกเข้า",
+            amount: cfg.amount,
+            note: cfg.note,
+            isActive: true,
+          },
+        });
+      } else {
+        await prisma.initialExpenseItem.create({
+          data: {
+            academicYearId,
+            level: cfg.level,
+            itemName: "ค่าใช้จ่ายแรกเข้า",
+            amount: cfg.amount,
+            note: cfg.note,
+            sortOrder: 1,
+            isActive: true,
+          },
+        });
+      }
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: "บันทึกค่าใช้จ่ายแรกเข้าสำเร็จเรียบร้อยแล้ว",
+    });
   } catch (error) {
     console.error("Error in POST /api/admin/expenses:", error);
     return NextResponse.json(
-      { success: false, error: "SERVER_ERROR", message: "ไม่สามารถสร้างรายการค่าใช้จ่ายได้" },
-      { status: 500 }
-    );
-  }
-}
-
-export async function PUT(request: Request) {
-  try {
-    const session = await getAdminSessionFromRequest(request);
-    if (!session) {
-      return NextResponse.json(
-        { success: false, error: "UNAUTHORIZED", message: "กรุณาเข้าสู่ระบบก่อนใช้งาน" },
-        { status: 401 }
-      );
-    }
-
-    const body = await request.json();
-    const { id, level, programCode, itemName, amount, note, sortOrder, isActive } = body;
-
-    if (!id) {
-      return NextResponse.json(
-        { success: false, error: "VALIDATION_ERROR", message: "กรุณาระบุ ID ของรายการ" },
-        { status: 400 }
-      );
-    }
-
-    const updated = await prisma.initialExpenseItem.update({
-      where: { id },
-      data: {
-        ...(level && { level }),
-        programCode: programCode !== undefined ? (programCode ? String(programCode).trim() : null) : undefined,
-        ...(itemName && { itemName: String(itemName).trim() }),
-        ...(amount !== undefined && { amount: Number(amount) }),
-        ...(note !== undefined && { note: note ? String(note).trim() : null }),
-        ...(sortOrder !== undefined && { sortOrder: Number(sortOrder) }),
-        ...(isActive !== undefined && { isActive: Boolean(isActive) }),
-      },
-    });
-
-    return NextResponse.json({ success: true, item: updated });
-  } catch (error) {
-    console.error("Error in PUT /api/admin/expenses:", error);
-    return NextResponse.json(
-      { success: false, error: "SERVER_ERROR", message: "ไม่สามารถแก้ไขรายการค่าใช้จ่ายได้" },
-      { status: 500 }
-    );
-  }
-}
-
-export async function DELETE(request: Request) {
-  try {
-    const session = await getAdminSessionFromRequest(request);
-    if (!session) {
-      return NextResponse.json(
-        { success: false, error: "UNAUTHORIZED", message: "กรุณาเข้าสู่ระบบก่อนใช้งาน" },
-        { status: 401 }
-      );
-    }
-
-    const { searchParams } = new URL(request.url);
-    const id = searchParams.get("id");
-
-    if (!id) {
-      return NextResponse.json(
-        { success: false, error: "VALIDATION_ERROR", message: "กรุณาระบุ ID ที่ต้องการลบ" },
-        { status: 400 }
-      );
-    }
-
-    await prisma.initialExpenseItem.delete({ where: { id } });
-
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error("Error in DELETE /api/admin/expenses:", error);
-    return NextResponse.json(
-      { success: false, error: "SERVER_ERROR", message: "ไม่สามารถลบรายการได้" },
+      { success: false, error: "SERVER_ERROR", message: "ไม่สามารถบันทึกค่าใช้จ่ายได้" },
       { status: 500 }
     );
   }

@@ -1046,7 +1046,7 @@ export default function GuidanceQuizPage() {
               </div>
             </div>
 
-            {/* SECTION: ESTIMATED EXPENSES & SHARE CARD PROMO */}
+            {/* SECTION: INITIAL EXPENSES & SHARE CARD PROMO */}
             <div className="bg-gradient-to-r from-amber-50 via-white to-blue-50/40 rounded-3xl p-6 sm:p-7 border border-amber-200/90 shadow-sm flex flex-col md:flex-row items-center justify-between gap-5">
               <div className="space-y-1.5">
                 <div className="flex items-center gap-2">
@@ -1054,17 +1054,17 @@ export default function GuidanceQuizPage() {
                     <Coins className="w-5 h-5" />
                   </span>
                   <h3 className="text-base font-black text-slate-900">
-                    ประมาณการค่าใช้จ่ายแรกเข้า & สิทธิประโยชน์ทุนการศึกษา
+                    ค่าใช้จ่ายแรกเข้า
                   </h3>
                 </div>
                 <p className="text-xs text-slate-600 max-w-xl leading-relaxed">
                   {selectedLevelView === "ปวช."
-                    ? "✨ ระดับ ปวช. เรียนฟรี 15 ปีอย่างมีคุณภาพ (ค่าเล่าเรียน 0 บาท) จ่ายเฉพาะค่าเครื่องแบบ อุปกรณ์ช่าง และกิจกรรมพัฒนาผู้เรียน มีกองทุน กยศ./กรอ. รองรับ"
-                    : "✨ ระดับ ปวส. ค่าเล่าเรียนตามระเบียบกระทรวงศึกษาธิการ มีระบบทวิภาคีฝึกงานสถานประกอบการพร้อมเบี้ยเลี้ยงและรายได้ระหว่างเรียน"}
+                    ? "✨ ระดับ ปวช. สนับสนุนนโยบายเรียนฟรี 15 ปีอย่างมีคุณภาพ (ค่าเล่าเรียน 0 บาทตลอดหลักสูตร) มีกองทุน กยศ./กรอ. รองรับ"
+                    : "✨ ระดับ ปวส. ค่าใช้จ่ายแรกเข้าเป็นไปตามระเบียบกระทรวงศึกษาธิการ สามารถยื่นกู้ กยศ. ได้ และระบบทวิภาคีมีเบี้ยเลี้ยงรายได้ระหว่างเรียน"}
                 </p>
                 <div className="flex items-center gap-2 pt-1 text-[11px] text-amber-900 font-bold">
                   <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                  <span>สามารถทดลองคำนวณและปรับลด-เพิ่มรายการค่าใช้จ่ายเพื่อทำสรุปส่งให้ผู้ปกครองได้</span>
+                  <span>บันทึกหรือแชร์ผลลัพธ์ผ่านการ์ดรูปภาพ 3D พื้นหลังคาแรกเตอร์สุดเท่ลง Instagram, TikTok หรือส่งให้เพื่อนได้ทันที</span>
                 </div>
               </div>
 
@@ -1075,8 +1075,8 @@ export default function GuidanceQuizPage() {
               >
                 <Share2 className="w-4 h-4 text-amber-300" />
                 <div className="text-left">
-                  <div className="text-[11px] text-blue-200 font-medium">แชร์ผลลัพธ์ & สรุปค่าใช้จ่าย</div>
-                  <div className="text-xs font-black">สร้างการ์ดรูปภาพ 3D / ส่งผู้ปกครอง</div>
+                  <div className="text-[11px] text-blue-200 font-medium">ภาพพื้นหลังการ์ตูน 3D</div>
+                  <div className="text-xs font-black">สร้างการ์ดรูปภาพแชร์สตอรี่ / โซเชียล</div>
                 </div>
               </button>
             </div>

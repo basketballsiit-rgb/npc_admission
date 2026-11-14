@@ -16,6 +16,22 @@ export async function GET(request: Request) {
     const clickedApplyCount = await prisma.guidanceAssessmentLog.count({
       where: { clickedApply: true },
     });
+    
+    // ยอดรวมการแชร์/ดาวน์โหลดการ์ดรูปภาพ PR
+    const shareAgg = await prisma.guidanceAssessmentLog.aggregate({
+      _sum: { sharedCardCount: true },
+    });
+    const totalSharedCards = shareAgg._sum.sharedCardCount || 0;
+
+    // ยอดแนะนำสาขายานยนต์ไฟฟ้า (20143)
+    const evRecommendedCount = await prisma.guidanceAssessmentLog.count({
+      where: {
+        OR: [
+          { recommendedCode1: "20143" },
+          { recommendedCode1: "20108" },
+        ],
+      },
+    });
 
     const conversionRate =
       totalAssessments > 0
@@ -93,6 +109,7 @@ export async function GET(request: Request) {
         studyModePref: true,
         specialInterest: true,
         clickedApply: true,
+        sharedCardCount: true,
         createdAt: true,
       },
     });
@@ -102,6 +119,8 @@ export async function GET(request: Request) {
       summary: {
         totalAssessments,
         clickedApplyCount,
+        totalSharedCards,
+        evRecommendedCount,
         conversionRate,
         trackCounts,
         eduCounts,

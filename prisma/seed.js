@@ -108,7 +108,7 @@ async function main() {
       regularSeats: 20,
     },
     {
-      code: "20108",
+      code: "20143",
       level: "ปวช.",
       name: "สาขาวิชายานยนต์ไฟฟ้า",
       quotaSeats: 20,
@@ -223,6 +223,114 @@ async function main() {
       },
     });
     console.log(`  [${item.level}] รหัส ${item.code}: ${item.name} (โควตา: ${item.quotaSeats}, ปกติ: ${item.regularSeats})`);
+  }
+
+  // 5. รายการค่าใช้จ่ายเบื้องต้นแรกเข้า (Initial Expense Items)
+  const defaultExpenses = [
+    // ปวช. (ทั่วไป)
+    {
+      level: "ปวช.",
+      programCode: null,
+      itemName: "ค่าบำรุงการศึกษา / ค่าหน่วยกิต",
+      amount: 0,
+      note: "ฟรีตามนโยบายเรียนฟรี 15 ปีของรัฐบาล",
+      sortOrder: 1,
+    },
+    {
+      level: "ปวช.",
+      programCode: null,
+      itemName: "ค่าชุดฝึกปฏิบัติการวิชาชีพและอุปกรณ์ประจำสาขา",
+      amount: 1200,
+      note: "ชำระวันมอบตัว / ใช้อุปกรณ์ฝึกจริง",
+      sortOrder: 2,
+    },
+    {
+      level: "ปวช.",
+      programCode: null,
+      itemName: "ค่าประกันอุบัติเหตุ บัตรนักศึกษา และตรวจสุขภาพ",
+      amount: 350,
+      note: "คุ้มครองการรักษาพยาบาลตลอด 24 ชั่วโมง",
+      sortOrder: 3,
+    },
+    // ปวช. เฉพาะสาขาวิชายานยนต์ไฟฟ้า (20143)
+    {
+      level: "ปวช.",
+      programCode: "20143",
+      itemName: "ค่าอุปกรณ์ความปลอดภัยระบบไฟฟ้าแรงดันสูง (EV Safety)",
+      amount: 300,
+      note: "ถุงมือฉนวนและอุปกรณ์มาตรฐานความปลอดภัย EV",
+      sortOrder: 4,
+    },
+    // ปวส.
+    {
+      level: "ปวส.",
+      programCode: null,
+      itemName: "ค่าลงทะเบียนเรียนและค่าหน่วยกิต",
+      amount: 2500,
+      note: "สามารถยื่นกู้ยืมกองทุน กยศ. ได้เต็มจำนวน",
+      sortOrder: 1,
+    },
+    {
+      level: "ปวส.",
+      programCode: null,
+      itemName: "ค่าบำรุงห้องปฏิบัติการเทคโนโลยีและซอฟต์แวร์วิชาชีพ",
+      amount: 1200,
+      note: "รวมการใช้งานเครื่องมือและระบบเครือข่าย",
+      sortOrder: 2,
+    },
+    {
+      level: "ปวส.",
+      programCode: null,
+      itemName: "ค่าประกันอุบัติเหตุ บัตรนักศึกษา และพัฒนาทักษะวิชาชีพ",
+      amount: 450,
+      note: "คุ้มครองอุบัติเหตุและกิจกรรมการศึกษา",
+      sortOrder: 3,
+    },
+    // ปวส.ทวิภาคี
+    {
+      level: "ปวส.ทวิภาคี",
+      programCode: null,
+      itemName: "ค่าลงทะเบียนเรียนระบบทวิภาคี",
+      amount: 2000,
+      note: "มีเบี้ยเลี้ยงและรายได้ระหว่างฝึกงานในสถานประกอบการ",
+      sortOrder: 1,
+    },
+    {
+      level: "ปวส.ทวิภาคี",
+      programCode: null,
+      itemName: "ค่าประกันอุบัติเหตุและการตรวจสุขภาพก่อนฝึกงาน",
+      amount: 450,
+      note: "ครอบคลุมการฝึกงานในสถานประกอบการจริง",
+      sortOrder: 2,
+    },
+  ];
+
+  console.log("\n💰 กำลังสร้างข้อมูลรายการค่าใช้จ่ายเบื้องต้น...");
+  for (const exp of defaultExpenses) {
+    const existing = await prisma.initialExpenseItem.findFirst({
+      where: {
+        academicYearId: year2570.id,
+        level: exp.level,
+        programCode: exp.programCode,
+        itemName: exp.itemName,
+      },
+    });
+
+    if (!existing) {
+      await prisma.initialExpenseItem.create({
+        data: {
+          academicYearId: year2570.id,
+          level: exp.level,
+          programCode: exp.programCode,
+          itemName: exp.itemName,
+          amount: exp.amount,
+          note: exp.note,
+          sortOrder: exp.sortOrder,
+          isActive: true,
+        },
+      });
+      console.log(`  [${exp.level}] ${exp.itemName}: ${exp.amount} บาท (${exp.note || "-"})`);
+    }
   }
 
   console.log("\n==========================================================");

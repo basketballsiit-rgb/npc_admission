@@ -450,6 +450,7 @@ export interface AssessmentResult {
   }[];
   top1: DepartmentKey;
   top2: DepartmentKey;
+  preferEv: boolean;
   studyMode: StudyModeType;
   specialInterest: SpecialInterestType;
 }
@@ -566,6 +567,10 @@ export function calculateAssessmentResult(
   const top1 = sortedDepartments[0].key;
   const top2 = sortedDepartments[1].key;
 
+  // หากผู้ทำแบบประเมินมีคะแนนด้านไฟฟ้า (ELEC) หรืออิเล็กทรอนิกส์ (TRON) ตั้งแต่ 6 คะแนนขึ้นไป หรือเลือกความสนใจเกี่ยวกับ EV ในข้อ 5
+  const preferEv =
+    deptScores.ELEC >= 6 || deptScores.TRON >= 6 || answers[5] === "5_a";
+
   return {
     currentEducation,
     schoolName,
@@ -578,6 +583,7 @@ export function calculateAssessmentResult(
     sortedDepartments,
     top1,
     top2,
+    preferEv,
     studyMode,
     specialInterest,
   };

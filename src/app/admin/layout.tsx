@@ -17,6 +17,7 @@ import {
   Loader2,
   Calendar,
   Compass,
+  Coins,
 } from "lucide-react";
 
 interface AdminUser {
@@ -119,6 +120,12 @@ export default function AdminLayout({
       href: "/admin/guidance",
       icon: Compass,
       active: pathname.startsWith("/admin/guidance"),
+    },
+    {
+      name: "จัดการค่าใช้จ่ายแรกเข้า",
+      href: "/admin/expenses",
+      icon: Coins,
+      active: pathname.startsWith("/admin/expenses"),
     },
     {
       name: "ศูนย์ส่งออก ศธ.02 / RMS",

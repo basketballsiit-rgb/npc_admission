@@ -31,8 +31,9 @@ model AcademicYear {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  rounds   AdmissionRound[]
-  programs ProgramQuota[]
+  rounds          AdmissionRound[]
+  programs        ProgramQuota[]
+  initialExpenses InitialExpenseItem[]
 
   @@map("academic_years")
 }
@@ -128,6 +129,7 @@ model GuidanceAssessmentLog {
   studyModePref    String   // "NORMAL" | "DUAL" | "FLEX" จากข้อ 11
   specialInterest  String   // "CAFE" | "CRAFT" | "MEDIA" | "FIXIT" | "NONE" จากข้อ 12
   clickedApply     Boolean  @default(false) // อัปเดตเป็น true เมื่อผู้ใช้กดปุ่มสมัครเรียนต่อจากหน้าผลลัพธ์
+  sharedCardCount  Int      @default(0)     // จำนวนครั้งที่มีการกดดาวน์โหลด/แชร์การ์ดรูปภาพ PR
   createdAt        DateTime @default(now())
 
   @@index([createdAt])
@@ -135,4 +137,26 @@ model GuidanceAssessmentLog {
   @@index([recommendedDept1])
   @@index([clickedApply])
   @@map("guidance_assessment_logs")
+}
+
+// 7. รายการค่าใช้จ่ายเบื้องต้นแรกเข้า (ปรับแก้และจัดการได้ตามปีการศึกษาและระดับชั้น)
+model InitialExpenseItem {
+  id             String   @id @default(cuid())
+  academicYearId String
+  level          String   // "ปวช." | "ปวส." | "ปวส.ทวิภาคี"
+  programCode    String?  // รหัสสาขาเฉพาะ เช่น "20143" (หากเว้นว่าง null คือใช้กับทุกสาขาในระดับนั้น)
+  itemName       String   // เช่น "ค่าบำรุงการศึกษา", "ค่าชุดฝึกปฏิบัติการวิชาชีพ"
+  amount         Float    // จำนวนเงินเป็นบาท (0 = ฟรีตามนโยบายรัฐ)
+  note           String?  // หมายเหตุ เช่น "ฟรีตามนโยบายเรียนฟรี 15 ปี", "ชำระวันมอบตัว"
+  sortOrder      Int      @default(0)
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  academicYear AcademicYear @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
+
+  @@index([academicYearId])
+  @@index([level])
+  @@index([programCode])
+  @@map("initial_expense_items")
 }

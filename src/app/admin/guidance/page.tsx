@@ -19,6 +19,8 @@ import {
   CheckCircle2,
   Clock,
   ArrowUpRight,
+  Share2,
+  Zap,
 } from "lucide-react";
 import { DEPARTMENTS, DepartmentKey, STUDY_MODES, SPECIAL_INTERESTS } from "@/lib/guidance-config";
 
@@ -26,6 +28,8 @@ interface GuidanceData {
   summary: {
     totalAssessments: number;
     clickedApplyCount: number;
+    totalSharedCards?: number;
+    evRecommendedCount?: number;
     conversionRate: number;
     trackCounts: {
       VOCATIONAL: number;
@@ -57,6 +61,7 @@ interface GuidanceData {
     studyModePref: string;
     specialInterest: string;
     clickedApply: boolean;
+    sharedCardCount?: number;
     createdAt: string;
   }[];
 }
@@ -131,8 +136,8 @@ export default function AdminGuidancePage() {
         </button>
       </div>
 
-      {/* 4 Summary Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* 6 Summary Stat Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
         {/* Card 1: Total Assessments */}
         <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs space-y-2">
           <div className="flex items-center justify-between">
@@ -148,7 +153,7 @@ export default function AdminGuidancePage() {
             <span className="text-xs font-medium text-slate-500 ml-1.5">คน</span>
           </div>
           <div className="text-[11px] text-slate-400">
-            ม.3: {summary?.eduCounts.M3 || 0} คน • ม.6/ปวช.3: {summary?.eduCounts.M6_PVS || 0} คน
+            ม.3: {summary?.eduCounts.M3 || 0} • ม.6/ปวช.3: {summary?.eduCounts.M6_PVS || 0}
           </div>
         </div>
 
@@ -171,11 +176,49 @@ export default function AdminGuidancePage() {
           </div>
         </div>
 
-        {/* Card 3: Conversion Rate */}
+        {/* Card 3: Shared 3D Cards */}
         <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-slate-500">
-              อัตราส่งต่อสู่การสมัคร (Conversion)
+              แชร์การ์ดรูปภาพ / สตอรี่
+            </span>
+            <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-700 flex items-center justify-center">
+              <Share2 className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="text-2xl font-black text-indigo-600">
+            {(summary?.totalSharedCards || 0).toLocaleString()}
+            <span className="text-xs font-medium text-slate-500 ml-1.5">ครั้ง</span>
+          </div>
+          <div className="text-[11px] text-slate-400">
+            บันทึกภาพ/แชร์ให้ผู้ปกครอง
+          </div>
+        </div>
+
+        {/* Card 4: EV 20143 Recommendations */}
+        <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-slate-500">
+              แนะนำยานยนต์ไฟฟ้า
+            </span>
+            <div className="w-8 h-8 rounded-xl bg-cyan-50 text-cyan-700 flex items-center justify-center">
+              <Zap className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="text-2xl font-black text-cyan-600">
+            {(summary?.evRecommendedCount || 0).toLocaleString()}
+            <span className="text-xs font-medium text-slate-500 ml-1.5">คน</span>
+          </div>
+          <div className="text-[11px] text-slate-400">
+            สาขาวิชา 20143 (ปวช.)
+          </div>
+        </div>
+
+        {/* Card 5: Conversion Rate */}
+        <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-slate-500">
+              Conversion Rate
             </span>
             <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
               <TrendingUp className="w-4 h-4" />
@@ -185,15 +228,15 @@ export default function AdminGuidancePage() {
             {summary?.conversionRate || 0}%
           </div>
           <div className="text-[11px] text-slate-400">
-            สัดส่วนผู้ประเมินที่สนใจสมัครเรียนจริง
+            ส่งต่อสู่การสมัครเรียนจริง
           </div>
         </div>
 
-        {/* Card 4: Vocational Track Ratio */}
+        {/* Card 6: Vocational Track Ratio */}
         <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-slate-500">
-              สายอาชีพโดยตรง (Vocational)
+              สายอาชีพ (Vocational)
             </span>
             <div className="w-8 h-8 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center">
               <Award className="w-4 h-4" />
@@ -204,7 +247,7 @@ export default function AdminGuidancePage() {
             <span className="text-xs font-medium text-slate-500 ml-1.5">คน</span>
           </div>
           <div className="text-[11px] text-slate-400">
-            ลูกผสม: {summary?.trackCounts.HYBRID || 0} • สายสามัญ: {summary?.trackCounts.ACADEMIC || 0}
+            ลูกผสม: {summary?.trackCounts.HYBRID || 0} • สามัญ: {summary?.trackCounts.ACADEMIC || 0}
           </div>
         </div>
       </div>
@@ -355,13 +398,14 @@ export default function AdminGuidancePage() {
                 <th className="py-2.5 px-3">ผลวิเคราะห์สาย</th>
                 <th className="py-2.5 px-3">อันดับ 1 (รหัส)</th>
                 <th className="py-2.5 px-3">อันดับ 2</th>
+                <th className="py-2.5 px-3 text-center">แชร์การ์ด</th>
                 <th className="py-2.5 px-3 text-center">กดสมัครเรียน</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 font-medium">
               {recentLogs.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="py-8 text-center text-slate-400">
+                  <td colSpan={9} className="py-8 text-center text-slate-400">
                     ยังไม่มีข้อมูลผลการประเมินในระบบ
                   </td>
                 </tr>
@@ -410,9 +454,24 @@ export default function AdminGuidancePage() {
                         <span className="font-mono text-slate-400 text-[11px]">
                           ({log.recommendedCode1})
                         </span>
+                        {log.recommendedCode1 === "20143" && (
+                          <span className="ml-1 px-1.5 py-0.2 rounded bg-cyan-100 text-cyan-800 text-[9px] font-bold">
+                            EV
+                          </span>
+                        )}
                       </td>
                       <td className="py-2.5 px-3 text-slate-600">
                         {dept2?.shortName || log.recommendedDept2}
+                      </td>
+                      <td className="py-2.5 px-3 text-center">
+                        {(log.sharedCardCount || 0) > 0 ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 font-mono text-[11px] font-bold">
+                            <Share2 className="w-3 h-3" />
+                            <span>{log.sharedCardCount}</span>
+                          </span>
+                        ) : (
+                          <span className="text-slate-300 text-[11px]">-</span>
+                        )}
                       </td>
                       <td className="py-2.5 px-3 text-center">
                         {log.clickedApply ? (

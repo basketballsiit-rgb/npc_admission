@@ -26,6 +26,8 @@ import {
   Heart,
   Wrench,
   Check,
+  Coins,
+  Plus,
 } from "lucide-react";
 import { apiUrl, assetUrl } from "@/lib/basepath";
 import {
@@ -42,6 +44,7 @@ import {
   AssessmentResult,
 } from "@/lib/guidance-questions";
 import RadarChart from "@/components/RadarChart";
+import GuidanceShareCardModal from "@/components/GuidanceShareCardModal";
 
 export default function GuidanceQuizPage() {
   const router = useRouter();
@@ -67,9 +70,12 @@ export default function GuidanceQuizPage() {
   const [selectedLevelView, setSelectedLevelView] =
     useState<EducationLevelType>("ปวช.");
 
-  // Sub-program selection for departments with multiple options (e.g. ช่างยนต์ 20101 vs ยานยนต์ไฟฟ้า 20108)
+  // Sub-program selection for departments with multiple options (e.g. ช่างยนต์ 20101 vs ยานยนต์ไฟฟ้า 20143)
   const [subProgramTop1, setSubProgramTop1] = useState<string>("20101");
   const [subProgramTop2, setSubProgramTop2] = useState<string>("20101");
+
+  // Share Card 3D Modal
+  const [shareModalOpen, setShareModalOpen] = useState(false);
 
   // Tooltip/highlighted department on hover
   const [highlightedDept, setHighlightedDept] = useState<DepartmentKey | null>(
@@ -126,13 +132,27 @@ export default function GuidanceQuizPage() {
     setStep("result");
     window.scrollTo({ top: 0, behavior: "smooth" });
 
+    // หากผู้ทำแบบประเมิน ปวช. มีคะแนนด้านไฟฟ้า/อิเล็กทรอนิกส์ >= 6 หรือเลือก EV ในข้อ 5 ให้แนะนำรหัส 20143 ยานยนต์ไฟฟ้าเป็นหลัก
+    let defaultCodeTop1 =
+      res.currentEducation === "ม.3"
+        ? (res.top1 === "AUTO" && res.preferEv ? "20143" : DEPARTMENTS[res.top1].pvc.code)
+        : DEPARTMENTS[res.top1].pvs.code;
+
+    if (res.currentEducation === "ม.3" && res.top1 === "AUTO" && res.preferEv) {
+      setSubProgramTop1("20143");
+    } else {
+      setSubProgramTop1("20101");
+    }
+
+    if (res.currentEducation === "ม.3" && res.top2 === "AUTO" && res.preferEv) {
+      setSubProgramTop2("20143");
+    } else {
+      setSubProgramTop2("20101");
+    }
+
     // Save log to backend
     setSavingLog(true);
     try {
-      const top1Config = DEPARTMENTS[res.top1];
-      const program1 =
-        res.currentEducation === "ม.3" ? top1Config.pvc : top1Config.pvs;
-
       const top2Config = DEPARTMENTS[res.top2];
       const program2 =
         res.currentEducation === "ม.3" ? top2Config.pvc : top2Config.pvs;
@@ -148,7 +168,7 @@ export default function GuidanceQuizPage() {
           trackResult: res.trackResult,
           scores: res.scores,
           recommendedDept1: res.top1,
-          recommendedCode1: program1.code,
+          recommendedCode1: defaultCodeTop1,
           recommendedDept2: res.top2,
           studyModePref: res.studyMode,
           specialInterest: res.specialInterest,
@@ -496,7 +516,15 @@ export default function GuidanceQuizPage() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShareModalOpen(true)}
+                  className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white text-xs font-bold transition shadow-sm flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Share2 className="w-3.5 h-3.5" />
+                  <span>สร้างการ์ดรูปภาพ 3D / สตอรี่</span>
+                </button>
                 <button
                   onClick={() => window.print()}
                   className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition flex items-center gap-1.5"
@@ -719,8 +747,8 @@ export default function GuidanceQuizPage() {
                     dept.alternativePvc.length > 0;
                   
                   let prog = selectedLevelView === "ปวช." ? dept.pvc : dept.pvs;
-                  if (hasAlternatives && subProgramTop1 === "20108") {
-                    const evProg = dept.alternativePvc?.find((a) => a.code === "20108");
+                  if (hasAlternatives && subProgramTop1 === "20143") {
+                    const evProg = dept.alternativePvc?.find((a) => a.code === "20143");
                     if (evProg) prog = evProg;
                   }
 
@@ -774,21 +802,21 @@ export default function GuidanceQuizPage() {
 
                               <button
                                 type="button"
-                                onClick={() => setSubProgramTop1("20108")}
+                                onClick={() => setSubProgramTop1("20143")}
                                 className={`p-2 rounded-xl border text-left transition cursor-pointer ${
-                                  subProgramTop1 === "20108"
+                                  subProgramTop1 === "20143"
                                     ? "bg-gradient-to-r from-amber-500 to-amber-600 text-white border-amber-500 shadow-xs"
                                     : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
                                 }`}
                               >
                                 <div className="font-bold text-xs flex items-center gap-1">
                                   <span>ยานยนต์ไฟฟ้า</span>
-                                  <span className={`text-[9px] px-1 rounded font-bold ${subProgramTop1 === "20108" ? "bg-white/20 text-white" : "bg-amber-100 text-amber-800"}`}>
+                                  <span className={`text-[9px] px-1 rounded font-bold ${subProgramTop1 === "20143" ? "bg-white/20 text-white" : "bg-amber-100 text-amber-800"}`}>
                                     ⚡ EV
                                   </span>
                                 </div>
-                                <div className={`text-[10px] font-mono ${subProgramTop1 === "20108" ? "text-amber-100" : "text-slate-400"}`}>
-                                  รหัส 20108
+                                <div className={`text-[10px] font-mono ${subProgramTop1 === "20143" ? "text-amber-100" : "text-slate-400"}`}>
+                                  รหัส 20143
                                 </div>
                               </button>
                             </div>
@@ -850,7 +878,7 @@ export default function GuidanceQuizPage() {
                         <button
                           onClick={() => handleApplyClick(prog.level, prog.code)}
                           className={`w-full py-3 px-4 rounded-xl text-white font-bold text-xs shadow-md hover:shadow-lg transition flex items-center justify-center gap-2 group cursor-pointer ${
-                            prog.code === "20108"
+                            prog.code === "20143"
                               ? "bg-gradient-to-r from-amber-500 via-amber-600 to-red-600 hover:from-amber-600 hover:to-red-700"
                               : "bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700"
                           }`}
@@ -874,8 +902,8 @@ export default function GuidanceQuizPage() {
                     dept.alternativePvc.length > 0;
 
                   let prog = selectedLevelView === "ปวช." ? dept.pvc : dept.pvs;
-                  if (hasAlternatives && subProgramTop2 === "20108") {
-                    const evProg = dept.alternativePvc?.find((a) => a.code === "20108");
+                  if (hasAlternatives && subProgramTop2 === "20143") {
+                    const evProg = dept.alternativePvc?.find((a) => a.code === "20143");
                     if (evProg) prog = evProg;
                   }
 
@@ -929,21 +957,21 @@ export default function GuidanceQuizPage() {
 
                               <button
                                 type="button"
-                                onClick={() => setSubProgramTop2("20108")}
+                                onClick={() => setSubProgramTop2("20143")}
                                 className={`p-2 rounded-xl border text-left transition cursor-pointer ${
-                                  subProgramTop2 === "20108"
+                                  subProgramTop2 === "20143"
                                     ? "bg-gradient-to-r from-amber-500 to-amber-600 text-white border-amber-500 shadow-xs"
                                     : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
                                 }`}
                               >
                                 <div className="font-bold text-xs flex items-center gap-1">
                                   <span>ยานยนต์ไฟฟ้า</span>
-                                  <span className={`text-[9px] px-1 rounded font-bold ${subProgramTop2 === "20108" ? "bg-white/20 text-white" : "bg-amber-100 text-amber-800"}`}>
+                                  <span className={`text-[9px] px-1 rounded font-bold ${subProgramTop2 === "20143" ? "bg-white/20 text-white" : "bg-amber-100 text-amber-800"}`}>
                                     ⚡ EV
                                   </span>
                                 </div>
-                                <div className={`text-[10px] font-mono ${subProgramTop2 === "20108" ? "text-amber-100" : "text-slate-400"}`}>
-                                  รหัส 20108
+                                <div className={`text-[10px] font-mono ${subProgramTop2 === "20143" ? "text-amber-100" : "text-slate-400"}`}>
+                                  รหัส 20143
                                 </div>
                               </button>
                             </div>
@@ -1018,6 +1046,41 @@ export default function GuidanceQuizPage() {
               </div>
             </div>
 
+            {/* SECTION: ESTIMATED EXPENSES & SHARE CARD PROMO */}
+            <div className="bg-gradient-to-r from-amber-50 via-white to-blue-50/40 rounded-3xl p-6 sm:p-7 border border-amber-200/90 shadow-sm flex flex-col md:flex-row items-center justify-between gap-5">
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-2">
+                  <span className="p-2 rounded-xl bg-amber-500 text-white shadow-xs">
+                    <Coins className="w-5 h-5" />
+                  </span>
+                  <h3 className="text-base font-black text-slate-900">
+                    ประมาณการค่าใช้จ่ายแรกเข้า & สิทธิประโยชน์ทุนการศึกษา
+                  </h3>
+                </div>
+                <p className="text-xs text-slate-600 max-w-xl leading-relaxed">
+                  {selectedLevelView === "ปวช."
+                    ? "✨ ระดับ ปวช. เรียนฟรี 15 ปีอย่างมีคุณภาพ (ค่าเล่าเรียน 0 บาท) จ่ายเฉพาะค่าเครื่องแบบ อุปกรณ์ช่าง และกิจกรรมพัฒนาผู้เรียน มีกองทุน กยศ./กรอ. รองรับ"
+                    : "✨ ระดับ ปวส. ค่าเล่าเรียนตามระเบียบกระทรวงศึกษาธิการ มีระบบทวิภาคีฝึกงานสถานประกอบการพร้อมเบี้ยเลี้ยงและรายได้ระหว่างเรียน"}
+                </p>
+                <div className="flex items-center gap-2 pt-1 text-[11px] text-amber-900 font-bold">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                  <span>สามารถทดลองคำนวณและปรับลด-เพิ่มรายการค่าใช้จ่ายเพื่อทำสรุปส่งให้ผู้ปกครองได้</span>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setShareModalOpen(true)}
+                className="shrink-0 px-5 py-3 rounded-2xl bg-gradient-to-r from-[#1E3A8A] to-blue-700 hover:from-blue-900 hover:to-blue-800 text-white font-bold text-xs shadow-md hover:shadow-lg transition flex items-center gap-2.5 cursor-pointer"
+              >
+                <Share2 className="w-4 h-4 text-amber-300" />
+                <div className="text-left">
+                  <div className="text-[11px] text-blue-200 font-medium">แชร์ผลลัพธ์ & สรุปค่าใช้จ่าย</div>
+                  <div className="text-xs font-black">สร้างการ์ดรูปภาพ 3D / ส่งผู้ปกครอง</div>
+                </div>
+              </button>
+            </div>
+
             {/* SECTION 4: EXTRA GUIDANCE (Q11 & Q12) */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {/* Study Mode Box */}
@@ -1081,6 +1144,18 @@ export default function GuidanceQuizPage() {
           </div>
         )}
       </main>
+
+      {/* 3D Share Card Modal */}
+      {result && (
+        <GuidanceShareCardModal
+          isOpen={shareModalOpen}
+          onClose={() => setShareModalOpen(false)}
+          result={result}
+          selectedCode={subProgramTop1}
+          selectedLevel={selectedLevelView}
+          logId={logId}
+        />
+      )}
 
       {/* Footer */}
       <footer className="mt-auto py-6 border-t border-slate-200 bg-white text-center text-xs text-slate-500">

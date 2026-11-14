@@ -1,0 +1,114 @@
+// Prisma schema for NPC_Admission (ระบบรับสมัครนักเรียน นักศึกษาใหม่ วิทยาลัยสารพัดช่างน่าน)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// 1. ผู้ดูแลระบบ (Admin User)
+model AdminUser {
+  id        String   @id @default(cuid())
+  username  String   @unique
+  password  String   // Scrypt / PBKDF2 Hashed Password
+  name      String   // ชื่อ-นามสกุล หรือ ตำแหน่งงาน
+  role      String   @default("ADMIN") // ADMIN | SUPERADMIN | OFFICER
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("admin_users")
+}
+
+// 2. ปีการศึกษา
+model AcademicYear {
+  id        String   @id @default(cuid())
+  year      String   @unique // เช่น "2570"
+  isActive  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  rounds   AdmissionRound[]
+  programs ProgramQuota[]
+
+  @@map("academic_years")
+}
+
+// 3. รอบการรับสมัคร (รอบโควตา / รอบปกติ / รอบเพิ่มเติม)
+model AdmissionRound {
+  id             String   @id @default(cuid())
+  academicYearId String
+  name           String   // เช่น "รอบโควตา", "รอบปกติ", "รอบเพิ่มเติม"
+  roundType      String   // "QUOTA" | "REGULAR" | "EXTRA" (ใช้ String เพื่อความเข้ากันได้ 100% ทั้ง SQLite, MySQL, PostgreSQL)
+  startAt        DateTime
+  endAt          DateTime
+  announceAt     DateTime
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  academicYear AcademicYear  @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
+  applications Application[]
+
+  @@index([academicYearId])
+  @@index([roundType])
+  @@map("admission_rounds")
+}
+
+// 4. โควตาและแผนการรับสมัครรายสาขา
+model ProgramQuota {
+  id            String   @id @default(cuid())
+  academicYearId String
+  code          String   // รหัสสาขามาตรฐานสำหรับส่งต่อ ศธ.02
+  level         String   // "ปวช." | "ปวส." | "ปวส.ทวิภาคี"
+  name          String   // ชื่อสาขางาน เช่น "ช่างยนต์", "การบัญชี"
+  quotaSeats    Int      @default(0) // จำนวนรับรอบโควตา
+  regularSeats  Int      @default(0) // จำนวนรับรอบปกติ
+  rolloverSeats Int      @default(0) // จำนวนที่นั่งทบมาจากรอบโควตา (ค่าเริ่มต้น 0)
+  isOpen        Boolean  @default(true) // สำหรับเปิด-ปิดรับสมัครรายสาขา
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  academicYear AcademicYear  @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
+  applications Application[]
+
+  @@unique([academicYearId, code, level])
+  @@index([academicYearId])
+  @@index([code])
+  @@map("program_quotas")
+}
+
+// 5. ใบสมัครของผู้สมัคร
+model Application {
+  id                String   @id @default(cuid())
+  applicationNo     String   @unique // เลขใบสมัครสร้างอัตโนมัติ เช่น NPC70-Q-0001
+  roundId           String
+  programId         String
+  cidEncrypted      String   // เลข 13 หลักที่เข้ารหัส AES-256-GCM
+  cidHash           String   // ค่า HMAC-SHA256 hash สำหรับค้นหาและเช็กซ้ำ
+  cidMasked         String   // แสดงผลแบบ Masked เช่น 1-55XX-XXXXX-12-3
+  prefix            String   // นาย / นางสาว / เด็กชาย / เด็กหญิง
+  firstName         String
+  lastName          String
+  birthDate         DateTime
+  phone             String
+  previousSchool    String
+  schoolProvince    String
+  previousEducation String   // ม.3 / ปวช.3 / ม.6 / อื่นๆ
+  gpax              Float
+  status            String   @default("PENDING") // PENDING | APPROVED | REJECTED | CANCELLED
+  addressInfo       String?  // JSON text สำหรับที่อยู่ ข้อมูลสุขภาพ/หมู่เลือด ชื่อ-เบอร์ผู้ปกครอง ฯลฯ
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  round   AdmissionRound @relation(fields: [roundId], references: [id], onDelete: Restrict)
+  program ProgramQuota   @relation(fields: [programId], references: [id], onDelete: Restrict)
+
+  @@index([cidHash])
+  @@index([roundId, cidHash]) // เช็กการสมัครซ้ำในรอบเดียวกันได้รวดเร็ว
+  @@index([status])
+  @@map("applications")
+}

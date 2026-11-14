@@ -108,6 +108,13 @@ async function main() {
       regularSeats: 20,
     },
     {
+      code: "20108",
+      level: "ปวช.",
+      name: "สาขาวิชายานยนต์ไฟฟ้า",
+      quotaSeats: 20,
+      regularSeats: 20,
+    },
+    {
       code: "20104",
       level: "ปวช.",
       name: "สาขาวิชาช่างไฟฟ้า (ไฟฟ้ากำลัง)",

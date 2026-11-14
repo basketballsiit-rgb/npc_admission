@@ -13,6 +13,7 @@ export interface ProgramInfo {
   name: string;
   level: EducationLevelType;
   levelLabel: string;
+  badge?: string;
 }
 
 export interface DepartmentConfig {
@@ -24,6 +25,7 @@ export interface DepartmentConfig {
   iconName: string;
   pvc: ProgramInfo;
   pvs: ProgramInfo;
+  alternativePvc?: ProgramInfo[];
   futureCareers: string[];
   strengths: string[];
 }
@@ -31,8 +33,8 @@ export interface DepartmentConfig {
 export const DEPARTMENTS: Record<DepartmentKey, DepartmentConfig> = {
   AUTO: {
     key: "AUTO",
-    shortName: "ช่างยนต์",
-    name: "แผนกวิชาช่างยนต์",
+    shortName: "ช่างยนต์ & ยานยนต์ไฟฟ้า",
+    name: "แผนกวิชาช่างยนต์ & ยานยนต์ไฟฟ้า",
     badgeColor: "bg-red-50 text-red-700 border-red-200",
     accentColor: "#DC2626",
     iconName: "Car",
@@ -41,7 +43,17 @@ export const DEPARTMENTS: Record<DepartmentKey, DepartmentConfig> = {
       name: "สาขาวิชาช่างยนต์ (งานยานยนต์)",
       level: "ปวช.",
       levelLabel: "ปวช. (สำหรับผู้จบ ม.3)",
+      badge: "สาขาช่างยนต์หลัก",
     },
+    alternativePvc: [
+      {
+        code: "20108",
+        name: "สาขาวิชายานยนต์ไฟฟ้า",
+        level: "ปวช.",
+        levelLabel: "ปวช. (สำหรับผู้จบ ม.3)",
+        badge: "⚡ ยานยนต์ไฟฟ้า (EV) มาแรง",
+      },
+    ],
     pvs: {
       code: "30101",
       name: "สาขาวิชาเทคนิคเครื่องกล (เทคนิคยานยนต์)",

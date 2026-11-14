@@ -67,6 +67,10 @@ export default function GuidanceQuizPage() {
   const [selectedLevelView, setSelectedLevelView] =
     useState<EducationLevelType>("ปวช.");
 
+  // Sub-program selection for departments with multiple options (e.g. ช่างยนต์ 20101 vs ยานยนต์ไฟฟ้า 20108)
+  const [subProgramTop1, setSubProgramTop1] = useState<string>("20101");
+  const [subProgramTop2, setSubProgramTop2] = useState<string>("20101");
+
   // Tooltip/highlighted department on hover
   const [highlightedDept, setHighlightedDept] = useState<DepartmentKey | null>(
     null
@@ -709,7 +713,17 @@ export default function GuidanceQuizPage() {
                 {/* TOP 1 CARD */}
                 {(() => {
                   const dept = DEPARTMENTS[result.top1];
-                  const prog = selectedLevelView === "ปวช." ? dept.pvc : dept.pvs;
+                  const hasAlternatives =
+                    selectedLevelView === "ปวช." &&
+                    dept.alternativePvc &&
+                    dept.alternativePvc.length > 0;
+                  
+                  let prog = selectedLevelView === "ปวช." ? dept.pvc : dept.pvs;
+                  if (hasAlternatives && subProgramTop1 === "20108") {
+                    const evProg = dept.alternativePvc?.find((a) => a.code === "20108");
+                    if (evProg) prog = evProg;
+                  }
+
                   const item = result.sortedDepartments[0];
 
                   return (
@@ -729,12 +743,69 @@ export default function GuidanceQuizPage() {
                           </span>
                         </div>
 
+                        {/* Multiple Programs Selector (e.g. ช่างยนต์ vs ยานยนต์ไฟฟ้า EV) */}
+                        {hasAlternatives && (
+                          <div className="p-2.5 bg-gradient-to-r from-amber-50 to-red-50/50 rounded-2xl border border-amber-200 space-y-1.5">
+                            <div className="flex items-center justify-between text-[11px] font-bold text-amber-900">
+                              <span className="flex items-center gap-1">
+                                <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+                                <span>สาขาวิชาที่เปิดรับสมัคร (ระดับ ปวช.):</span>
+                              </span>
+                              <span className="text-[10px] bg-amber-200 text-amber-950 px-2 py-0.2 rounded-full font-bold">
+                                เปิด 2 สาขา
+                              </span>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-2">
+                              <button
+                                type="button"
+                                onClick={() => setSubProgramTop1("20101")}
+                                className={`p-2 rounded-xl border text-left transition cursor-pointer ${
+                                  subProgramTop1 === "20101"
+                                    ? "bg-[#1E3A8A] text-white border-[#1E3A8A] shadow-xs"
+                                    : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
+                                }`}
+                              >
+                                <div className="font-bold text-xs">สาขาช่างยนต์</div>
+                                <div className={`text-[10px] font-mono ${subProgramTop1 === "20101" ? "text-blue-200" : "text-slate-400"}`}>
+                                  รหัส 20101
+                                </div>
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => setSubProgramTop1("20108")}
+                                className={`p-2 rounded-xl border text-left transition cursor-pointer ${
+                                  subProgramTop1 === "20108"
+                                    ? "bg-gradient-to-r from-amber-500 to-amber-600 text-white border-amber-500 shadow-xs"
+                                    : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
+                                }`}
+                              >
+                                <div className="font-bold text-xs flex items-center gap-1">
+                                  <span>ยานยนต์ไฟฟ้า</span>
+                                  <span className={`text-[9px] px-1 rounded font-bold ${subProgramTop1 === "20108" ? "bg-white/20 text-white" : "bg-amber-100 text-amber-800"}`}>
+                                    ⚡ EV
+                                  </span>
+                                </div>
+                                <div className={`text-[10px] font-mono ${subProgramTop1 === "20108" ? "text-amber-100" : "text-slate-400"}`}>
+                                  รหัส 20108
+                                </div>
+                              </button>
+                            </div>
+                          </div>
+                        )}
+
                         <div>
                           <div className="text-xs font-bold text-slate-500">
                             {prog.levelLabel} • รหัส ศธ.02:{" "}
                             <span className="font-mono text-[#1E3A8A] font-black text-sm">
                               {prog.code}
                             </span>
+                            {prog.badge && (
+                              <span className="ml-2 inline-block px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300">
+                                {prog.badge}
+                              </span>
+                            )}
                           </div>
                           <h4 className="text-base font-black text-slate-900 mt-0.5 leading-snug">
                             {prog.name}
@@ -778,9 +849,15 @@ export default function GuidanceQuizPage() {
                       <div className="pt-3 border-t border-slate-100">
                         <button
                           onClick={() => handleApplyClick(prog.level, prog.code)}
-                          className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold text-xs shadow-md hover:shadow-lg transition flex items-center justify-center gap-2 group cursor-pointer"
+                          className={`w-full py-3 px-4 rounded-xl text-white font-bold text-xs shadow-md hover:shadow-lg transition flex items-center justify-center gap-2 group cursor-pointer ${
+                            prog.code === "20108"
+                              ? "bg-gradient-to-r from-amber-500 via-amber-600 to-red-600 hover:from-amber-600 hover:to-red-700"
+                              : "bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700"
+                          }`}
                         >
-                          <span>สมัครเรียนสาขานี้ทันที ({prog.level})</span>
+                          <span>
+                            สมัครเรียน: {prog.name} (รหัส {prog.code})
+                          </span>
                           <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                         </button>
                       </div>
@@ -791,7 +868,17 @@ export default function GuidanceQuizPage() {
                 {/* TOP 2 CARD */}
                 {(() => {
                   const dept = DEPARTMENTS[result.top2];
-                  const prog = selectedLevelView === "ปวช." ? dept.pvc : dept.pvs;
+                  const hasAlternatives =
+                    selectedLevelView === "ปวช." &&
+                    dept.alternativePvc &&
+                    dept.alternativePvc.length > 0;
+
+                  let prog = selectedLevelView === "ปวช." ? dept.pvc : dept.pvs;
+                  if (hasAlternatives && subProgramTop2 === "20108") {
+                    const evProg = dept.alternativePvc?.find((a) => a.code === "20108");
+                    if (evProg) prog = evProg;
+                  }
+
                   const item = result.sortedDepartments[1];
 
                   return (
@@ -811,12 +898,69 @@ export default function GuidanceQuizPage() {
                           </span>
                         </div>
 
+                        {/* Multiple Programs Selector for Top 2 */}
+                        {hasAlternatives && (
+                          <div className="p-2.5 bg-gradient-to-r from-amber-50 to-red-50/50 rounded-2xl border border-amber-200 space-y-1.5">
+                            <div className="flex items-center justify-between text-[11px] font-bold text-amber-900">
+                              <span className="flex items-center gap-1">
+                                <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+                                <span>สาขาวิชาที่เปิดรับสมัคร (ระดับ ปวช.):</span>
+                              </span>
+                              <span className="text-[10px] bg-amber-200 text-amber-950 px-2 py-0.2 rounded-full font-bold">
+                                เปิด 2 สาขา
+                              </span>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-2">
+                              <button
+                                type="button"
+                                onClick={() => setSubProgramTop2("20101")}
+                                className={`p-2 rounded-xl border text-left transition cursor-pointer ${
+                                  subProgramTop2 === "20101"
+                                    ? "bg-[#1E3A8A] text-white border-[#1E3A8A] shadow-xs"
+                                    : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
+                                }`}
+                              >
+                                <div className="font-bold text-xs">สาขาช่างยนต์</div>
+                                <div className={`text-[10px] font-mono ${subProgramTop2 === "20101" ? "text-blue-200" : "text-slate-400"}`}>
+                                  รหัส 20101
+                                </div>
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => setSubProgramTop2("20108")}
+                                className={`p-2 rounded-xl border text-left transition cursor-pointer ${
+                                  subProgramTop2 === "20108"
+                                    ? "bg-gradient-to-r from-amber-500 to-amber-600 text-white border-amber-500 shadow-xs"
+                                    : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
+                                }`}
+                              >
+                                <div className="font-bold text-xs flex items-center gap-1">
+                                  <span>ยานยนต์ไฟฟ้า</span>
+                                  <span className={`text-[9px] px-1 rounded font-bold ${subProgramTop2 === "20108" ? "bg-white/20 text-white" : "bg-amber-100 text-amber-800"}`}>
+                                    ⚡ EV
+                                  </span>
+                                </div>
+                                <div className={`text-[10px] font-mono ${subProgramTop2 === "20108" ? "text-amber-100" : "text-slate-400"}`}>
+                                  รหัส 20108
+                                </div>
+                              </button>
+                            </div>
+                          </div>
+                        )}
+
                         <div>
                           <div className="text-xs font-bold text-slate-500">
                             {prog.levelLabel} • รหัส ศธ.02:{" "}
                             <span className="font-mono text-[#1E3A8A] font-black text-sm">
                               {prog.code}
                             </span>
+                            {prog.badge && (
+                              <span className="ml-2 inline-block px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300">
+                                {prog.badge}
+                              </span>
+                            )}
                           </div>
                           <h4 className="text-base font-black text-slate-900 mt-0.5 leading-snug">
                             {prog.name}
@@ -862,7 +1006,9 @@ export default function GuidanceQuizPage() {
                           onClick={() => handleApplyClick(prog.level, prog.code)}
                           className="w-full py-3 px-4 rounded-xl bg-[#1E3A8A] hover:bg-blue-900 text-white font-bold text-xs shadow-md hover:shadow-lg transition flex items-center justify-center gap-2 group cursor-pointer"
                         >
-                          <span>สมัครเรียนสาขานี้ทันที ({prog.level})</span>
+                          <span>
+                            สมัครเรียน: {prog.name} (รหัส {prog.code})
+                          </span>
                           <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                         </button>
                       </div>

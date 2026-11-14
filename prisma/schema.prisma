@@ -112,3 +112,27 @@ model Application {
   @@index([status])
   @@map("applications")
 }
+
+// 6. บันทึกสถิติการทำแบบประเมินแนะแนวค้นหาสายเรียนและสาขาที่ใช่ (ไม่เก็บข้อมูลระบุตัวบุคคล - PDPA 100%)
+model GuidanceAssessmentLog {
+  id               String   @id @default(cuid())
+  currentEducation String   // "ม.3" หรือ "ม.6_ปวช.3"
+  schoolName       String?  // ชื่อโรงเรียนเดิมที่ระบุเพิ่มเติมได้ (Optional)
+  vocScore         Int      // คะแนนสายอาชีพ เต็ม 12
+  genScore         Int      // คะแนนสายสามัญ เต็ม 12
+  trackResult      String   // "VOCATIONAL" | "HYBRID" | "ACADEMIC"
+  scoresJson       String   // JSON string เก็บคะแนนทั้ง 6 แผนก: AUTO, ELEC, TRON, IT, ACC, MKT
+  recommendedDept1 String   // แผนกอันดับ 1
+  recommendedCode1 String   // รหัสสาขา 5 หลักอันดับ 1
+  recommendedDept2 String   // แผนกอันดับ 2
+  studyModePref    String   // "NORMAL" | "DUAL" | "FLEX" จากข้อ 11
+  specialInterest  String   // "CAFE" | "CRAFT" | "MEDIA" | "FIXIT" | "NONE" จากข้อ 12
+  clickedApply     Boolean  @default(false) // อัปเดตเป็น true เมื่อผู้ใช้กดปุ่มสมัครเรียนต่อจากหน้าผลลัพธ์
+  createdAt        DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([trackResult])
+  @@index([recommendedDept1])
+  @@index([clickedApply])
+  @@map("guidance_assessment_logs")
+}

@@ -35,6 +35,7 @@ import {
   User,
   ShieldCheck,
   Home as HomeIcon,
+  Sparkles,
 } from "lucide-react";
 
 interface ProgramItem {
@@ -67,12 +68,14 @@ function ApplyForm() {
   const searchParams = useSearchParams();
   const initialProgramId = searchParams.get("programId") || "";
   const initialLevel = searchParams.get("level") || "ปวช.";
+  const queryCode = searchParams.get("code") || "";
 
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [fromGuidance, setFromGuidance] = useState(Boolean(queryCode));
 
   // ข้อมูลตั้งต้นจาก API
   const [rounds, setRounds] = useState<RoundItem[]>([]);
@@ -130,7 +133,28 @@ function ApplyForm() {
 
         if (progData.success) {
           setPrograms(progData.data);
-          if (!selectedProgramId && progData.data.length > 0) {
+          let targetProg: ProgramItem | undefined = undefined;
+
+          if (queryCode) {
+            // ค้นหาสาขาวิชาตรงตามรหัส 5 หลัก และระดับการศึกษาที่ส่งมาจากหน้าแนะแนว
+            targetProg = progData.data.find(
+              (p: ProgramItem) =>
+                p.code === queryCode &&
+                (initialLevel ? p.level === initialLevel : true) &&
+                p.isOpen
+            );
+            // หากไม่เจอตรงระดับ ให้หาตามรหัส 5 หลักที่เปิดรับ
+            if (!targetProg) {
+              targetProg = progData.data.find(
+                (p: ProgramItem) => p.code === queryCode && p.isOpen
+              );
+            }
+          }
+
+          if (targetProg) {
+            setSelectedProgramId(targetProg.id);
+            setSelectedLevel(targetProg.level);
+          } else if (!selectedProgramId && progData.data.length > 0) {
             const defaultProg = progData.data.find(
               (p: ProgramItem) => p.level === selectedLevel && p.isOpen
             );
@@ -453,6 +477,35 @@ function ApplyForm() {
                 ระบบจะตรวจสอบความถูกต้องของเลข 13 หลักตามสูตร Checksum ทันที เพื่อความปลอดภัย
               </p>
             </div>
+
+            {/* Guidance Auto-Selection Banner */}
+            {fromGuidance && selectedProgram && (
+              <div className="p-4 rounded-2xl bg-amber-50 border border-amber-300 text-amber-950 flex items-start justify-between gap-3 shadow-xs animate-fadeIn">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 rounded-xl bg-amber-200 text-amber-900 shrink-0">
+                    <Sparkles className="w-4 h-4" />
+                  </div>
+                  <div className="text-xs">
+                    <strong className="text-amber-900 font-bold block text-sm">
+                      ระบบล็อกเลือกสาขาวิชาจากแบบประเมินแนะแนวให้อัตโนมัติ ✨
+                    </strong>
+                    <span className="text-amber-800">
+                      ระดับ <strong>{selectedProgram.level}</strong> • รหัส ศธ.02: <strong>{selectedProgram.code}</strong> • {selectedProgram.name}
+                    </span>
+                    <p className="text-[11px] text-amber-700 mt-0.5">
+                      กรอกเพียงเลขประจำตัวประชาชน 13 หลักด้านล่าง เพื่อดำเนินการต่อได้ทันที
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setFromGuidance(false)}
+                  className="text-amber-600 hover:text-amber-900 text-xs font-bold px-2 py-1"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
 
             {/* 1.1 เลขประจำตัวประชาชน 13 หลัก */}
             <div className="space-y-2">

@@ -11,6 +11,7 @@ import {
   Menu,
   X,
   Building2,
+  Compass,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -20,6 +21,7 @@ export default function Navbar() {
 
   const navLinks = [
     { href: "/", label: "หน้าแรก", icon: Building2 },
+    { href: "/guidance", label: "แนะแนวค้นหาสาขา", icon: Compass },
     { href: "/apply", label: "สมัครเรียนออนไลน์", icon: ClipboardList },
     { href: "/status", label: "ตรวจสอบสถานะ / แก้ไข", icon: Search },
   ];

@@ -27,6 +27,7 @@ import {
   Calculator,
   TrendingUp,
   Laptop,
+  Compass,
 } from "lucide-react";
 
 interface ProgramItem {
@@ -210,11 +211,11 @@ export default function Home() {
               </div>
             )}
 
-            {/* 2 Primary CTA Buttons */}
-            <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto pt-4">
+            {/* Primary CTA Buttons */}
+            <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto pt-4">
               <Link
                 href="/apply"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-2xl bg-gradient-to-r from-[#F59E0B] to-amber-500 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold text-base shadow-lg shadow-amber-500/25 hover:shadow-amber-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-7 py-3.5 rounded-2xl bg-gradient-to-r from-[#F59E0B] to-amber-500 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold text-sm sm:text-base shadow-lg shadow-amber-500/25 hover:shadow-amber-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all"
               >
                 <ClipboardCheck className="w-5 h-5 text-slate-950" />
                 <span>สมัครเรียนออนไลน์</span>
@@ -222,11 +223,19 @@ export default function Home() {
               </Link>
 
               <Link
+                href="/guidance"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-sm sm:text-base border border-amber-300/40 backdrop-blur-md transition-all hover:border-amber-300 hover:scale-[1.02] shadow-sm"
+              >
+                <Compass className="w-5 h-5 text-amber-400 animate-pulse" />
+                <span>ค้นหาสายเรียนที่ใช่ (1 นาที)</span>
+              </Link>
+
+              <Link
                 href="/status"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-4 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-semibold text-base border border-white/20 backdrop-blur-md transition-all hover:border-white/40"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3.5 rounded-2xl bg-white/5 hover:bg-white/15 text-slate-200 font-semibold text-sm sm:text-base border border-white/20 backdrop-blur-md transition-all hover:border-white/40"
               >
                 <Search className="w-4 h-4 text-slate-300" />
-                <span>ตรวจสอบสถานะ / แก้ไขข้อมูล</span>
+                <span>ตรวจสอบสถานะ</span>
               </Link>
             </div>
 
@@ -250,7 +259,35 @@ export default function Home() {
       </section>
 
       {/* Program Quotas Section */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 -mt-8 sm:-mt-12 z-20 pb-16 space-y-12">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 -mt-8 sm:-mt-12 z-20 pb-16 space-y-8">
+        {/* Prominent Guidance Banner Card */}
+        <div className="bg-gradient-to-r from-blue-900 via-[#1E3A8A] to-indigo-950 rounded-3xl p-6 sm:p-7 shadow-lg border border-blue-400/30 text-white flex flex-col md:flex-row items-center justify-between gap-5 relative overflow-hidden">
+          <div className="absolute right-0 top-0 bottom-0 w-72 bg-[radial-gradient(#F59E0B_1px,transparent_1px)] [background-size:12px_12px] opacity-20 pointer-events-none" />
+          <div className="flex items-center gap-4 relative z-10">
+            <div className="w-14 h-14 rounded-2xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-400 shrink-0 shadow-inner">
+              <Compass className="w-8 h-8" />
+            </div>
+            <div>
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-400/20 text-amber-300 text-[11px] font-bold mb-1 border border-amber-400/30">
+                <Sparkles className="w-3 h-3 text-amber-400" />
+                <span>Career & Major Discovery Quiz</span>
+              </div>
+              <h3 className="text-lg sm:text-xl font-black">
+                ยังไม่แน่ใจว่าจะเรียนสาขาไหนดี?
+              </h3>
+              <p className="text-xs sm:text-sm text-blue-100 mt-0.5">
+                ทำแบบประเมินความถนัด 12 ข้อ ค้นพบสายอาชีพที่ใช่ พร้อมวิเคราะห์กราฟใยแมงมุม 6 แผนกวิชาทันที
+              </p>
+            </div>
+          </div>
+          <Link
+            href="/guidance"
+            className="w-full md:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-sm shadow-md hover:shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98] shrink-0 relative z-10"
+          >
+            <span>ค้นหาสายเรียนและสาขาที่ใช่ใน 1 นาที (ฟรี)</span>
+            <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
         {/* Filter and Tab Header Card */}
         <div className="bg-slate-50/75 rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-200/90 space-y-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200/70 pb-6">

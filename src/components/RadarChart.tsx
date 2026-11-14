@@ -1,0 +1,218 @@
+"use client";
+
+import React, { useState } from "react";
+import { DepartmentKey, DEPARTMENTS } from "@/lib/guidance-config";
+
+interface RadarChartProps {
+  scores: Record<DepartmentKey, number>;
+  maxScore?: number;
+  highlightDept?: DepartmentKey;
+}
+
+const AXIS_KEYS: DepartmentKey[] = ["AUTO", "ELEC", "TRON", "IT", "ACC", "MKT"];
+
+export default function RadarChart({
+  scores,
+  maxScore = 15,
+  highlightDept,
+}: RadarChartProps) {
+  const [hoveredKey, setHoveredKey] = useState<DepartmentKey | null>(null);
+
+  // SVG Dimension
+  const size = 380;
+  const center = size / 2;
+  const radius = 130; // Radius for 100%
+
+  // Concentric levels (3, 6, 9, 12, 15)
+  const levels = [0.2, 0.4, 0.6, 0.8, 1.0];
+
+  // Helper: compute (x, y) for an axis index and relative ratio (0 to 1)
+  // Start from top (-90 deg), clockwise
+  const getCoordinates = (index: number, ratio: number) => {
+    const angle = (Math.PI * 2 * index) / AXIS_KEYS.length - Math.PI / 2;
+    const x = center + radius * ratio * Math.cos(angle);
+    const y = center + radius * ratio * Math.sin(angle);
+    return { x, y, angle };
+  };
+
+  // Build grid polygon points
+  const gridPolygons = levels.map((lvl) => {
+    return AXIS_KEYS.map((_, i) => {
+      const { x, y } = getCoordinates(i, lvl);
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    }).join(" ");
+  });
+
+  // Build data polygon points
+  const dataPoints = AXIS_KEYS.map((key, i) => {
+    const score = Math.max(0, Math.min(scores[key] || 0, maxScore));
+    const ratio = score / maxScore;
+    const { x, y } = getCoordinates(i, ratio);
+    return { key, x, y, score, ratio };
+  });
+
+  const polygonPath = dataPoints
+    .map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`)
+    .join(" ");
+
+  const activeHoverKey = hoveredKey || highlightDept || null;
+  const activePoint = dataPoints.find((p) => p.key === activeHoverKey);
+
+  return (
+    <div className="w-full flex flex-col items-center">
+      <div className="relative w-full max-w-[380px] aspect-square flex items-center justify-center">
+        <svg
+          viewBox={`0 0 ${size} ${size}`}
+          className="w-full h-full overflow-visible select-none drop-shadow-xs"
+        >
+          {/* Subtle Background Glow */}
+          <circle
+            cx={center}
+            cy={center}
+            r={radius}
+            fill="#F8FAFC"
+            className="transition-colors"
+          />
+
+          {/* Grid Concentric Polygons */}
+          {gridPolygons.map((pts, idx) => (
+            <polygon
+              key={`grid-${idx}`}
+              points={pts}
+              fill="none"
+              stroke="#E2E8F0"
+              strokeWidth={idx === levels.length - 1 ? 1.5 : 1}
+              strokeDasharray={idx < levels.length - 1 ? "3 3" : undefined}
+            />
+          ))}
+
+          {/* Axis lines from center to outer vertex */}
+          {AXIS_KEYS.map((key, i) => {
+            const { x, y } = getCoordinates(i, 1.0);
+            return (
+              <line
+                key={`axis-${key}`}
+                x1={center}
+                y1={center}
+                x2={x}
+                y2={y}
+                stroke="#CBD5E1"
+                strokeWidth={1}
+              />
+            );
+          })}
+
+          {/* Data Filled Polygon */}
+          <polygon
+            points={polygonPath}
+            fill="rgba(30, 58, 138, 0.22)"
+            stroke="#1E3A8A"
+            strokeWidth={2.5}
+            strokeLinejoin="round"
+            className="transition-all duration-300"
+          />
+
+          {/* Outer Vertex Labels and Badges */}
+          {AXIS_KEYS.map((key, i) => {
+            const { x, y, angle } = getCoordinates(i, 1.22);
+            const dept = DEPARTMENTS[key];
+            const score = scores[key] || 0;
+            const pct = Math.round((score / maxScore) * 100);
+            const isHovered = activeHoverKey === key;
+
+            // Anchor text according to angle
+            let textAnchor: "middle" | "start" | "end" = "middle";
+            if (Math.cos(angle) > 0.3) textAnchor = "start";
+            else if (Math.cos(angle) < -0.3) textAnchor = "end";
+
+            return (
+              <g
+                key={`label-${key}`}
+                className="cursor-pointer transition-transform duration-200"
+                onMouseEnter={() => setHoveredKey(key)}
+                onMouseLeave={() => setHoveredKey(null)}
+                onClick={() => setHoveredKey(key)}
+              >
+                <text
+                  x={x}
+                  y={y - 7}
+                  textAnchor={textAnchor}
+                  className={`text-[12px] font-bold ${
+                    isHovered ? "fill-[#1E3A8A] font-black" : "fill-slate-700"
+                  }`}
+                >
+                  {dept.shortName}
+                </text>
+                <text
+                  x={x}
+                  y={y + 8}
+                  textAnchor={textAnchor}
+                  className={`text-[10px] font-mono font-bold ${
+                    isHovered ? "fill-amber-600 font-black" : "fill-slate-400"
+                  }`}
+                >
+                  {score}/{maxScore} ({pct}%)
+                </text>
+              </g>
+            );
+          })}
+
+          {/* Vertex Point Circles */}
+          {dataPoints.map((pt) => {
+            const isHovered = activeHoverKey === pt.key;
+            return (
+              <g
+                key={`point-${pt.key}`}
+                className="cursor-pointer"
+                onMouseEnter={() => setHoveredKey(pt.key)}
+                onMouseLeave={() => setHoveredKey(null)}
+                onClick={() => setHoveredKey(pt.key)}
+              >
+                <circle
+                  cx={pt.x}
+                  cy={pt.y}
+                  r={isHovered ? 8 : 5}
+                  fill={isHovered ? "#F59E0B" : "#1E3A8A"}
+                  stroke="#FFFFFF"
+                  strokeWidth={2}
+                  className="transition-all duration-200 shadow-md"
+                />
+              </g>
+            );
+          })}
+        </svg>
+
+        {/* Floating Tooltip inside container */}
+        {activePoint && (
+          <div
+            className="absolute z-10 pointer-events-none bg-slate-900/90 text-white rounded-xl px-3 py-2 text-xs shadow-xl backdrop-blur-xs border border-white/10"
+            style={{
+              bottom: "8px",
+              left: "50%",
+              transform: "translateX(-50%)",
+            }}
+          >
+            <div className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+              <span className="font-bold">
+                {DEPARTMENTS[activePoint.key].name}
+              </span>
+            </div>
+            <div className="text-[11px] text-slate-300 mt-0.5">
+              คะแนนความถนัด:{" "}
+              <strong className="text-amber-400 font-mono text-sm">
+                {activePoint.score}
+              </strong>{" "}
+              / {maxScore} คะแนน (
+              {Math.round((activePoint.score / maxScore) * 100)}%)
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="text-center text-[11px] text-slate-400 mt-1">
+        * แตะหรือชี้ที่มุมของกราฟใยแมงมุมเพื่อดูคะแนนรายแผนกวิชา
+      </div>
+    </div>
+  );
+}

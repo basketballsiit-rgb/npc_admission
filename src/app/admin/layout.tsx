@@ -16,6 +16,7 @@ import {
   Shield,
   Loader2,
   Calendar,
+  Compass,
 } from "lucide-react";
 
 interface AdminUser {
@@ -112,6 +113,12 @@ export default function AdminLayout({
       href: "/admin/settings",
       icon: Settings,
       active: pathname.startsWith("/admin/settings"),
+    },
+    {
+      name: "สถิติงานแนะแนว & Quiz",
+      href: "/admin/guidance",
+      icon: Compass,
+      active: pathname.startsWith("/admin/guidance"),
     },
     {
       name: "ศูนย์ส่งออก ศธ.02 / RMS",

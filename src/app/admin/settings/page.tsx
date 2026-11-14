@@ -19,6 +19,8 @@ import {
   Edit2,
   X,
   Loader2,
+  Trash2,
+  BookOpen,
 } from "lucide-react";
 
 interface AcademicYear {
@@ -72,6 +74,15 @@ export default function AdminSettingsPage() {
   // Rollover Preview State
   const [rolloverLoading, setRolloverLoading] = useState(false);
   const [rolloverPreview, setRolloverPreview] = useState<any | null>(null);
+
+  // New Program Modal State
+  const [newProgramModalOpen, setNewProgramModalOpen] = useState(false);
+  const [newProgCode, setNewProgCode] = useState("");
+  const [newProgLevel, setNewProgLevel] = useState<"ปวช." | "ปวส.">("ปวช.");
+  const [newProgName, setNewProgName] = useState("");
+  const [newProgQuotaSeats, setNewProgQuotaSeats] = useState(20);
+  const [newProgRegularSeats, setNewProgRegularSeats] = useState(20);
+  const [newProgIsOpen, setNewProgIsOpen] = useState(true);
 
   const fetchSettings = async () => {
     try {
@@ -235,6 +246,92 @@ export default function AdminSettingsPage() {
       }
     } catch {
       alert("เกิดข้อผิดพลาดในการบันทึกรอบรับสมัคร");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Create New Program
+  const handleCreateProgram = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!activeYear) {
+      alert("กรุณาเลือกปีการศึกษาที่เปิดใช้งานก่อน");
+      return;
+    }
+    if (!newProgCode.trim()) {
+      alert("กรุณากรอกรหัสสาขาวิชา (เช่น 20101, 30101 ตาม ศธ.02)");
+      return;
+    }
+    if (!newProgName.trim()) {
+      alert("กรุณากรอกชื่อสาขาวิชา");
+      return;
+    }
+
+    try {
+      setSaving(true);
+      const res = await fetch(apiUrl("/api/admin/settings"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "CREATE_PROGRAM",
+          academicYearId: activeYear.id,
+          code: newProgCode.trim(),
+          level: newProgLevel,
+          name: newProgName.trim(),
+          quotaSeats: Math.max(0, Number(newProgQuotaSeats) || 0),
+          regularSeats: Math.max(0, Number(newProgRegularSeats) || 0),
+          isOpen: newProgIsOpen,
+        }),
+      });
+
+      const json = await res.json();
+      if (!res.ok || !json.success) {
+        alert(json.error || "เกิดข้อผิดพลาดในการเพิ่มสาขาวิชา");
+        return;
+      }
+
+      showNotification(json.message || "เพิ่มสาขาวิชาใหม่สำเร็จ");
+      setNewProgramModalOpen(false);
+      setNewProgCode("");
+      setNewProgName("");
+      setNewProgQuotaSeats(20);
+      setNewProgRegularSeats(20);
+      setNewProgIsOpen(true);
+      await fetchSettings();
+    } catch {
+      alert("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Delete Program
+  const handleDeleteProgram = async (id: string, name: string, level: string) => {
+    if (!confirm(`คุณต้องการลบสาขาวิชา "${name} (${level})" ออกจากแผนรับหรือไม่?`)) {
+      return;
+    }
+
+    try {
+      setSaving(true);
+      const res = await fetch(apiUrl("/api/admin/settings"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "DELETE_PROGRAM",
+          id,
+        }),
+      });
+
+      const json = await res.json();
+      if (!res.ok || !json.success) {
+        alert(json.error || "ไม่สามารถลบสาขาวิชาได้");
+        return;
+      }
+
+      showNotification(json.message || "ลบสาขาวิชาเรียบร้อยแล้ว");
+      await fetchSettings();
+    } catch {
+      alert("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
     } finally {
       setSaving(false);
     }
@@ -498,6 +595,13 @@ export default function AdminSettingsPage() {
                 สามารถเปิดหรือปิดรับสมัครแต่ละสาขาได้ทันที และปรับแก้โควตารับรอบโควตาและรอบปกติ
               </p>
             </div>
+            <button
+              onClick={() => setNewProgramModalOpen(true)}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-[#1E3A8A] hover:bg-blue-900 text-white rounded-xl text-xs font-bold transition shadow-sm self-start sm:self-auto"
+            >
+              <Plus className="w-4 h-4" />
+              <span>เพิ่มสาขาวิชาใหม่</span>
+            </button>
           </div>
 
           <div className="overflow-x-auto">
@@ -512,7 +616,7 @@ export default function AdminSettingsPage() {
                   <th className="py-3 px-3 text-center text-amber-700">ทบยอด</th>
                   <th className="py-3 px-3 text-center">รวมรับ</th>
                   <th className="py-3 px-4 text-center">สถานะเปิดรับ</th>
-                  <th className="py-3 px-4 text-center">บันทึก</th>
+                  <th className="py-3 px-4 text-center">จัดการ</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -568,28 +672,37 @@ export default function AdminSettingsPage() {
                       </button>
                     </td>
                     <td className="py-3 px-4 text-center">
-                      <button
-                        onClick={() => {
-                          const qInput = document.getElementById(
-                            `quota-${p.id}`
-                          ) as HTMLInputElement;
-                          const rInput = document.getElementById(
-                            `regular-${p.id}`
-                          ) as HTMLInputElement;
-                          if (qInput && rInput) {
-                            handleUpdateSeats(
-                              p.id,
-                              Number(qInput.value),
-                              Number(rInput.value),
-                              p.name
-                            );
-                          }
-                        }}
-                        className="p-1.5 text-slate-500 hover:text-[#1E3A8A] hover:bg-slate-100 rounded-lg transition"
-                        title="บันทึกจำนวนที่นั่ง"
-                      >
-                        <Save className="w-4 h-4" />
-                      </button>
+                      <div className="flex items-center justify-center gap-1">
+                        <button
+                          onClick={() => {
+                            const qInput = document.getElementById(
+                              `quota-${p.id}`
+                            ) as HTMLInputElement;
+                            const rInput = document.getElementById(
+                              `regular-${p.id}`
+                            ) as HTMLInputElement;
+                            if (qInput && rInput) {
+                              handleUpdateSeats(
+                                p.id,
+                                Number(qInput.value),
+                                Number(rInput.value),
+                                p.name
+                              );
+                            }
+                          }}
+                          className="p-1.5 text-slate-500 hover:text-[#1E3A8A] hover:bg-slate-100 rounded-lg transition"
+                          title="บันทึกจำนวนที่นั่ง"
+                        >
+                          <Save className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteProgram(p.id, p.name, p.level)}
+                          className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
+                          title="ลบสาขาวิชา"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -873,6 +986,136 @@ export default function AdminSettingsPage() {
                 >
                   {saving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                   <span>บันทึกการแก้ไข</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* New Program Modal */}
+      {newProgramModalOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2">
+                <BookOpen className="w-5 h-5 text-[#1E3A8A]" />
+                <h3 className="font-bold text-slate-900 text-sm">เพิ่มสาขาวิชาที่เปิดรับสมัครใหม่</h3>
+              </div>
+              <button
+                onClick={() => setNewProgramModalOpen(false)}
+                className="p-1 text-slate-400 hover:text-slate-700"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateProgram} className="space-y-3.5 text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 mb-1">
+                    รหัสสาขาวิชา (ศธ.02) <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="เช่น 20101, 30101"
+                    value={newProgCode}
+                    onChange={(e) => setNewProgCode(e.target.value)}
+                    required
+                    className="w-full py-2 px-3 border border-slate-300 rounded-xl text-xs font-mono font-bold"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 mb-1">
+                    ระดับการศึกษา <span className="text-rose-500">*</span>
+                  </label>
+                  <select
+                    value={newProgLevel}
+                    onChange={(e) => setNewProgLevel(e.target.value as "ปวช." | "ปวส.")}
+                    className="w-full py-2 px-3 border border-slate-300 rounded-xl text-xs font-bold bg-white"
+                  >
+                    <option value="ปวช.">ปวช. (ประกาศนียบัตรวิชาชีพ)</option>
+                    <option value="ปวส.">ปวส. (ประกาศนียบัตรวิชาชีพชั้นสูง)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-slate-600 mb-1">
+                  ชื่อสาขาวิชา <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  placeholder="เช่น สาขาวิชาช่างยนต์ (ยานยนต์), สาขาวิชาการบัญชี"
+                  value={newProgName}
+                  onChange={(e) => setNewProgName(e.target.value)}
+                  required
+                  className="w-full py-2 px-3 border border-slate-300 rounded-xl text-xs font-bold"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 mb-1">
+                    จำนวนรับรอบโควตา (คน)
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={newProgQuotaSeats}
+                    onChange={(e) => setNewProgQuotaSeats(Number(e.target.value))}
+                    required
+                    className="w-full py-2 px-3 border border-slate-300 rounded-xl text-xs font-bold text-center"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 mb-1">
+                    จำนวนรับรอบปกติ (คน)
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={newProgRegularSeats}
+                    onChange={(e) => setNewProgRegularSeats(Number(e.target.value))}
+                    required
+                    className="w-full py-2 px-3 border border-slate-300 rounded-xl text-xs font-bold text-center"
+                  />
+                </div>
+              </div>
+
+              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200">
+                <label className="flex items-center gap-2 cursor-pointer font-bold text-slate-700">
+                  <input
+                    type="checkbox"
+                    checked={newProgIsOpen}
+                    onChange={(e) => setNewProgIsOpen(e.target.checked)}
+                    className="w-4 h-4 rounded text-[#1E3A8A]"
+                  />
+                  <span>เปิดรับสมัครทันทีในระบบ (ผู้สมัครสามารถเลือกสาขานี้ได้)</span>
+                </label>
+              </div>
+
+              <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setNewProgramModalOpen(false)}
+                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold"
+                >
+                  ยกเลิก
+                </button>
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="px-4 py-2 bg-[#1E3A8A] hover:bg-blue-900 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5"
+                >
+                  {saving ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <Plus className="w-3.5 h-3.5" />
+                  )}
+                  <span>บันทึกและเปิดสาขา</span>
                 </button>
               </div>
             </form>

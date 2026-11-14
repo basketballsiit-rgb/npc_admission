@@ -190,6 +190,72 @@ export async function POST(request: Request) {
       });
     }
 
+    // 5. เพิ่มสาขาวิชาใหม่สำหรับปีการศึกษา
+    if (action === "CREATE_PROGRAM") {
+      const { academicYearId, code, level, name, quotaSeats, regularSeats, isOpen } = body;
+
+      if (!academicYearId || !code || !level || !name) {
+        return NextResponse.json(
+          { success: false, error: "กรุณากรอกข้อมูลสาขาวิชาให้ครบถ้วน (รหัสสาขา, ระดับชั้น, ชื่อสาขาวิชา)" },
+          { status: 400 }
+        );
+      }
+
+      // ตรวจสอบความซ้ำซ้อนของรหัสสาขาและระดับชั้นในปีการศึกษานี้
+      const existing = await prisma.programQuota.findFirst({
+        where: {
+          academicYearId,
+          code: code.trim(),
+          level: level.trim(),
+        },
+      });
+
+      if (existing) {
+        return NextResponse.json(
+          { success: false, error: `มีรหัสสาขาวิชา ${code} (${level}) ในปีการศึกษานี้อยู่แล้ว` },
+          { status: 400 }
+        );
+      }
+
+      const newProg = await prisma.programQuota.create({
+        data: {
+          academicYearId,
+          code: code.trim(),
+          level: level.trim(),
+          name: name.trim(),
+          quotaSeats: Math.max(0, Number(quotaSeats) || 0),
+          regularSeats: Math.max(0, Number(regularSeats) || 0),
+          rolloverSeats: 0,
+          isOpen: isOpen !== undefined ? Boolean(isOpen) : true,
+        },
+      });
+
+      return NextResponse.json({
+        success: true,
+        message: `เพิ่มสาขาวิชา "${newProg.name}" (${newProg.level}) เรียบร้อยแล้ว`,
+        data: newProg,
+      });
+    }
+
+    // 6. ลบสาขาวิชา (กรณีที่ยังไม่มีผู้สมัคร)
+    if (action === "DELETE_PROGRAM") {
+      const { id } = body;
+      const count = await prisma.application.count({ where: { programId: id } });
+      if (count > 0) {
+        return NextResponse.json(
+          { success: false, error: `ไม่สามารถลบสาขาวิชานี้ได้ เนื่องจากมีผู้สมัครแล้วจำนวน ${count} คน (แนะนำให้กดปิดรับสมัครแทน)` },
+          { status: 400 }
+        );
+      }
+
+      await prisma.programQuota.delete({ where: { id } });
+
+      return NextResponse.json({
+        success: true,
+        message: "ลบสาขาวิชาเรียบร้อยแล้ว",
+      });
+    }
+
     return NextResponse.json({ success: false, error: "Invalid action" }, { status: 400 });
   } catch (error) {
     console.error("POST /api/admin/settings Error:", error);

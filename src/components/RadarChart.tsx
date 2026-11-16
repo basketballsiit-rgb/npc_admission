@@ -7,7 +7,7 @@ interface RadarChartProps {
   scores: Record<DepartmentKey, number>;
   maxScore?: number;
   highlightDept?: DepartmentKey;
-  theme?: "light" | "dark";
+  theme?: "light" | "dark" | "cyber";
   hideScores?: boolean;
   hideHint?: boolean;
   containerClassName?: string;
@@ -26,10 +26,12 @@ export default function RadarChart({
 }: RadarChartProps) {
   const [hoveredKey, setHoveredKey] = useState<DepartmentKey | null>(null);
 
-  // SVG Dimension with wide safety margin to prevent label clipping
-  const size = 440;
-  const center = size / 2;
-  const radius = 115; // Safe radius ensuring labels at ratio 1.25 stay inside 440px viewBox
+  const isCyber = theme === "cyber";
+  const viewBoxW = isCyber ? 280 : 440;
+  const viewBoxH = isCyber ? 220 : 440;
+  const centerX = viewBoxW / 2;
+  const centerY = viewBoxH / 2;
+  const radius = isCyber ? 68 : 115;
 
   // Concentric levels (3, 6, 9, 12, 15)
   const levels = [0.2, 0.4, 0.6, 0.8, 1.0];
@@ -38,8 +40,8 @@ export default function RadarChart({
   // Start from top (-90 deg), clockwise
   const getCoordinates = (index: number, ratio: number) => {
     const angle = (Math.PI * 2 * index) / AXIS_KEYS.length - Math.PI / 2;
-    const x = center + radius * ratio * Math.cos(angle);
-    const y = center + radius * ratio * Math.sin(angle);
+    const x = centerX + radius * ratio * Math.cos(angle);
+    const y = centerY + radius * ratio * Math.sin(angle);
     return { x, y, angle };
   };
 
@@ -68,19 +70,29 @@ export default function RadarChart({
 
   return (
     <div className="w-full flex flex-col items-center">
-      <div className={`relative w-full ${containerClassName || "max-w-[380px]"} aspect-square flex items-center justify-center`}>
+      <div className={`relative w-full ${containerClassName || (isCyber ? "w-full h-full" : "max-w-[380px] aspect-square")} flex items-center justify-center`}>
         <svg
-          viewBox={`0 0 ${size} ${size}`}
+          viewBox={`0 0 ${viewBoxW} ${viewBoxH}`}
           className="w-full h-full overflow-visible select-none drop-shadow-xs"
         >
-          {/* Subtle Background Glow */}
-          <circle
-            cx={center}
-            cy={center}
-            r={radius}
-            fill={theme === "dark" ? "rgba(255, 255, 255, 0.05)" : "#F8FAFC"}
-            className="transition-colors"
-          />
+          {/* Background */}
+          {isCyber ? (
+            <rect
+              width={viewBoxW}
+              height={viewBoxH}
+              rx={14}
+              fill="#081426"
+              fillOpacity={0.98}
+            />
+          ) : (
+            <circle
+              cx={centerX}
+              cy={centerY}
+              r={radius}
+              fill={theme === "dark" ? "rgba(255, 255, 255, 0.05)" : "#F8FAFC"}
+              className="transition-colors"
+            />
+          )}
 
           {/* Grid Concentric Polygons */}
           {gridPolygons.map((pts, idx) => (
@@ -88,8 +100,15 @@ export default function RadarChart({
               key={`grid-${idx}`}
               points={pts}
               fill="none"
-              stroke={theme === "dark" ? "rgba(255, 255, 255, 0.25)" : "#E2E8F0"}
+              stroke={
+                isCyber
+                  ? "#0284c7"
+                  : theme === "dark"
+                  ? "rgba(255, 255, 255, 0.25)"
+                  : "#E2E8F0"
+              }
               strokeWidth={idx === levels.length - 1 ? 1.5 : 1}
+              strokeOpacity={isCyber ? 0.45 : 1}
               strokeDasharray={idx < levels.length - 1 ? "3 3" : undefined}
             />
           ))}
@@ -100,12 +119,19 @@ export default function RadarChart({
             return (
               <line
                 key={`axis-${key}`}
-                x1={center}
-                y1={center}
+                x1={centerX}
+                y1={centerY}
                 x2={x}
                 y2={y}
-                stroke={theme === "dark" ? "rgba(255, 255, 255, 0.3)" : "#CBD5E1"}
+                stroke={
+                  isCyber
+                    ? "#0ea5e9"
+                    : theme === "dark"
+                    ? "rgba(255, 255, 255, 0.3)"
+                    : "#CBD5E1"
+                }
                 strokeWidth={1}
+                strokeOpacity={isCyber ? 0.6 : 1}
               />
             );
           })}
@@ -113,8 +139,14 @@ export default function RadarChart({
           {/* Data Filled Polygon */}
           <polygon
             points={polygonPath}
-            fill={theme === "dark" ? "rgba(245, 158, 11, 0.38)" : "rgba(30, 58, 138, 0.22)"}
-            stroke={theme === "dark" ? "#F59E0B" : "#1E3A8A"}
+            fill={
+              isCyber
+                ? "rgba(6, 182, 212, 0.48)"
+                : theme === "dark"
+                ? "rgba(245, 158, 11, 0.38)"
+                : "rgba(30, 58, 138, 0.22)"
+            }
+            stroke={isCyber ? "#38bdf8" : theme === "dark" ? "#F59E0B" : "#1E3A8A"}
             strokeWidth={2.5}
             strokeLinejoin="round"
             className="transition-all duration-300"
@@ -122,7 +154,7 @@ export default function RadarChart({
 
           {/* Outer Vertex Labels and Badges */}
           {AXIS_KEYS.map((key, i) => {
-            const { x, y, angle } = getCoordinates(i, 1.22);
+            const { x, y, angle } = getCoordinates(i, isCyber ? 1.25 : 1.22);
             const dept = DEPARTMENTS[key];
             const score = scores[key] || 0;
             const pct = Math.round((score / maxScore) * 100);
@@ -146,13 +178,17 @@ export default function RadarChart({
                   y={hideScores ? y : y - 7}
                   textAnchor={textAnchor}
                   dominantBaseline={hideScores ? "central" : "auto"}
-                  className={`text-[13px] ${
-                    theme === "dark"
+                  className={`select-none ${
+                    isCyber
                       ? isHovered
-                        ? "fill-amber-300 font-black"
-                        : "fill-white font-black drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]"
+                        ? "fill-cyan-300 font-black text-[11px]"
+                        : "fill-white font-black text-[10px] drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]"
+                      : theme === "dark"
+                      ? isHovered
+                        ? "fill-amber-300 font-black text-[13px]"
+                        : "fill-white font-black text-[13px] drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]"
                       : isHovered
-                      ? "fill-[#1E3A8A] font-black"
+                      ? "fill-[#1E3A8A] font-black text-[13px]"
                       : "fill-[#0F172A] font-black text-[13px]"
                   }`}
                 >
@@ -164,7 +200,9 @@ export default function RadarChart({
                     y={y + 8}
                     textAnchor={textAnchor}
                     className={`text-[11px] font-mono font-bold ${
-                      theme === "dark"
+                      isCyber
+                        ? "fill-cyan-300"
+                        : theme === "dark"
                         ? isHovered
                           ? "fill-emerald-300 font-black"
                           : "fill-amber-300 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]"
@@ -194,10 +232,10 @@ export default function RadarChart({
                 <circle
                   cx={pt.x}
                   cy={pt.y}
-                  r={isHovered ? 8 : 5}
-                  fill={isHovered ? "#F59E0B" : "#1E3A8A"}
+                  r={isHovered ? (isCyber ? 6 : 8) : isCyber ? 4 : 5}
+                  fill={isCyber ? "#38bdf8" : isHovered ? "#F59E0B" : "#1E3A8A"}
                   stroke="#FFFFFF"
-                  strokeWidth={2}
+                  strokeWidth={isCyber ? 1.5 : 2}
                   className="transition-all duration-200 shadow-md"
                 />
               </g>
@@ -206,7 +244,7 @@ export default function RadarChart({
         </svg>
 
         {/* Floating Tooltip inside container */}
-        {activePoint && (
+        {activePoint && !isCyber && (
           <div
             className="absolute z-10 pointer-events-none bg-slate-900/90 text-white rounded-xl px-3 py-2 text-xs shadow-xl backdrop-blur-xs border border-white/10"
             style={{

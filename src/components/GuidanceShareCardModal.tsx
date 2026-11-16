@@ -118,8 +118,8 @@ export default function GuidanceShareCardModal({
 
       const dataUrl = await toPng(cardRef.current, {
         cacheBust: true,
-        pixelRatio: 2.5,
-        backgroundColor: "#FEF08A",
+        pixelRatio: 2,
+        backgroundColor: "#0c2411",
       });
 
       const link = document.createElement("a");
@@ -144,8 +144,8 @@ export default function GuidanceShareCardModal({
       setExporting(true);
       const dataUrl = await toPng(cardRef.current, {
         cacheBust: true,
-        pixelRatio: 2.5,
-        backgroundColor: "#FEF08A",
+        pixelRatio: 2,
+        backgroundColor: "#0c2411",
       });
 
       const res = await fetch(dataUrl);
@@ -260,194 +260,145 @@ export default function GuidanceShareCardModal({
               <ul className="text-slate-700 space-y-1 text-[11px] leading-relaxed">
                 <li className="flex items-center gap-1.5">
                   <span className="text-emerald-600 font-bold">✓</span>
-                  <span>ตราสัญลักษณ์วิทยาลัยคมชัด พร้อมกรอบทอง 3D หรูหรา</span>
+                  <span>ดีไซน์โปสเตอร์ระดับพรีเมียม สไตล์ 3D Career Quiz ตามแบบตัวอย่าง</span>
                 </li>
                 <li className="flex items-center gap-1.5">
                   <span className="text-emerald-600 font-bold">✓</span>
-                  <span>จัดวางสัดส่วนลงตัว ข้อความด้านล่างและ QR Code ไม่ตกขอบ</span>
+                  <span>ตัวการ์ตูนมาสคอต 3D ปรับเปลี่ยนอัตโนมัติตามสาขาวิชาที่แนะนำ</span>
                 </li>
                 <li className="flex items-center gap-1.5">
                   <span className="text-emerald-600 font-bold">✓</span>
-                  <span>กราฟใยแมงมุมแสดงเฉพาะชื่อสาขาวิชา ตัวหนา คมชัด สบายตา</span>
+                  <span>จอแท็บเล็ตไซเบอร์แสดงผลกราฟใยแมงมุม 6 แผนกวิชาตามคะแนนจริง</span>
                 </li>
                 <li className="flex items-center gap-1.5">
                   <span className="text-emerald-600 font-bold">✓</span>
-                  <span>ขนาดเดียวใช้งานได้ทันทีทั้ง LINE, Facebook, IG และ TikTok</span>
+                  <span>ฝัง Dynamic QR Code เชื่อมตรงเข้าสู่หน้ารับสมัครสาขาวิชานี้ทันที</span>
                 </li>
               </ul>
             </div>
           </div>
 
           {/* Canvas Preview Column (7 cols) */}
-          <div className="lg:col-span-7 flex flex-col items-center justify-center bg-slate-100 p-3 sm:p-5 rounded-3xl border border-slate-300 shadow-inner">
-            <div className="text-[11px] font-bold text-slate-600 mb-2 flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+          <div className="lg:col-span-7 flex flex-col items-center justify-center bg-slate-900/90 p-3 sm:p-5 rounded-3xl border border-slate-700 shadow-inner overflow-hidden">
+            <div className="text-[11px] font-bold text-emerald-400 mb-2 flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
               <span>
-                พรีวิวภาพการ์ดที่จะถูกบันทึกและส่งแชร์ (ขนาดสากล พอดีกรอบ 100%)
+                พรีวิวภาพการ์ดตามสไตล์แบบที่ 1 (ขนาด 9:16 พร้อมกดแชร์และดาวน์โหลด)
               </span>
             </div>
 
-            {/* ===================== UNIVERSAL SHARE CARD CANVAS ===================== */}
-            <div className="overflow-auto max-h-[80vh] w-full flex justify-center py-1">
-              <div
-                ref={cardRef}
-                style={{
-                  width: "410px",
-                  height: "700px",
-                  boxSizing: "border-box",
-                }}
-                className="relative bg-gradient-to-b from-amber-300 via-sky-300 to-cyan-500 text-slate-900 shadow-2xl flex flex-col justify-between overflow-hidden select-none rounded-3xl border-4 border-white"
-              >
-                {/* Festive Sparkle Elements & Sunburst Background */}
-                <div className="absolute inset-0 opacity-25 bg-[radial-gradient(#ffffff_2px,transparent_2px)] [background-size:18px_18px] pointer-events-none" />
-                <div className="absolute -top-12 -right-12 w-48 h-48 bg-yellow-200/50 rounded-full blur-2xl pointer-events-none" />
-                <div className="absolute top-1/3 -left-12 w-48 h-48 bg-white/40 rounded-full blur-2xl pointer-events-none" />
+            {/* ===================== CAREER POSTER 9:16 CANVAS ===================== */}
+            <div className="overflow-y-auto max-h-[76vh] w-full flex justify-center py-2">
+              <div className="transform scale-[0.62] sm:scale-[0.70] md:scale-[0.78] origin-top my-[-180px] sm:my-[-140px] md:my-[-90px]">
+                <div
+                  ref={cardRef}
+                  style={{
+                    width: "576px",
+                    height: "1024px",
+                    boxSizing: "border-box",
+                  }}
+                  className="relative text-white shadow-2xl overflow-hidden select-none rounded-3xl bg-[#0c2411] border-4 border-emerald-400/30 shrink-0"
+                >
+                  {/* 1. Base Poster Template Image (High-Res 576x1024 Backdrop) */}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={assetUrl("/images/card-elements/career-poster-template.jpg")}
+                    alt="Career Poster Template"
+                    className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none z-0"
+                  />
 
-                {/* Hanging Festive Light Bulbs */}
-                <div className="absolute top-1 left-0 right-0 flex justify-around px-8 pointer-events-none z-20">
-                  <span className="w-2.5 h-3 rounded-full bg-red-500 shadow-[0_0_8px_#ef4444]" />
-                  <span className="w-2.5 h-3 rounded-full bg-yellow-300 shadow-[0_0_8px_#fde047]" />
-                  <span className="w-2.5 h-3 rounded-full bg-cyan-300 shadow-[0_0_8px_#67e8f9]" />
-                  <span className="w-2.5 h-3 rounded-full bg-pink-400 shadow-[0_0_8px_#f472b6]" />
-                  <span className="w-2.5 h-3 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]" />
-                </div>
+                  {/* 2. DYNAMIC GOLDEN CAPSULE: Major / Program Name */}
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: "201px",
+                      left: "32px",
+                      width: "512px",
+                      height: "68px",
+                    }}
+                    className="z-30 flex items-center justify-center pointer-events-none"
+                  >
+                    <div className="w-full h-full rounded-full bg-gradient-to-r from-yellow-200 via-amber-300 to-yellow-200 border-2 border-yellow-100 shadow-[0_0_24px_rgba(250,204,21,0.95)] flex flex-col items-center justify-center px-4 leading-none">
+                      {studentName && studentName !== "น้องผู้สมัคร" && (
+                        <span className="text-[10px] font-black text-blue-950/80 mb-0.5 tracking-wider">
+                          ผลลัพธ์ของ: {studentName}
+                        </span>
+                      )}
+                      <h2 className="text-[#1e1b4b] font-black text-xl sm:text-2xl tracking-tight drop-shadow-[0_1px_1px_rgba(255,255,255,0.8)] text-center truncate">
+                        ด้วย {programName}
+                      </h2>
+                    </div>
+                  </div>
 
-                {/* 1. TOP HEADER: PROMINENT & BEAUTIFUL COLLEGE LOGO BADGE (WHITE CIRCLE BACKGROUND) */}
-                <div className="relative z-10 px-4 pt-3.5 pb-1 flex items-center justify-between">
-                  <div className="flex items-center gap-2.5">
-                    {/* College Crest Badge with Pure White Circular Background */}
-                    <div className="w-12 h-12 rounded-full bg-white p-0.5 border-2 border-amber-400 shadow-md ring-2 ring-amber-300/60 flex items-center justify-center shrink-0 overflow-hidden">
+                  {/* 3. DYNAMIC 3D MASCOT HERO (Prepared for each major) */}
+                  {mascotType !== "tron" && (
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: "260px",
+                        left: "6px",
+                        width: "258px",
+                        height: "385px",
+                      }}
+                      className="z-20 rounded-3xl overflow-hidden border-2 border-cyan-400/90 shadow-[0_0_25px_rgba(6,182,212,0.65)] bg-slate-950/90 flex flex-col items-center justify-end"
+                    >
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
-                        src={assetUrl("/npc-logo-circle.png")}
-                        alt="NPC Logo"
-                        className="w-full h-full object-contain rounded-full"
-                        onError={(e) => {
-                          const el = e.currentTarget;
-                          if (!el.src.includes("/npc-logo.png")) {
-                            el.src = assetUrl("/npc-logo.png");
-                          }
-                        }}
+                        src={assetUrl(`/images/mascots/${mascotType}.png`)}
+                        alt={`Mascot ${topDept.name}`}
+                        className="w-full h-full object-cover object-center"
                       />
-                    </div>
-                    <div>
-                      <div className="text-[9px] font-black tracking-widest text-blue-950 uppercase leading-none">
-                        NAN POLYTECHNIC COLLEGE
-                      </div>
-                      <h4 className="text-sm sm:text-base font-black text-slate-900 leading-tight mt-0.5">
-                        วิทยาลัยสารพัดช่างน่าน
-                      </h4>
-                      <div className="text-[9px] text-blue-900 font-bold">
-                        งานแนะแนวอาชีพและการจัดหางาน
+                      {/* Mascot Department Badge */}
+                      <div className="absolute bottom-2 inset-x-2 bg-slate-950/90 backdrop-blur-xs py-1 px-2 rounded-xl border border-cyan-400/50 text-center shadow-lg">
+                        <span className="text-[11px] font-black text-cyan-300 tracking-wide">
+                          ★ ตัวแทน {topDept.shortName}
+                        </span>
                       </div>
                     </div>
-                  </div>
+                  )}
 
-                  {/* 3D Bubble Title Tag */}
-                  <div className="text-right shrink-0">
-                    <span className="inline-block px-2.5 py-0.5 rounded-full bg-white text-blue-950 text-[9px] font-black border-2 border-blue-900 shadow-[0_2px_0_#1e3a8a]">
-                      CAREER QUIZ
-                    </span>
-                    <div className="text-[9px] font-black text-blue-950 mt-0.5">
-                      ปีการศึกษา 2570
-                    </div>
-                  </div>
-                </div>
-
-                {/* 2. CANDIDATE PROFILE BAR */}
-                <div className="relative z-10 px-4 pt-1">
-                  <div className="flex items-center justify-between bg-white/95 backdrop-blur-xs p-1.5 px-3 rounded-2xl border-2 border-white shadow-sm">
-                    <div className="flex items-center gap-1.5 min-w-0">
-                      <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-400 shrink-0" />
-                      <span className="text-[11px] font-black text-slate-900 truncate">
-                        ค้นพบตัวตน: <span className="text-blue-900 font-black">{studentName}</span>
-                      </span>
-                    </div>
-
-                    <div className="px-2 py-0.5 rounded-full bg-emerald-500 text-white text-[10px] font-black shadow-xs shrink-0 flex items-center gap-1">
-                      <span>ตรงใจ</span>
-                      <span className="text-emerald-100">{result.sortedDepartments[0]?.percentage || 100}%</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* 3. HERO RECOMMENDATION BANNER (RED 3D RIBBON) */}
-                <div className="relative z-10 px-4 pt-1.5">
-                  <div className="bg-gradient-to-r from-red-600 via-rose-600 to-red-700 text-white rounded-2xl p-2 px-3.5 shadow-[0_4px_10px_rgba(220,38,38,0.35)] border-2 border-yellow-300 relative text-center">
-                    <div className="inline-block px-2 py-0.5 rounded-full bg-yellow-400 text-red-950 text-[8px] font-black mb-0.5 shadow-xs uppercase">
-                      {selectedCode === "20143" ? "⚡ นวัตกรรมยานยนต์ไฟฟ้า EV" : "★ สาขาที่ตรงกับศักยภาพของคุณ"}
-                    </div>
-
-                    <h2 className="text-base sm:text-lg font-black text-white leading-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)] tracking-tight">
-                      {programName}
-                    </h2>
-                  </div>
-                </div>
-
-                {/* 4. CENTER SHOWCASE: 3D MASCOT HERO + COMPACT RADAR CHART (NO NUMBERS, NO HINT TEXT) */}
-                <div className="relative z-10 px-4 py-1 flex-1 flex flex-col items-center justify-center space-y-1">
-                  {/* 3D Mascot Character */}
-                  <div className="flex flex-col items-center shrink-0">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={assetUrl(`/images/mascots/${mascotType}.png`)}
-                      alt="3D Mascot Hero"
-                      className="w-20 h-20 object-contain drop-shadow-[0_4px_10px_rgba(0,0,0,0.3)] transform hover:scale-105 transition-transform"
-                    />
-                    <div className="w-18 h-2 bg-black/15 rounded-full blur-xs -mt-1" />
-                  </div>
-
-                  {/* Compact Radar Chart (Clean, White card, ONLY DEPT NAMES, NO GRAY HINT TEXT) */}
-                  <div className="w-full max-w-[340px] bg-white/95 p-1.5 rounded-2xl border-2 border-white shadow-md flex items-center justify-center overflow-hidden">
+                  {/* 4. DYNAMIC CYBER RADAR CHART (Covering the tablet screen with candidate's REAL scores) */}
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: "434px",
+                      left: "246px",
+                      width: "282px",
+                      height: "220px",
+                    }}
+                    className="z-25 rounded-2xl overflow-hidden bg-[#071329] border border-cyan-500/70 shadow-[0_0_20px_rgba(6,182,212,0.5)] p-0.5 flex items-center justify-center"
+                  >
                     <RadarChart
                       scores={result.scores}
                       maxScore={15}
-                      theme="light"
+                      theme="cyber"
                       hideScores={true}
                       hideHint={true}
-                      containerClassName="max-w-[260px]"
+                      containerClassName="w-full h-full"
                     />
                   </div>
-                </div>
 
-                {/* 5. VIBRANT YELLOW BOTTOM PROMO BANNER (100% VISIBLE & NEVER CUT OFF!) */}
-                <div className="relative z-10 bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-400 text-slate-950 p-2.5 px-3.5 flex items-center justify-between gap-2.5 border-t-2 border-yellow-200 shadow-md">
-                  <div className="space-y-0.5 leading-tight flex-1">
-                    <div className="font-black text-[11px] text-blue-950 flex items-center gap-1">
-                      <span>วิทยาลัยสารพัดช่างน่าน</span>
-                      <span className="text-[9px] bg-red-600 text-white px-1.5 py-0.2 rounded font-black">
-                        สมัครเรียน
-                      </span>
-                    </div>
-                    <div className="text-[9px] font-bold text-slate-800 leading-tight">
-                      &quot;เรียนดี มีความสุข มีรายได้ระหว่างเรียน พร้อมสู่อนาคต&quot;
-                    </div>
-                    <div className="flex items-center gap-2 text-slate-900 text-[8px] font-black pt-0.5">
-                      <span className="flex items-center gap-0.5">
-                        <Phone className="w-2.5 h-2.5 text-blue-950" /> 054-710-259
-                      </span>
-                      <span>•</span>
-                      <span className="flex items-center gap-0.5">
-                        <Globe className="w-2.5 h-2.5 text-blue-950" /> service.npc.ac.th
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Clean Dynamic QR Code Box */}
-                  <div className="bg-white p-1 rounded-xl shadow-md flex flex-col items-center shrink-0 border-2 border-slate-900">
+                  {/* 5. DYNAMIC QR CODE OVERLAY (Direct link to online admission for this program) */}
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: "846px",
+                      left: "442px",
+                      width: "104px",
+                      height: "104px",
+                    }}
+                    className="z-30 rounded-xl overflow-hidden bg-white p-1 flex items-center justify-center shadow-md"
+                  >
                     {qrCodeUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
                         src={qrCodeUrl}
                         alt="QR Code รับสมัคร"
-                        className="w-11 h-11 object-contain"
+                        className="w-full h-full object-contain"
                       />
                     ) : (
-                      <div className="w-11 h-11 bg-slate-200 animate-pulse rounded" />
+                      <div className="w-full h-full bg-slate-200 animate-pulse rounded" />
                     )}
-                    <span className="text-[7px] text-slate-950 font-black tracking-tighter mt-0.5">
-                      สแกนสมัครเรียน
-                    </span>
                   </div>
                 </div>
               </div>

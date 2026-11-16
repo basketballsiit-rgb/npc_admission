@@ -363,7 +363,7 @@ export default function GuidanceShareCardModal({
                   }}
                   className="relative text-white shadow-2xl overflow-hidden select-none rounded-3xl bg-[#0c2411] border-4 border-emerald-400/30 shrink-0"
                 >
-                  {/* 1. Base Poster Template Image (Clean Backdrop WITHOUT old boy/hands/dummy QR) */}
+                  {/* 1. Base Poster Template Image (Clean Backdrop WITH original crystal-clear 3D 'น้องสู่เส้นทางอนาคต', NO old boy/hands/dummy QR) */}
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={assetUrl("/images/card-elements/career-poster-clean-bg.jpg")}
@@ -371,30 +371,11 @@ export default function GuidanceShareCardModal({
                     className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none z-0"
                   />
 
-                  {/* 2. PROMINENT 3D TITLE: 'น้องสู่เส้นทางอนาคต' (Original 3D Graphic Typography) */}
+                  {/* 2. DYNAMIC GOLDEN CAPSULE: Major / Program Name (Positioned cleanly below original 3D title) */}
                   <div
                     style={{
                       position: "absolute",
-                      top: "144px",
-                      left: "0",
-                      width: "576px",
-                      height: "56px",
-                    }}
-                    className="z-30 pointer-events-none flex items-center justify-center"
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={assetUrl("/images/card-elements/future_path_title_3d.png")}
-                      alt="น้องสู่เส้นทางอนาคต"
-                      className="h-full object-contain drop-shadow-[0_4px_10px_rgba(0,0,0,0.85)] filter"
-                    />
-                  </div>
-
-                  {/* 3. DYNAMIC GOLDEN CAPSULE: Major / Program Name */}
-                  <div
-                    style={{
-                      position: "absolute",
-                      top: "200px",
+                      top: "206px",
                       left: "24px",
                       width: "528px",
                       height: "64px",
@@ -492,21 +473,21 @@ export default function GuidanceShareCardModal({
                     </div>
                   </div>
 
-                  {/* 6. DYNAMIC QR CODE CARD OVERLAY (Real official admission link, old dummy QR completely gone) */}
+                  {/* 5. DYNAMIC QR CODE CARD OVERLAY (Real official admission link, old dummy QR and old text completely erased) */}
                   <div
                     style={{
                       position: "absolute",
-                      top: "828px",
-                      left: "426px",
-                      width: "134px",
-                      height: "148px",
+                      top: "832px",
+                      left: "436px",
+                      width: "130px",
+                      height: "144px",
                     }}
                     className="z-30 rounded-2xl bg-white border-2 border-amber-400 shadow-xl flex flex-col items-center justify-between p-1.5 overflow-hidden"
                   >
                     <div className="w-full bg-[#1e3a8a] text-amber-300 font-black text-[9px] py-0.5 rounded-lg text-center tracking-wide shadow-xs">
                       สแกนสมัครทันที
                     </div>
-                    <div className="w-[100px] h-[100px] bg-white flex items-center justify-center p-0.5">
+                    <div className="w-[96px] h-[96px] bg-white flex items-center justify-center p-0.5">
                       {qrCodeUrl ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img

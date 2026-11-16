@@ -371,35 +371,33 @@ export default function GuidanceShareCardModal({
                     className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none z-0"
                   />
 
-                  {/* 2. PROMINENT 3D TITLE: 'น้องสู่เส้นทางอนาคต' (Placed cleanly in front of / before the box) */}
+                  {/* 2. PROMINENT 3D TITLE: 'น้องสู่เส้นทางอนาคต' (Original 3D Graphic Typography) */}
                   <div
                     style={{
                       position: "absolute",
-                      top: "152px",
+                      top: "144px",
                       left: "0",
                       width: "576px",
-                      textAlign: "center",
+                      height: "56px",
                     }}
                     className="z-30 pointer-events-none flex items-center justify-center"
                   >
-                    <span
-                      style={{
-                        letterSpacing: "0.03em",
-                      }}
-                      className="text-[26px] sm:text-[28px] font-black text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] [text-shadow:_0_0_15px_#38bdf8,_0_0_28px_#0284c7]"
-                    >
-                      น้องสู่เส้นทางอนาคต
-                    </span>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={assetUrl("/images/card-elements/future_path_title_3d.png")}
+                      alt="น้องสู่เส้นทางอนาคต"
+                      className="h-full object-contain drop-shadow-[0_4px_10px_rgba(0,0,0,0.85)] filter"
+                    />
                   </div>
 
                   {/* 3. DYNAMIC GOLDEN CAPSULE: Major / Program Name */}
                   <div
                     style={{
                       position: "absolute",
-                      top: "198px",
+                      top: "200px",
                       left: "24px",
                       width: "528px",
-                      height: "66px",
+                      height: "64px",
                     }}
                     className="z-30 flex items-center justify-center pointer-events-none"
                   >
@@ -415,25 +413,25 @@ export default function GuidanceShareCardModal({
                     </div>
                   </div>
 
-                  {/* 4. DYNAMIC 3D MASCOT HERO (Background cut out, transparent PNG, gesturing toward screen) */}
+                  {/* 4. DYNAMIC 3D MASCOT HERO (Replaces original character, transparent PNG, gesturing toward screen) */}
                   <div
                     style={{
                       position: "absolute",
-                      top: "270px",
-                      left: "4px",
-                      width: "245px",
-                      height: "385px",
+                      top: "240px",
+                      left: "-4px",
+                      width: "275px",
+                      height: "415px",
                     }}
-                    className="z-20 pointer-events-none flex flex-col items-center justify-end"
+                    className="z-22 pointer-events-none flex flex-col items-center justify-end"
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={assetUrl(`/images/mascots/${mascotType}_transparent.png`)}
                       alt={`Mascot ${topDept.name}`}
-                      className="w-full h-full object-contain object-bottom drop-shadow-[0_15px_25px_rgba(0,0,0,0.85)] filter"
+                      className="w-full h-full object-contain object-bottom drop-shadow-[0_18px_28px_rgba(0,0,0,0.85)] filter"
                     />
                     {/* Mascot Department Badge */}
-                    <div className="absolute bottom-2 left-6 bg-slate-950/85 backdrop-blur-xs py-1 px-3 rounded-full border border-cyan-400/60 shadow-[0_0_12px_rgba(6,182,212,0.6)]">
+                    <div className="absolute bottom-2 left-6 bg-slate-950/90 backdrop-blur-xs py-1 px-3 rounded-full border border-cyan-400/60 shadow-[0_0_12px_rgba(6,182,212,0.6)]">
                       <span className="text-[10px] font-black text-cyan-300 tracking-wider">
                         ★ ตัวแทน {topDept.shortName}
                       </span>
@@ -444,12 +442,12 @@ export default function GuidanceShareCardModal({
                   <div
                     style={{
                       position: "absolute",
-                      top: "272px",
-                      left: "234px",
-                      width: "326px",
-                      height: "380px",
+                      top: "265px",
+                      left: "232px",
+                      width: "328px",
+                      height: "385px",
                     }}
-                    className="z-25 rounded-3xl overflow-hidden bg-gradient-to-b from-[#0a1e3f]/95 via-[#071329]/95 to-[#040b18]/95 border-2 border-cyan-400/80 shadow-[0_0_30px_rgba(6,182,212,0.45)] backdrop-blur-md flex flex-col justify-between p-2.5"
+                    className="z-20 rounded-3xl overflow-hidden bg-gradient-to-b from-[#0a1e3f]/95 via-[#071329]/95 to-[#040b18]/95 border-2 border-cyan-400/80 shadow-[0_0_30px_rgba(6,182,212,0.45)] backdrop-blur-md flex flex-col justify-between p-2.5"
                   >
                     {/* Cyber Tablet Top Bar */}
                     <div className="flex items-center justify-between px-2 pt-1 pb-1.5 border-b border-cyan-500/30">

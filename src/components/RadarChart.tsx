@@ -178,19 +178,26 @@ export default function RadarChart({
                   y={hideScores ? y : y - 7}
                   textAnchor={textAnchor}
                   dominantBaseline={hideScores ? "central" : "auto"}
-                  className={`select-none ${
+                  fill={
                     isCyber
                       ? isHovered
-                        ? "fill-cyan-300 font-black text-[11px]"
-                        : "fill-white font-black text-[10px] drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]"
+                        ? "#67e8f9"
+                        : "#ffffff"
                       : theme === "dark"
                       ? isHovered
-                        ? "fill-amber-300 font-black text-[13px]"
-                        : "fill-white font-black text-[13px] drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]"
+                        ? "#fcd34d"
+                        : "#ffffff"
                       : isHovered
-                      ? "fill-[#1E3A8A] font-black text-[13px]"
-                      : "fill-[#0F172A] font-black text-[13px]"
-                  }`}
+                      ? "#1e3a8a"
+                      : "#0f172a"
+                  }
+                  fontSize={isCyber ? 10.5 : 13}
+                  fontWeight={900}
+                  style={{
+                    filter: isCyber ? "drop-shadow(0 2px 4px rgba(0,0,0,0.95))" : undefined,
+                    userSelect: "none",
+                  }}
+                  className="select-none"
                 >
                   {dept.shortName}
                 </text>
@@ -199,17 +206,25 @@ export default function RadarChart({
                     x={x}
                     y={y + 8}
                     textAnchor={textAnchor}
-                    className={`text-[11px] font-mono font-bold ${
+                    fill={
                       isCyber
-                        ? "fill-cyan-300"
+                        ? "#67e8f9"
                         : theme === "dark"
                         ? isHovered
-                          ? "fill-emerald-300 font-black"
-                          : "fill-amber-300 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]"
+                          ? "#6ee7b7"
+                          : "#fcd34d"
                         : isHovered
-                        ? "fill-amber-600 font-black"
-                        : "fill-[#1E3A8A] font-black"
-                    }`}
+                        ? "#d97706"
+                        : "#1e3a8a"
+                    }
+                    fontSize={11}
+                    fontWeight="bold"
+                    style={{
+                      fontFamily: "monospace",
+                      filter: isCyber ? "drop-shadow(0 1px 2px rgba(0,0,0,0.9))" : undefined,
+                      userSelect: "none",
+                    }}
+                    className="text-[11px] font-mono font-bold"
                   >
                     {score}/{maxScore} ({pct}%)
                   </text>

@@ -371,14 +371,14 @@ export default function GuidanceShareCardModal({
                     className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none z-0"
                   />
 
-                  {/* 2. DYNAMIC GOLDEN CAPSULE: Major / Program Name (Positioned cleanly below original 3D title) */}
+                  {/* 2. DYNAMIC GOLDEN CAPSULE: Major / Program Name (Moved down to give 'น้องสู่เส้นทางอนาคต' full breathing room) */}
                   <div
                     style={{
                       position: "absolute",
-                      top: "206px",
+                      top: "218px",
                       left: "24px",
                       width: "528px",
-                      height: "64px",
+                      height: "60px",
                     }}
                     className="z-30 flex items-center justify-center pointer-events-none"
                   >
@@ -394,11 +394,11 @@ export default function GuidanceShareCardModal({
                     </div>
                   </div>
 
-                  {/* 4. DYNAMIC 3D MASCOT HERO (Replaces original character, transparent PNG, gesturing toward screen) */}
+                  {/* 3. DYNAMIC 3D MASCOT HERO (Replaces original character, transparent PNG, gesturing toward screen) */}
                   <div
                     style={{
                       position: "absolute",
-                      top: "240px",
+                      top: "255px",
                       left: "-4px",
                       width: "275px",
                       height: "415px",
@@ -419,14 +419,14 @@ export default function GuidanceShareCardModal({
                     </div>
                   </div>
 
-                  {/* 5. FUTURISTIC CYBER TABLET SCREEN (Containing Radar Chart as Native Display) */}
+                  {/* 4. FUTURISTIC CYBER TABLET SCREEN (Containing Radar Chart as Native Display) */}
                   <div
                     style={{
                       position: "absolute",
-                      top: "265px",
+                      top: "278px",
                       left: "232px",
                       width: "328px",
-                      height: "385px",
+                      height: "380px",
                     }}
                     className="z-20 rounded-3xl overflow-hidden bg-gradient-to-b from-[#0a1e3f]/95 via-[#071329]/95 to-[#040b18]/95 border-2 border-cyan-400/80 shadow-[0_0_30px_rgba(6,182,212,0.45)] backdrop-blur-md flex flex-col justify-between p-2.5"
                   >
@@ -473,21 +473,18 @@ export default function GuidanceShareCardModal({
                     </div>
                   </div>
 
-                  {/* 5. DYNAMIC QR CODE CARD OVERLAY (Real official admission link, old dummy QR and old text completely erased) */}
+                  {/* 5. DYNAMIC QR CODE OVERLAY (Fits and overlays the original card with pixel-perfect precision) */}
                   <div
                     style={{
                       position: "absolute",
-                      top: "832px",
-                      left: "436px",
-                      width: "130px",
-                      height: "144px",
+                      top: "844px",
+                      left: "448px",
+                      width: "110px",
+                      height: "128px",
                     }}
-                    className="z-30 rounded-2xl bg-white border-2 border-amber-400 shadow-xl flex flex-col items-center justify-between p-1.5 overflow-hidden"
+                    className="z-30 flex flex-col items-center justify-between pointer-events-none"
                   >
-                    <div className="w-full bg-[#1e3a8a] text-amber-300 font-black text-[9px] py-0.5 rounded-lg text-center tracking-wide shadow-xs">
-                      สแกนสมัครทันที
-                    </div>
-                    <div className="w-[96px] h-[96px] bg-white flex items-center justify-center p-0.5">
+                    <div className="w-[106px] h-[106px] bg-white flex items-center justify-center p-0.5 rounded-lg shadow-xs">
                       {qrCodeUrl ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
@@ -499,7 +496,7 @@ export default function GuidanceShareCardModal({
                         <div className="w-full h-full bg-slate-200 animate-pulse rounded" />
                       )}
                     </div>
-                    <span className="text-[#0f172a] font-black text-[8px] text-center tracking-tight">
+                    <span className="text-[#0f172a] font-black text-[9px] text-center tracking-tight leading-none mt-1">
                       วิทยาลัยสารพัดช่างน่าน
                     </span>
                   </div>

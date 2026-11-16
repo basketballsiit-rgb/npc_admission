@@ -15,6 +15,8 @@ import {
   User,
   Star,
   MapPin,
+  Briefcase,
+  Target,
 } from "lucide-react";
 import { apiUrl, assetUrl } from "@/lib/basepath";
 import { AssessmentResult } from "@/lib/guidance-questions";
@@ -65,11 +67,27 @@ export default function GuidanceShareCardModal({
   const mascotType = getMascotType();
   const topDept = DEPARTMENTS[result.top1];
 
-  // Resolve active program name (WITHOUT code or level)
+  // Resolve active program name and personalized strengths/careers
   let programName = selectedLevel === "ปวช." ? topDept.pvc.name : topDept.pvs.name;
+  let programStrengths =
+    selectedLevel === "ปวช."
+      ? topDept.pvc.strengths || topDept.strengths
+      : topDept.strengths;
+  let programCareers =
+    selectedLevel === "ปวช."
+      ? topDept.pvc.futureCareers || topDept.futureCareers
+      : topDept.futureCareers;
+
   if (selectedLevel === "ปวช." && selectedCode === "20143") {
     programName = "สาขาวิชายานยนต์ไฟฟ้า";
+    if (topDept.alternativePvc && topDept.alternativePvc[0]) {
+      programStrengths = topDept.alternativePvc[0].strengths || programStrengths;
+      programCareers = topDept.alternativePvc[0].futureCareers || programCareers;
+    }
   }
+
+  const topScore = result.scores[result.top1] || 0;
+  const topScorePct = Math.round((topScore / 15) * 100);
 
   // Generate Dynamic QR Code
   useEffect(() => {
@@ -254,27 +272,73 @@ export default function GuidanceShareCardModal({
               </div>
             )}
 
-            {/* Checklist */}
-            <div className="bg-amber-50/70 p-3.5 rounded-2xl border border-amber-200 space-y-1.5 text-xs">
-              <div className="font-black text-amber-950">จุดเด่นของการ์ดรูปภาพนี้:</div>
-              <ul className="text-slate-700 space-y-1 text-[11px] leading-relaxed">
-                <li className="flex items-center gap-1.5">
-                  <span className="text-emerald-600 font-bold">✓</span>
-                  <span>ดีไซน์โปสเตอร์ระดับพรีเมียม สไตล์ 3D Career Quiz ตามแบบตัวอย่าง</span>
-                </li>
-                <li className="flex items-center gap-1.5">
-                  <span className="text-emerald-600 font-bold">✓</span>
-                  <span>ตัวการ์ตูนมาสคอต 3D ปรับเปลี่ยนอัตโนมัติตามสาขาวิชาที่แนะนำ</span>
-                </li>
-                <li className="flex items-center gap-1.5">
-                  <span className="text-emerald-600 font-bold">✓</span>
-                  <span>จอแท็บเล็ตไซเบอร์แสดงผลกราฟใยแมงมุม 6 แผนกวิชาตามคะแนนจริง</span>
-                </li>
-                <li className="flex items-center gap-1.5">
-                  <span className="text-emerald-600 font-bold">✓</span>
-                  <span>ฝัง Dynamic QR Code เชื่อมตรงเข้าสู่หน้ารับสมัครสาขาวิชานี้ทันที</span>
-                </li>
-              </ul>
+            {/* Personalized Assessment Result & Insights */}
+            <div className="bg-gradient-to-br from-amber-50 to-orange-50/60 p-4 rounded-2xl border-2 border-amber-300/80 space-y-3 text-xs shadow-xs">
+              <div className="flex items-center gap-2 border-b border-amber-200/80 pb-2">
+                <div className="w-7 h-7 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-xs">
+                  <Sparkles className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                  <h4 className="font-black text-amber-950 text-xs">
+                    ทำไมคุณจึงเหมาะกับสาขาวิชานี้?
+                  </h4>
+                  <p className="text-[10px] text-amber-800/80 font-medium">
+                    วิเคราะห์เจาะลึกจากผลการทำแบบทดสอบค้นหาตัวตนของคุณ
+                  </p>
+                </div>
+              </div>
+
+              {/* Top Score & Match */}
+              <div className="bg-white/90 p-2.5 rounded-xl border border-amber-200 space-y-1">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-slate-700 text-[11px]">
+                    ความถนัดเด่นอันดับ 1:
+                  </span>
+                  <span className="font-black text-emerald-700 bg-emerald-100/90 px-2 py-0.5 rounded-full text-[10px]">
+                    ตรงใจ {topScorePct}%
+                  </span>
+                </div>
+                <div className="text-blue-950 font-black text-xs">
+                  {topDept.name} ({topScore}/15 คะแนน)
+                </div>
+                <p className="text-[10px] text-slate-600 leading-relaxed">
+                  สไตล์การเรียนรู้: <span className="font-bold text-amber-900">{result.trackTitle}</span> — คำตอบของคุณสะท้อนความสนใจในภาคปฏิบัติและทักษะเฉพาะทางที่สอดคล้องกับสาขานี้โดยตรง
+                </p>
+              </div>
+
+              {/* Key Strengths */}
+              <div className="space-y-1.5">
+                <div className="font-black text-slate-800 text-[11px] flex items-center gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>จุดเด่นและศักยภาพที่คุณจะได้รับการพัฒนา:</span>
+                </div>
+                <ul className="space-y-1 pl-1">
+                  {programStrengths.slice(0, 3).map((item, idx) => (
+                    <li key={idx} className="flex items-start gap-1.5 text-[11px] text-slate-700 leading-snug">
+                      <span className="text-emerald-600 font-black shrink-0">✓</span>
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Future Careers */}
+              <div className="space-y-1.5 pt-1 border-t border-amber-200/60">
+                <div className="font-black text-slate-800 text-[11px] flex items-center gap-1.5">
+                  <Briefcase className="w-3.5 h-3.5 text-blue-600" />
+                  <span>เส้นทางอาชีพและโอกาสในอนาคต:</span>
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  {programCareers.slice(0, 3).map((career, idx) => (
+                    <span
+                      key={idx}
+                      className="px-2 py-0.5 rounded-md bg-blue-50 text-blue-900 font-bold text-[10px] border border-blue-200/70"
+                    >
+                      • {career}
+                    </span>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
 
@@ -299,22 +363,43 @@ export default function GuidanceShareCardModal({
                   }}
                   className="relative text-white shadow-2xl overflow-hidden select-none rounded-3xl bg-[#0c2411] border-4 border-emerald-400/30 shrink-0"
                 >
-                  {/* 1. Base Poster Template Image (High-Res 576x1024 Backdrop) */}
+                  {/* 1. Base Poster Template Image (Clean Backdrop WITHOUT old boy/hands/dummy QR) */}
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={assetUrl("/images/card-elements/career-poster-template.jpg")}
+                    src={assetUrl("/images/card-elements/career-poster-clean-bg.jpg")}
                     alt="Career Poster Template"
                     className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none z-0"
                   />
 
-                  {/* 2. DYNAMIC GOLDEN CAPSULE: Major / Program Name */}
+                  {/* 2. PROMINENT 3D TITLE: 'น้องสู่เส้นทางอนาคต' (Placed cleanly in front of / before the box) */}
                   <div
                     style={{
                       position: "absolute",
-                      top: "201px",
-                      left: "32px",
-                      width: "512px",
-                      height: "68px",
+                      top: "152px",
+                      left: "0",
+                      width: "576px",
+                      textAlign: "center",
+                    }}
+                    className="z-30 pointer-events-none flex items-center justify-center"
+                  >
+                    <span
+                      style={{
+                        letterSpacing: "0.03em",
+                      }}
+                      className="text-[26px] sm:text-[28px] font-black text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] [text-shadow:_0_0_15px_#38bdf8,_0_0_28px_#0284c7]"
+                    >
+                      น้องสู่เส้นทางอนาคต
+                    </span>
+                  </div>
+
+                  {/* 3. DYNAMIC GOLDEN CAPSULE: Major / Program Name */}
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: "198px",
+                      left: "24px",
+                      width: "528px",
+                      height: "66px",
                     }}
                     className="z-30 flex items-center justify-center pointer-events-none"
                   >
@@ -330,75 +415,114 @@ export default function GuidanceShareCardModal({
                     </div>
                   </div>
 
-                  {/* 3. DYNAMIC 3D MASCOT HERO (Prepared for each major) */}
-                  {mascotType !== "tron" && (
-                    <div
-                      style={{
-                        position: "absolute",
-                        top: "260px",
-                        left: "6px",
-                        width: "258px",
-                        height: "385px",
-                      }}
-                      className="z-20 rounded-3xl overflow-hidden border-2 border-cyan-400/90 shadow-[0_0_25px_rgba(6,182,212,0.65)] bg-slate-950/90 flex flex-col items-center justify-end"
-                    >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={assetUrl(`/images/mascots/${mascotType}.png`)}
-                        alt={`Mascot ${topDept.name}`}
-                        className="w-full h-full object-cover object-center"
-                      />
-                      {/* Mascot Department Badge */}
-                      <div className="absolute bottom-2 inset-x-2 bg-slate-950/90 backdrop-blur-xs py-1 px-2 rounded-xl border border-cyan-400/50 text-center shadow-lg">
-                        <span className="text-[11px] font-black text-cyan-300 tracking-wide">
-                          ★ ตัวแทน {topDept.shortName}
-                        </span>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* 4. DYNAMIC CYBER RADAR CHART (Covering the tablet screen with candidate's REAL scores) */}
+                  {/* 4. DYNAMIC 3D MASCOT HERO (Background cut out, transparent PNG, gesturing toward screen) */}
                   <div
                     style={{
                       position: "absolute",
-                      top: "434px",
-                      left: "246px",
-                      width: "282px",
-                      height: "220px",
+                      top: "270px",
+                      left: "4px",
+                      width: "245px",
+                      height: "385px",
                     }}
-                    className="z-25 rounded-2xl overflow-hidden bg-[#071329] border border-cyan-500/70 shadow-[0_0_20px_rgba(6,182,212,0.5)] p-0.5 flex items-center justify-center"
+                    className="z-20 pointer-events-none flex flex-col items-center justify-end"
                   >
-                    <RadarChart
-                      scores={result.scores}
-                      maxScore={15}
-                      theme="cyber"
-                      hideScores={true}
-                      hideHint={true}
-                      containerClassName="w-full h-full"
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={assetUrl(`/images/mascots/${mascotType}_transparent.png`)}
+                      alt={`Mascot ${topDept.name}`}
+                      className="w-full h-full object-contain object-bottom drop-shadow-[0_15px_25px_rgba(0,0,0,0.85)] filter"
                     />
+                    {/* Mascot Department Badge */}
+                    <div className="absolute bottom-2 left-6 bg-slate-950/85 backdrop-blur-xs py-1 px-3 rounded-full border border-cyan-400/60 shadow-[0_0_12px_rgba(6,182,212,0.6)]">
+                      <span className="text-[10px] font-black text-cyan-300 tracking-wider">
+                        ★ ตัวแทน {topDept.shortName}
+                      </span>
+                    </div>
                   </div>
 
-                  {/* 5. DYNAMIC QR CODE OVERLAY (Direct link to online admission for this program) */}
+                  {/* 5. FUTURISTIC CYBER TABLET SCREEN (Containing Radar Chart as Native Display) */}
                   <div
                     style={{
                       position: "absolute",
-                      top: "846px",
-                      left: "442px",
-                      width: "104px",
-                      height: "104px",
+                      top: "272px",
+                      left: "234px",
+                      width: "326px",
+                      height: "380px",
                     }}
-                    className="z-30 rounded-xl overflow-hidden bg-white p-1 flex items-center justify-center shadow-md"
+                    className="z-25 rounded-3xl overflow-hidden bg-gradient-to-b from-[#0a1e3f]/95 via-[#071329]/95 to-[#040b18]/95 border-2 border-cyan-400/80 shadow-[0_0_30px_rgba(6,182,212,0.45)] backdrop-blur-md flex flex-col justify-between p-2.5"
                   >
-                    {qrCodeUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={qrCodeUrl}
-                        alt="QR Code รับสมัคร"
-                        className="w-full h-full object-contain"
+                    {/* Cyber Tablet Top Bar */}
+                    <div className="flex items-center justify-between px-2 pt-1 pb-1.5 border-b border-cyan-500/30">
+                      <div className="flex items-center gap-1.5">
+                        <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_8px_#38bdf8]" />
+                        <span className="text-[9px] font-mono font-bold text-cyan-300 tracking-wider uppercase">
+                          CAREER RADAR ANALYTICS
+                        </span>
+                      </div>
+                      <span className="text-[9px] font-mono font-black text-emerald-400 bg-emerald-950/80 border border-emerald-500/40 px-1.5 py-0.5 rounded-full">
+                        MATCH {topScorePct}%
+                      </span>
+                    </div>
+
+                    {/* Cyber Tablet Screen: Native Radar Chart */}
+                    <div className="relative flex-1 flex items-center justify-center overflow-hidden py-1">
+                      {/* Cyber screen grid and corner accents */}
+                      <div className="absolute inset-0 bg-[linear-gradient(to_right,#0ea5e910_1px,transparent_1px),linear-gradient(to_bottom,#0ea5e910_1px,transparent_1px)] bg-[size:16px_16px] pointer-events-none" />
+                      <div className="absolute top-1 left-1 text-cyan-400/60 font-mono text-[9px] pointer-events-none">┌</div>
+                      <div className="absolute top-1 right-1 text-cyan-400/60 font-mono text-[9px] pointer-events-none">┐</div>
+                      <div className="absolute bottom-1 left-1 text-cyan-400/60 font-mono text-[9px] pointer-events-none">└</div>
+                      <div className="absolute bottom-1 right-1 text-cyan-400/60 font-mono text-[9px] pointer-events-none">┘</div>
+
+                      <RadarChart
+                        scores={result.scores}
+                        maxScore={15}
+                        theme="cyber"
+                        hideScores={true}
+                        hideHint={true}
+                        containerClassName="w-full h-full"
                       />
-                    ) : (
-                      <div className="w-full h-full bg-slate-200 animate-pulse rounded" />
-                    )}
+                    </div>
+
+                    {/* Cyber Tablet Bottom Bar */}
+                    <div className="px-2 py-1 bg-cyan-950/60 border border-cyan-500/30 rounded-xl flex items-center justify-between text-[9px]">
+                      <span className="text-cyan-200 font-bold truncate">
+                        อันดับ 1: {topDept.shortName}
+                      </span>
+                      <span className="text-amber-300 font-mono font-bold shrink-0 ml-1">
+                        {topScore}/15 คะแนน
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* 6. DYNAMIC QR CODE CARD OVERLAY (Real official admission link, old dummy QR completely gone) */}
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: "828px",
+                      left: "426px",
+                      width: "134px",
+                      height: "148px",
+                    }}
+                    className="z-30 rounded-2xl bg-white border-2 border-amber-400 shadow-xl flex flex-col items-center justify-between p-1.5 overflow-hidden"
+                  >
+                    <div className="w-full bg-[#1e3a8a] text-amber-300 font-black text-[9px] py-0.5 rounded-lg text-center tracking-wide shadow-xs">
+                      สแกนสมัครทันที
+                    </div>
+                    <div className="w-[100px] h-[100px] bg-white flex items-center justify-center p-0.5">
+                      {qrCodeUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={qrCodeUrl}
+                          alt="QR Code รับสมัครเรียน วิทยาลัยสารพัดช่างน่าน"
+                          className="w-full h-full object-contain"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-slate-200 animate-pulse rounded" />
+                      )}
+                    </div>
+                    <span className="text-[#0f172a] font-black text-[8px] text-center tracking-tight">
+                      วิทยาลัยสารพัดช่างน่าน
+                    </span>
                   </div>
                 </div>
               </div>

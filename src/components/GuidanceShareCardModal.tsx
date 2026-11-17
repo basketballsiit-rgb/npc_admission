@@ -477,14 +477,15 @@ export default function GuidanceShareCardModal({
                   <div
                     style={{
                       position: "absolute",
-                      top: "844px",
-                      left: "448px",
-                      width: "110px",
-                      height: "128px",
+                      top: "864px",
+                      left: "450px",
+                      width: "109px",
+                      height: "131px",
+                      borderRadius: "14px",
                     }}
-                    className="z-30 flex flex-col items-center justify-between pointer-events-none"
+                    className="z-30 bg-white border-2 border-slate-900 rounded-[14px] shadow-sm flex flex-col items-center justify-between p-1.5 pointer-events-none select-none overflow-hidden"
                   >
-                    <div className="w-[106px] h-[106px] bg-white flex items-center justify-center p-0.5 rounded-lg shadow-xs">
+                    <div className="w-[96px] h-[96px] bg-white flex items-center justify-center">
                       {qrCodeUrl ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
@@ -496,7 +497,7 @@ export default function GuidanceShareCardModal({
                         <div className="w-full h-full bg-slate-200 animate-pulse rounded" />
                       )}
                     </div>
-                    <span className="text-[#0f172a] font-black text-[9px] text-center tracking-tight leading-none mt-1">
+                    <span className="text-[#0f172a] font-black text-[9px] text-center tracking-tight leading-none pb-0.5">
                       วิทยาลัยสารพัดช่างน่าน
                     </span>
                   </div>

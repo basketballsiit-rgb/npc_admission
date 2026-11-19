@@ -57,8 +57,8 @@ export default function CountdownTimer({ targetDate, roundName }: CountdownTimer
 
   if (timeLeft.isEnded) {
     return (
-      <div className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-white/10 border border-rose-400/30 text-rose-200 text-xs sm:text-sm font-medium backdrop-blur-md">
-        <Clock className="w-4 h-4 text-rose-400" />
+      <div className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-rose-950/85 border border-rose-400/40 text-rose-100 text-xs sm:text-sm font-semibold shadow-sm">
+        <Clock className="w-4 h-4 text-rose-300" />
         <span>รอบนี้สิ้นสุดระยะเวลารับสมัครแล้ว</span>
       </div>
     );
@@ -67,38 +67,38 @@ export default function CountdownTimer({ targetDate, roundName }: CountdownTimer
   const displayName = roundName.replace(/\s*\([^)]*\)/g, "").trim();
 
   return (
-    <div className="flex flex-col sm:flex-row items-center gap-3 bg-white/10 border border-amber-400/40 backdrop-blur-md px-5 py-3 rounded-2xl shadow-lg">
+    <div className="flex flex-col sm:flex-row items-center gap-3 bg-slate-900/55 border border-amber-300/45 backdrop-blur-md px-5 py-3 rounded-2xl shadow-lg">
       <div className="flex items-center gap-2 text-xs sm:text-sm font-medium text-white">
-        <Clock className="w-4 h-4 text-amber-300 animate-pulse" />
+        <Clock className="w-4 h-4 text-amber-300" />
         <span>
           เวลาที่เหลือก่อนปิด <strong className="text-amber-300 font-bold">{displayName}</strong>:
         </span>
       </div>
-      <div className="flex items-center gap-2 text-center font-mono">
-        <div className="bg-white px-3 py-1.5 rounded-xl shadow-xs border border-amber-200">
-          <span className="font-black text-[#1E3A8A] text-sm sm:text-base">{timeLeft.days}</span>
-          <span className="text-[11px] text-slate-500 font-sans ml-1">วัน</span>
+      <div className="flex items-center gap-1.5 sm:gap-2 text-center font-mono tabular-nums">
+        <div className="bg-amber-50 px-3 py-1.5 rounded-xl shadow-xs border-2 border-amber-400">
+          <span className="font-extrabold text-[#1E3A8A] text-sm sm:text-base">{timeLeft.days}</span>
+          <span className="text-xs text-slate-700 font-sans font-semibold ml-1">วัน</span>
         </div>
         <span className="text-amber-300 font-bold text-sm">:</span>
-        <div className="bg-white px-3 py-1.5 rounded-xl shadow-xs border border-amber-200">
-          <span className="font-black text-[#1E3A8A] text-sm sm:text-base">
+        <div className="bg-white px-3 py-1.5 rounded-xl shadow-xs border border-slate-200">
+          <span className="font-bold text-[#1E3A8A] text-sm sm:text-base">
             {String(timeLeft.hours).padStart(2, "0")}
           </span>
-          <span className="text-[11px] text-slate-500 font-sans ml-1">ชม.</span>
+          <span className="text-xs text-slate-600 font-sans ml-1">ชม.</span>
         </div>
         <span className="text-amber-300 font-bold text-sm">:</span>
-        <div className="bg-white px-3 py-1.5 rounded-xl shadow-xs border border-amber-200">
-          <span className="font-black text-[#1E3A8A] text-sm sm:text-base">
+        <div className="bg-white px-3 py-1.5 rounded-xl shadow-xs border border-slate-200">
+          <span className="font-bold text-[#1E3A8A] text-sm sm:text-base">
             {String(timeLeft.minutes).padStart(2, "0")}
           </span>
-          <span className="text-[11px] text-slate-500 font-sans ml-1">นาที</span>
+          <span className="text-xs text-slate-600 font-sans ml-1">นาที</span>
         </div>
         <span className="text-amber-300 font-bold text-sm">:</span>
-        <div className="bg-white px-3 py-1.5 rounded-xl shadow-xs border border-amber-200">
-          <span className="font-black text-[#F59E0B] text-sm sm:text-base">
+        <div className="bg-white/90 px-2.5 py-1.5 rounded-xl shadow-xs border border-slate-200">
+          <span className="font-semibold text-slate-600 text-sm sm:text-base">
             {String(timeLeft.seconds).padStart(2, "0")}
           </span>
-          <span className="text-[11px] text-slate-500 font-sans ml-1">วิ</span>
+          <span className="text-xs text-slate-500 font-sans ml-1">วิ</span>
         </div>
       </div>
     </div>

@@ -42,6 +42,7 @@ export default function Navbar() {
                 className="w-full h-full object-cover"
                 onError={(e) => {
                   const el = e.currentTarget;
+                  el.onerror = null;
                   if (!el.src.includes("/npc_admission")) {
                     el.src = "/npc_admission/npc-logo.jpg";
                   }
@@ -74,11 +75,11 @@ export default function Navbar() {
                   href={link.href}
                   className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium transition-colors ${
                     isActive
-                      ? "bg-slate-100 text-[#1E3A8A] font-semibold"
+                      ? "bg-blue-50 text-[#1E3A8A] font-semibold"
                       : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
                   }`}
                 >
-                  <Icon className={`w-4 h-4 ${isActive ? "text-[#1E3A8A]" : "text-slate-400"}`} />
+                  <Icon className={`w-4 h-4 ${isActive ? "text-[#1E3A8A]" : "text-slate-500"}`} />
                   {link.label}
                 </Link>
               );
@@ -89,10 +90,10 @@ export default function Navbar() {
           <div className="hidden sm:flex items-center gap-3">
             <Link
               href="/admin/login"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-600 hover:text-[#1E3A8A] bg-slate-100/80 hover:bg-slate-200/80 border border-slate-200 rounded-lg transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-700 hover:text-[#1E3A8A] bg-slate-100/80 hover:bg-slate-200/80 border border-slate-200 rounded-lg transition-colors"
               title="สำหรับเจ้าหน้าที่งานทะเบียนและอาจารย์ที่ปรึกษา"
             >
-              <Lock className="w-3.5 h-3.5 text-slate-500" />
+              <Lock className="w-3.5 h-3.5 text-slate-600" />
               <span>เข้าสู่ระบบสำหรับเจ้าหน้าที่</span>
             </Link>
           </div>
@@ -102,7 +103,9 @@ export default function Navbar() {
             <button
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 focus:outline-none"
+              aria-expanded={mobileMenuOpen}
+              aria-controls="mobile-nav-menu"
+              className="p-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 focus-visible:outline-2 focus-visible:outline-[#1E3A8A]"
               aria-label="เมนูหลัก"
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -113,7 +116,10 @@ export default function Navbar() {
 
       {/* Mobile menu dropdown */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-slate-200 bg-white px-4 pt-3 pb-5 space-y-2 shadow-lg">
+        <div
+          id="mobile-nav-menu"
+          className="md:hidden border-t border-slate-200 bg-white px-4 pt-3 pb-5 space-y-2 shadow-lg"
+        >
           {navLinks.map((link) => {
             const Icon = link.icon;
             const isActive = pathname === link.href;
@@ -124,11 +130,11 @@ export default function Navbar() {
                 onClick={() => setMobileMenuOpen(false)}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
                   isActive
-                    ? "bg-indigo-50 text-[#1E3A8A] font-semibold"
+                    ? "bg-blue-50 text-[#1E3A8A] font-semibold"
                     : "text-slate-700 hover:bg-slate-50"
                 }`}
               >
-                <Icon className={`w-4 h-4 ${isActive ? "text-[#1E3A8A]" : "text-slate-400"}`} />
+                <Icon className={`w-4 h-4 ${isActive ? "text-[#1E3A8A]" : "text-slate-500"}`} />
                 {link.label}
               </Link>
             );

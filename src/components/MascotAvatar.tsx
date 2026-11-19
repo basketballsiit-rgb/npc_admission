@@ -82,12 +82,12 @@ const MASCOT_CONFIG: Record<
     title: "ยอดนักประดิษฐ์หุ่นยนต์ & IoT",
     subTitle: "Smart Tech & Robotics",
     imageFile: "/images/mascots/tron.png",
-    gradient: "from-purple-600 via-violet-600 to-indigo-700",
-    ringColor: "border-purple-300",
-    shadowColor: "shadow-purple-500/30",
+    gradient: "from-slate-700 via-slate-800 to-blue-900",
+    ringColor: "border-amber-300/90",
+    shadowColor: "shadow-slate-900/30",
     icon: Cpu,
-    iconColor: "text-purple-200",
-    accentGlow: "bg-purple-400/25",
+    iconColor: "text-amber-200",
+    accentGlow: "bg-slate-400/15",
   },
   it: {
     title: "ยอดนักพัฒนาซอฟต์แวร์ & AI",
@@ -187,7 +187,7 @@ export default function MascotAvatar({
               <Sparkles className="w-3.5 h-3.5 text-amber-300 absolute -top-1 -right-1 animate-pulse" />
             </div>
             {size !== "sm" && (
-              <span className="text-[10px] font-black text-white/90 uppercase tracking-widest mt-1">
+              <span className="text-xs font-bold text-white/90 uppercase tracking-wider mt-1">
                 3D NPC
               </span>
             )}
@@ -198,7 +198,7 @@ export default function MascotAvatar({
       {/* Label Badge below avatar */}
       {showBadge && (
         <div className="mt-2 text-center">
-          <span className="inline-block px-2.5 py-0.5 rounded-full bg-slate-900/80 text-amber-300 text-[10px] font-black border border-amber-300/40 shadow-xs">
+          <span className="inline-block px-3 py-1 rounded-full bg-slate-900/90 text-amber-300 text-xs font-bold border border-amber-300/40 shadow-xs leading-snug">
             {cfg.title}
           </span>
         </div>

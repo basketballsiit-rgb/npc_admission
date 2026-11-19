@@ -68,10 +68,24 @@ export default function RadarChart({
   const activeHoverKey = hoveredKey || highlightDept || null;
   const activePoint = dataPoints.find((p) => p.key === activeHoverKey);
 
+  // Build accessible summary text for screen readers
+  const ariaSummary = `กราฟใยแมงมุมแสดงคะแนนความถนัด 6 แผนกวิชา: ${AXIS_KEYS.map((key) => {
+    const dept = DEPARTMENTS[key];
+    const score = scores[key] || 0;
+    const pct = Math.round((score / maxScore) * 100);
+    return `${dept.shortName} ${score} จาก ${maxScore} คะแนน (${pct}%)`;
+  }).join(", ")}`;
+
+  const handleToggleKey = (key: DepartmentKey) => {
+    setHoveredKey((prev) => (prev === key ? null : key));
+  };
+
   return (
     <div className="w-full flex flex-col items-center">
       <div className={`relative w-full ${containerClassName || (isCyber ? "w-full h-full" : "max-w-[380px] aspect-square")} flex items-center justify-center`}>
         <svg
+          role="img"
+          aria-label={ariaSummary}
           viewBox={`0 0 ${viewBoxW} ${viewBoxH}`}
           className="w-full h-full overflow-visible select-none drop-shadow-xs"
         >
@@ -81,8 +95,8 @@ export default function RadarChart({
               width={viewBoxW}
               height={viewBoxH}
               rx={14}
-              fill="#081426"
-              fillOpacity={0.98}
+              fill="#0b1b3d"
+              fillOpacity={0.96}
             />
           ) : (
             <circle
@@ -102,13 +116,13 @@ export default function RadarChart({
               fill="none"
               stroke={
                 isCyber
-                  ? "#0284c7"
+                  ? "#60a5fa"
                   : theme === "dark"
                   ? "rgba(255, 255, 255, 0.25)"
                   : "#E2E8F0"
               }
               strokeWidth={idx === levels.length - 1 ? 1.5 : 1}
-              strokeOpacity={isCyber ? 0.45 : 1}
+              strokeOpacity={isCyber ? 0.35 : 1}
               strokeDasharray={idx < levels.length - 1 ? "3 3" : undefined}
             />
           ))}
@@ -125,13 +139,13 @@ export default function RadarChart({
                 y2={y}
                 stroke={
                   isCyber
-                    ? "#0ea5e9"
+                    ? "#93c5fd"
                     : theme === "dark"
                     ? "rgba(255, 255, 255, 0.3)"
                     : "#CBD5E1"
                 }
                 strokeWidth={1}
-                strokeOpacity={isCyber ? 0.6 : 1}
+                strokeOpacity={isCyber ? 0.45 : 1}
               />
             );
           })}
@@ -141,12 +155,12 @@ export default function RadarChart({
             points={polygonPath}
             fill={
               isCyber
-                ? "rgba(6, 182, 212, 0.48)"
+                ? "rgba(251, 191, 36, 0.32)"
                 : theme === "dark"
                 ? "rgba(245, 158, 11, 0.38)"
                 : "rgba(30, 58, 138, 0.22)"
             }
-            stroke={isCyber ? "#38bdf8" : theme === "dark" ? "#F59E0B" : "#1E3A8A"}
+            stroke={isCyber ? "#fbbf24" : theme === "dark" ? "#F59E0B" : "#1E3A8A"}
             strokeWidth={2.5}
             strokeLinejoin="round"
             className="transition-all duration-300"
@@ -154,7 +168,7 @@ export default function RadarChart({
 
           {/* Outer Vertex Labels and Badges */}
           {AXIS_KEYS.map((key, i) => {
-            const { x, y, angle } = getCoordinates(i, isCyber ? 1.25 : 1.22);
+            const { x, y, angle } = getCoordinates(i, isCyber ? 1.24 : 1.22);
             const dept = DEPARTMENTS[key];
             const score = scores[key] || 0;
             const pct = Math.round((score / maxScore) * 100);
@@ -168,10 +182,21 @@ export default function RadarChart({
             return (
               <g
                 key={`label-${key}`}
-                className="cursor-pointer transition-transform duration-200"
+                role="button"
+                tabIndex={isCyber ? -1 : 0}
+                aria-label={`${dept.name}: ${score} จาก ${maxScore} คะแนน (${pct}%)`}
+                className="cursor-pointer transition-transform duration-200 focus:outline-hidden"
                 onMouseEnter={() => setHoveredKey(key)}
                 onMouseLeave={() => setHoveredKey(null)}
-                onClick={() => setHoveredKey(key)}
+                onFocus={() => setHoveredKey(key)}
+                onBlur={() => setHoveredKey(null)}
+                onClick={() => handleToggleKey(key)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    handleToggleKey(key);
+                  }
+                }}
               >
                 <text
                   x={x}
@@ -181,7 +206,7 @@ export default function RadarChart({
                   fill={
                     isCyber
                       ? isHovered
-                        ? "#67e8f9"
+                        ? "#fde68a"
                         : "#ffffff"
                       : theme === "dark"
                       ? isHovered
@@ -191,10 +216,10 @@ export default function RadarChart({
                       ? "#1e3a8a"
                       : "#0f172a"
                   }
-                  fontSize={isCyber ? 10.5 : 13}
-                  fontWeight={900}
+                  fontSize={isCyber ? 11 : 13}
+                  fontWeight={700}
                   style={{
-                    filter: isCyber ? "drop-shadow(0 2px 4px rgba(0,0,0,0.95))" : undefined,
+                    filter: isCyber ? "drop-shadow(0 1px 3px rgba(0,0,0,0.9))" : undefined,
                     userSelect: "none",
                   }}
                   className="select-none"
@@ -204,11 +229,11 @@ export default function RadarChart({
                 {!hideScores && (
                   <text
                     x={x}
-                    y={y + 8}
+                    y={y + 9}
                     textAnchor={textAnchor}
                     fill={
                       isCyber
-                        ? "#67e8f9"
+                        ? "#fde68a"
                         : theme === "dark"
                         ? isHovered
                           ? "#6ee7b7"
@@ -217,14 +242,14 @@ export default function RadarChart({
                         ? "#d97706"
                         : "#1e3a8a"
                     }
-                    fontSize={11}
+                    fontSize={12}
                     fontWeight="bold"
                     style={{
                       fontFamily: "monospace",
                       filter: isCyber ? "drop-shadow(0 1px 2px rgba(0,0,0,0.9))" : undefined,
                       userSelect: "none",
                     }}
-                    className="text-[11px] font-mono font-bold"
+                    className="text-xs font-mono font-bold"
                   >
                     {score}/{maxScore} ({pct}%)
                   </text>
@@ -233,22 +258,41 @@ export default function RadarChart({
             );
           })}
 
-          {/* Vertex Point Circles */}
+          {/* Vertex Point Circles with generous >=44px touch hit-areas */}
           {dataPoints.map((pt) => {
             const isHovered = activeHoverKey === pt.key;
+            const dept = DEPARTMENTS[pt.key];
             return (
               <g
                 key={`point-${pt.key}`}
-                className="cursor-pointer"
+                role="button"
+                tabIndex={isCyber ? -1 : 0}
+                aria-label={`ดูคะแนน ${dept.name}: ${pt.score}/${maxScore}`}
+                className="cursor-pointer focus:outline-hidden"
                 onMouseEnter={() => setHoveredKey(pt.key)}
                 onMouseLeave={() => setHoveredKey(null)}
-                onClick={() => setHoveredKey(pt.key)}
+                onFocus={() => setHoveredKey(pt.key)}
+                onBlur={() => setHoveredKey(null)}
+                onClick={() => handleToggleKey(pt.key)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    handleToggleKey(pt.key);
+                  }
+                }}
               >
+                {/* Invisible generous touch target (>= 44x44px) */}
                 <circle
                   cx={pt.x}
                   cy={pt.y}
-                  r={isHovered ? (isCyber ? 6 : 8) : isCyber ? 4 : 5}
-                  fill={isCyber ? "#38bdf8" : isHovered ? "#F59E0B" : "#1E3A8A"}
+                  r={isCyber ? 18 : 24}
+                  fill="transparent"
+                />
+                <circle
+                  cx={pt.x}
+                  cy={pt.y}
+                  r={isHovered ? (isCyber ? 6 : 8) : isCyber ? 4.5 : 5.5}
+                  fill={isCyber ? "#fbbf24" : isHovered ? "#F59E0B" : "#1E3A8A"}
                   stroke="#FFFFFF"
                   strokeWidth={isCyber ? 1.5 : 2}
                   className="transition-all duration-200 shadow-md"
@@ -258,25 +302,60 @@ export default function RadarChart({
           })}
         </svg>
 
+        {/* Screen-Reader Accessible Score Table */}
+        <table className="sr-only">
+          <caption>ตารางคะแนนความถนัดรายแผนกวิชา วิทยาลัยสารพัดช่างน่าน</caption>
+          <thead>
+            <tr>
+              <th scope="col">แผนกวิชา</th>
+              <th scope="col">คะแนนที่ได้</th>
+              <th scope="col">ร้อยละ</th>
+            </tr>
+          </thead>
+          <tbody>
+            {AXIS_KEYS.map((key) => {
+              const score = scores[key] || 0;
+              const pct = Math.round((score / maxScore) * 100);
+              return (
+                <tr key={key}>
+                  <td>{DEPARTMENTS[key].name}</td>
+                  <td>
+                    {score}/{maxScore}
+                  </td>
+                  <td>{pct}%</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+
         {/* Floating Tooltip inside container */}
         {activePoint && !isCyber && (
           <div
-            className="absolute z-10 pointer-events-none bg-slate-900/90 text-white rounded-xl px-3 py-2 text-xs shadow-xl backdrop-blur-xs border border-white/10"
+            onClick={() => setHoveredKey(null)}
+            className="absolute z-10 bg-slate-900/95 text-white rounded-xl px-3.5 py-2 text-xs shadow-xl backdrop-blur-xs border border-white/15 cursor-pointer"
             style={{
               bottom: "8px",
               left: "50%",
               transform: "translateX(-50%)",
             }}
           >
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
-              <span className="font-bold">
-                {DEPARTMENTS[activePoint.key].name}
-              </span>
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-amber-400 shrink-0"></span>
+                <span className="font-bold">
+                  {DEPARTMENTS[activePoint.key].name}
+                </span>
+              </div>
+              {hoveredKey && (
+                <span className="text-[11px] text-slate-300 font-medium">
+                  ✕
+                </span>
+              )}
             </div>
-            <div className="text-[11px] text-slate-300 mt-0.5">
+            <div className="text-xs text-slate-200 mt-0.5 tabular-nums">
               คะแนนความถนัด:{" "}
-              <strong className="text-amber-400 font-mono text-sm">
+              <strong className="text-amber-300 font-mono text-sm">
                 {activePoint.score}
               </strong>{" "}
               / {maxScore} คะแนน (
@@ -287,7 +366,7 @@ export default function RadarChart({
       </div>
 
       {!hideHint && !hideScores && (
-        <div className="text-center text-[11px] text-slate-400 mt-1">
+        <div className="text-center text-xs text-slate-500 mt-1.5">
           * แตะหรือชี้ที่มุมของกราฟใยแมงมุมเพื่อดูคะแนนรายแผนกวิชา
         </div>
       )}

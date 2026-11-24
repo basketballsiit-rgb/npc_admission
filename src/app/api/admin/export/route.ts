@@ -21,15 +21,29 @@ export async function GET(request: Request) {
     }
 
     const { searchParams } = new URL(request.url);
+    const academicYearIdParam = searchParams.get("academicYearId");
     const roundId = searchParams.get("roundId");
     const programId = searchParams.get("programId");
     const format = searchParams.get("format") || "xlsx"; // xlsx | csv
     const status = searchParams.get("status") || "APPROVED"; // ตามโจทย์ส่งออกเฉพาะผู้ที่ผ่านการคัดเลือก
 
+    let targetYear = null;
+    if (academicYearIdParam) {
+      targetYear = await prisma.academicYear.findUnique({ where: { id: academicYearIdParam } });
+    }
+    if (!targetYear) {
+      targetYear =
+        (await prisma.academicYear.findFirst({ where: { isActive: true } })) ||
+        (await prisma.academicYear.findFirst({ orderBy: { year: "desc" } }));
+    }
+
     const where: Record<string, any> = {
       status,
     };
 
+    if (targetYear) {
+      where.round = { academicYearId: targetYear.id };
+    }
     if (roundId) where.roundId = roundId;
     if (programId) where.programId = programId;
 

@@ -25,8 +25,13 @@ export async function POST(request: Request) {
       );
     }
 
+    const activeYear =
+      (await prisma.academicYear.findFirst({ where: { isActive: true } })) ||
+      (await prisma.academicYear.findFirst({ orderBy: { year: "desc" } }));
+
     const log = await prisma.guidanceAssessmentLog.create({
       data: {
+        academicYearId: activeYear?.id ?? null,
         currentEducation: String(currentEducation),
         schoolName: schoolName ? String(schoolName).trim().slice(0, 150) : null,
         vocScore: Number(vocScore) || 0,

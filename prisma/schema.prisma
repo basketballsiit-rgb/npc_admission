@@ -34,6 +34,7 @@ model AcademicYear {
   rounds          AdmissionRound[]
   programs        ProgramQuota[]
   initialExpenses InitialExpenseItem[]
+  guidanceLogs    GuidanceAssessmentLog[]
 
   @@map("academic_years")
 }
@@ -117,6 +118,7 @@ model Application {
 // 6. บันทึกสถิติการทำแบบประเมินแนะแนวค้นหาสายเรียนและสาขาที่ใช่ (ไม่เก็บข้อมูลระบุตัวบุคคล - PDPA 100%)
 model GuidanceAssessmentLog {
   id               String   @id @default(cuid())
+  academicYearId   String?  // เชื่อมกับปีการศึกษาเพื่อแยกสถิติแนะแนวรายปี
   currentEducation String   // "ม.3" หรือ "ม.6_ปวช.3"
   schoolName       String?  // ชื่อโรงเรียนเดิมที่ระบุเพิ่มเติมได้ (Optional)
   vocScore         Int      // คะแนนสายอาชีพ เต็ม 12
@@ -132,6 +134,9 @@ model GuidanceAssessmentLog {
   sharedCardCount  Int      @default(0)     // จำนวนครั้งที่มีการกดดาวน์โหลด/แชร์การ์ดรูปภาพ PR
   createdAt        DateTime @default(now())
 
+  academicYear AcademicYear? @relation(fields: [academicYearId], references: [id], onDelete: SetNull)
+
+  @@index([academicYearId])
   @@index([createdAt])
   @@index([trackResult])
   @@index([recommendedDept1])

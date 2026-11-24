@@ -12,13 +12,41 @@ export async function GET(request: Request) {
       );
     }
 
-    const totalAssessments = await prisma.guidanceAssessmentLog.count();
-    const clickedApplyCount = await prisma.guidanceAssessmentLog.count({
-      where: { clickedApply: true },
+    const { searchParams } = new URL(request.url);
+    const yearIdParam = searchParams.get("academicYearId");
+
+    const allYears = await prisma.academicYear.findMany({
+      orderBy: { year: "desc" },
+      select: { id: true, year: true, isActive: true },
     });
-    
+
+    const currentYear = yearIdParam
+      ? allYears.find((y) => y.id === yearIdParam) ||
+        allYears.find((y) => y.isActive) ||
+        allYears[0] ||
+        null
+      : allYears.find((y) => y.isActive) || allYears[0] || null;
+
+    // Auto-assign any legacy logs (academicYearId === null) to the active year once
+    if (currentYear?.isActive) {
+      await prisma.guidanceAssessmentLog.updateMany({
+        where: { academicYearId: null },
+        data: { academicYearId: currentYear.id },
+      });
+    }
+
+    const baseWhere = currentYear ? { academicYearId: currentYear.id } : {};
+
+    const totalAssessments = await prisma.guidanceAssessmentLog.count({
+      where: baseWhere,
+    });
+    const clickedApplyCount = await prisma.guidanceAssessmentLog.count({
+      where: { ...baseWhere, clickedApply: true },
+    });
+
     // ยอดรวมการแชร์/ดาวน์โหลดการ์ดรูปภาพ PR
     const shareAgg = await prisma.guidanceAssessmentLog.aggregate({
+      where: baseWhere,
       _sum: { sharedCardCount: true },
     });
     const totalSharedCards = shareAgg._sum.sharedCardCount || 0;
@@ -26,6 +54,7 @@ export async function GET(request: Request) {
     // ยอดแนะนำสาขายานยนต์ไฟฟ้า (20143)
     const evRecommendedCount = await prisma.guidanceAssessmentLog.count({
       where: {
+        ...baseWhere,
         OR: [
           { recommendedCode1: "20143" },
           { recommendedCode1: "20108" },
@@ -41,23 +70,23 @@ export async function GET(request: Request) {
     // Track Result Counts
     const trackCounts = {
       VOCATIONAL: await prisma.guidanceAssessmentLog.count({
-        where: { trackResult: "VOCATIONAL" },
+        where: { ...baseWhere, trackResult: "VOCATIONAL" },
       }),
       HYBRID: await prisma.guidanceAssessmentLog.count({
-        where: { trackResult: "HYBRID" },
+        where: { ...baseWhere, trackResult: "HYBRID" },
       }),
       ACADEMIC: await prisma.guidanceAssessmentLog.count({
-        where: { trackResult: "ACADEMIC" },
+        where: { ...baseWhere, trackResult: "ACADEMIC" },
       }),
     };
 
     // Education Level Counts
     const eduCounts = {
       M3: await prisma.guidanceAssessmentLog.count({
-        where: { currentEducation: "ม.3" },
+        where: { ...baseWhere, currentEducation: "ม.3" },
       }),
       M6_PVS: await prisma.guidanceAssessmentLog.count({
-        where: { currentEducation: "ม.6_ปวช.3" },
+        where: { ...baseWhere, currentEducation: "ม.6_ปวช.3" },
       }),
     };
 
@@ -66,20 +95,20 @@ export async function GET(request: Request) {
     const topDeptCounts: Record<string, number> = {};
     for (const d of deptKeys) {
       topDeptCounts[d] = await prisma.guidanceAssessmentLog.count({
-        where: { recommendedDept1: d },
+        where: { ...baseWhere, recommendedDept1: d },
       });
     }
 
     // Study Mode Preferences
     const studyModeCounts = {
       NORMAL: await prisma.guidanceAssessmentLog.count({
-        where: { studyModePref: "NORMAL" },
+        where: { ...baseWhere, studyModePref: "NORMAL" },
       }),
       DUAL: await prisma.guidanceAssessmentLog.count({
-        where: { studyModePref: "DUAL" },
+        where: { ...baseWhere, studyModePref: "DUAL" },
       }),
       FLEX: await prisma.guidanceAssessmentLog.count({
-        where: { studyModePref: "FLEX" },
+        where: { ...baseWhere, studyModePref: "FLEX" },
       }),
     };
 
@@ -88,12 +117,13 @@ export async function GET(request: Request) {
     const specialInterestCounts: Record<string, number> = {};
     for (const key of interestKeys) {
       specialInterestCounts[key] = await prisma.guidanceAssessmentLog.count({
-        where: { specialInterest: key },
+        where: { ...baseWhere, specialInterest: key },
       });
     }
 
     // Recent 20 Assessment Logs (PDPA compliant, no PII)
     const recentLogs = await prisma.guidanceAssessmentLog.findMany({
+      where: baseWhere,
       orderBy: { createdAt: "desc" },
       take: 20,
       select: {
@@ -116,6 +146,8 @@ export async function GET(request: Request) {
 
     return NextResponse.json({
       success: true,
+      currentYear,
+      allYears,
       summary: {
         totalAssessments,
         clickedApplyCount,
@@ -150,11 +182,13 @@ export async function DELETE(request: Request) {
     }
 
     const body = await request.json().catch(() => ({}));
-    const { id, ids, all } = body;
+    const { id, ids, all, academicYearId } = body;
 
-    // 1. ลบทั้งหมด (Clear all logs)
+    // 1. ลบทั้งหมด (เฉพาะปีการศึกษาที่เลือก หรือทั้งหมดหากไม่ได้ระบุ)
     if (all === true) {
-      const result = await prisma.guidanceAssessmentLog.deleteMany({});
+      const result = await prisma.guidanceAssessmentLog.deleteMany({
+        where: academicYearId ? { academicYearId } : {},
+      });
       return NextResponse.json({
         success: true,
         message: `ลบข้อมูลผลการประเมินทั้งหมด (${result.count} รายการ) เรียบร้อยแล้ว`,

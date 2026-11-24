@@ -77,6 +77,8 @@ function ApplicationsContent() {
   const initialProgramId = searchParams.get("programId") || "";
 
   const [applications, setApplications] = useState<Application[]>([]);
+  const [allYears, setAllYears] = useState<Array<{ id: string; year: string; isActive: boolean }>>([]);
+  const [selectedYearId, setSelectedYearId] = useState<string>("");
   const [rounds, setRounds] = useState<Round[]>([]);
   const [programs, setPrograms] = useState<Program[]>([]);
   const [loading, setLoading] = useState(true);
@@ -99,12 +101,13 @@ function ApplicationsContent() {
   // Detail Modal
   const [viewApp, setViewApp] = useState<Application | null>(null);
 
-  // Fetch Programs & Rounds for Filter Dropdowns
-  const fetchFilterOptions = async () => {
+  // Fetch Programs & Rounds for Filter Dropdowns (scoped by Academic Year)
+  const fetchFilterOptions = async (yearId?: string) => {
     try {
+      const qs = yearId ? `?academicYearId=${encodeURIComponent(yearId)}` : "";
       const [roundRes, progRes] = await Promise.all([
-        fetch(apiUrl("/api/rounds")),
-        fetch(apiUrl("/api/programs")),
+        fetch(apiUrl(`/api/rounds${qs}`)),
+        fetch(apiUrl(`/api/programs${qs}`)),
       ]);
       if (roundRes.ok) {
         const roundData = await roundRes.json();
@@ -127,6 +130,7 @@ function ApplicationsContent() {
       setLoading(true);
       setError(null);
       const params = new URLSearchParams();
+      if (selectedYearId) params.set("academicYearId", selectedYearId);
       if (selectedRound) params.set("roundId", selectedRound);
       if (selectedLevel) params.set("level", selectedLevel);
       if (selectedProgram) params.set("programId", selectedProgram);
@@ -140,6 +144,10 @@ function ApplicationsContent() {
       const json = await res.json();
       if (json.success) {
         setApplications(json.data);
+        if (json.allYears) setAllYears(json.allYears);
+        if (!selectedYearId && json.currentYear?.id) {
+          setSelectedYearId(json.currentYear.id);
+        }
       } else {
         throw new Error(json.error || "เกิดข้อผิดพลาด");
       }
@@ -151,13 +159,13 @@ function ApplicationsContent() {
   };
 
   useEffect(() => {
-    fetchFilterOptions();
-  }, []);
+    fetchFilterOptions(selectedYearId || undefined);
+  }, [selectedYearId]);
 
   useEffect(() => {
     fetchApplications();
     setSelectedIds([]); // Reset selection when filters change
-  }, [selectedRound, selectedLevel, selectedProgram, selectedStatus, sortBy, sortOrder]);
+  }, [selectedYearId, selectedRound, selectedLevel, selectedProgram, selectedStatus, sortBy, sortOrder]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -286,7 +294,27 @@ function ApplicationsContent() {
         </form>
 
         {/* Dropdown Filters */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-2 border-t border-slate-100 text-xs">
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 pt-2 border-t border-slate-100 text-xs">
+          {/* Academic Year Filter */}
+          <div>
+            <label className="block text-[11px] font-bold text-slate-500 mb-1">ปีการศึกษา</label>
+            <select
+              value={selectedYearId}
+              onChange={(e) => {
+                setSelectedYearId(e.target.value);
+                setSelectedRound("");
+                setSelectedProgram("");
+              }}
+              className="w-full py-2 px-2.5 rounded-xl border border-slate-300 text-xs focus:outline-none focus:border-[#1E3A8A] bg-white font-semibold text-[#162C63]"
+            >
+              {allYears.map((y) => (
+                <option key={y.id} value={y.id}>
+                  ปีการศึกษา {y.year} {y.isActive ? "(ปัจจุบัน)" : ""}
+                </option>
+              ))}
+            </select>
+          </div>
+
           {/* Round Filter */}
           <div>
             <label className="block text-[11px] font-bold text-slate-500 mb-1">รอบรับสมัคร</label>

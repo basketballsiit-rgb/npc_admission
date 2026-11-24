@@ -11,11 +11,13 @@ import {
   AlertCircle,
   RefreshCw,
   ArrowUpDown,
+  Calendar,
 } from "lucide-react";
 
 interface DashboardData {
   academicYear: string;
   academicYearId: string;
+  allYears?: Array<{ id: string; year: string; isActive: boolean }>;
   summary: {
     totalApplications: number;
     quotaApplications: number;
@@ -70,22 +72,30 @@ export default function AdminDashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedYearId, setSelectedYearId] = useState<string>("");
   const [levelFilter, setLevelFilter] = useState<"ALL" | "ปวช." | "ปวส.">("ALL");
   const [sortBy, setSortBy] = useState<"code" | "targetSeats" | "totalApplicants" | "remainingSeats" | "percentFilled">("code");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
   const [lastUpdated, setLastUpdated] = useState<string>("");
 
-  const fetchDashboard = async () => {
+  const fetchDashboard = async (yearId?: string) => {
     try {
       setLoading(true);
       setError(null);
-      const res = await fetch(apiUrl("/api/admin/dashboard"));
+      const targetId = yearId !== undefined ? yearId : selectedYearId;
+      const endpoint = targetId
+        ? apiUrl(`/api/admin/dashboard?academicYearId=${encodeURIComponent(targetId)}`)
+        : apiUrl("/api/admin/dashboard");
+      const res = await fetch(endpoint);
       if (!res.ok) {
         throw new Error("ไม่สามารถโหลดข้อมูลสถิติได้");
       }
       const json = await res.json();
       if (json.success) {
         setData(json.data);
+        if (!targetId && json.data?.academicYearId) {
+          setSelectedYearId(json.data.academicYearId);
+        }
         setLastUpdated(
           new Date().toLocaleTimeString("th-TH", {
             hour: "2-digit",
@@ -128,8 +138,9 @@ export default function AdminDashboardPage() {
         <h3 className="font-bold text-rose-900 text-lg">โหลดข้อมูลแดชบอร์ดไม่สำเร็จ</h3>
         <p className="text-sm text-rose-700">{error || "เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์"}</p>
         <button
-          onClick={fetchDashboard}
-          className="px-4 py-2 bg-rose-600 text-white rounded-xl text-xs font-bold hover:bg-rose-700 transition"
+          type="button"
+          onClick={() => fetchDashboard()}
+          className="px-4 py-2 bg-rose-600 text-white rounded-xl text-xs font-bold hover:bg-rose-700 transition cursor-pointer"
         >
           ลองใหม่อีกครั้ง
         </button>
@@ -176,10 +187,31 @@ export default function AdminDashboardPage() {
             ปีการศึกษา {data.academicYear} · ระบบบริหารการรับสมัครนักเรียน นักศึกษาใหม่ วิทยาลัยสารพัดช่างน่าน
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {data.allYears && data.allYears.length > 0 && (
+            <div className="flex items-center gap-1.5 bg-white px-3 py-2 rounded-lg border border-slate-300">
+              <Calendar className="w-4 h-4 text-slate-500" strokeWidth={1.75} />
+              <select
+                value={selectedYearId || data.academicYearId}
+                onChange={(e) => {
+                  const nextId = e.target.value;
+                  setSelectedYearId(nextId);
+                  fetchDashboard(nextId);
+                }}
+                aria-label="เลือกปีการศึกษา"
+                className="text-sm font-medium text-slate-800 bg-transparent focus:outline-hidden cursor-pointer"
+              >
+                {data.allYears.map((y) => (
+                  <option key={y.id} value={y.id}>
+                    ปีการศึกษา {y.year} {y.isActive ? "(ปัจจุบัน)" : ""}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
           <button
             type="button"
-            onClick={fetchDashboard}
+            onClick={() => fetchDashboard()}
             title="รีเฟรชข้อมูล"
             aria-label="รีเฟรชข้อมูล"
             className="p-2 text-slate-600 hover:text-slate-900 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors cursor-pointer"

@@ -131,11 +131,17 @@ export async function GET(request: Request) {
       appliedAt: a.createdAt,
     }));
 
+    const allYears = await prisma.academicYear.findMany({
+      orderBy: { year: "desc" },
+      select: { id: true, year: true, isActive: true },
+    });
+
     return NextResponse.json({
       success: true,
       data: {
         academicYear: year.year,
         academicYearId: year.id,
+        allYears,
         summary: {
           totalApplications,
           quotaApplications,

@@ -52,6 +52,8 @@ interface GuidanceData {
     };
     specialInterestCounts: Record<string, number>;
   };
+  currentYear?: { id: string; year: string; isActive: boolean } | null;
+  allYears?: Array<{ id: string; year: string; isActive: boolean }>;
   recentLogs: {
     id: string;
     currentEducation: string;
@@ -72,6 +74,7 @@ interface GuidanceData {
 
 export default function AdminGuidancePage() {
   const [data, setData] = useState<GuidanceData | null>(null);
+  const [selectedYearId, setSelectedYearId] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -99,7 +102,7 @@ export default function AdminGuidancePage() {
       setDeleting(true);
       let payload: Record<string, unknown> = {};
       if (confirmModal.type === "all") {
-        payload = { all: true };
+        payload = { all: true, academicYearId: selectedYearId || data?.currentYear?.id };
       } else if (confirmModal.type === "batch") {
         payload = { ids: selectedIds };
       } else if (confirmModal.type === "single" && confirmModal.targetId) {
@@ -130,14 +133,21 @@ export default function AdminGuidancePage() {
     }
   };
 
-  const fetchData = async () => {
+  const fetchData = async (yearId?: string) => {
     try {
       setRefreshing(true);
-      const res = await fetch(apiUrl("/api/admin/guidance"));
+      const targetId = yearId !== undefined ? yearId : selectedYearId;
+      const endpoint = targetId
+        ? apiUrl(`/api/admin/guidance?academicYearId=${encodeURIComponent(targetId)}`)
+        : apiUrl("/api/admin/guidance");
+      const res = await fetch(endpoint);
       if (res.ok) {
         const json = await res.json();
         if (json.success) {
           setData(json);
+          if (!targetId && json.currentYear?.id) {
+            setSelectedYearId(json.currentYear.id);
+          }
         }
       }
     } catch (err) {
@@ -183,16 +193,38 @@ export default function AdminGuidancePage() {
           </p>
         </div>
 
-        <button
-          onClick={fetchData}
-          disabled={refreshing}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-bold transition shadow-xs self-start sm:self-auto cursor-pointer"
-        >
-          <RefreshCw
-            className={`w-3.5 h-3.5 ${refreshing ? "animate-spin text-[#1E3A8A]" : ""}`}
-          />
-          <span>รีเฟรชข้อมูล</span>
-        </button>
+        <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+          {data?.allYears && data.allYears.length > 0 && (
+            <select
+              value={selectedYearId || data.currentYear?.id || ""}
+              onChange={(e) => {
+                const nextId = e.target.value;
+                setSelectedYearId(nextId);
+                setSelectedIds([]);
+                fetchData(nextId);
+              }}
+              aria-label="เลือกปีการศึกษา"
+              className="px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-semibold text-slate-800 focus:outline-hidden focus:border-[#162C63] cursor-pointer"
+            >
+              {data.allYears.map((y) => (
+                <option key={y.id} value={y.id}>
+                  ปีการศึกษา {y.year} {y.isActive ? "(ปัจจุบัน)" : ""}
+                </option>
+              ))}
+            </select>
+          )}
+          <button
+            type="button"
+            onClick={() => fetchData()}
+            disabled={refreshing}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-bold transition shadow-xs cursor-pointer"
+          >
+            <RefreshCw
+              className={`w-3.5 h-3.5 ${refreshing ? "animate-spin text-[#1E3A8A]" : ""}`}
+            />
+            <span>รีเฟรชข้อมูล</span>
+          </button>
+        </div>
       </div>
 
       {/* 6 Summary Stat Cards */}

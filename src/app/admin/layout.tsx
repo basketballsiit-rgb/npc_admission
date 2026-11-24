@@ -37,6 +37,7 @@ export default function AdminLayout({
   const isLoginPage = pathname === "/admin/login";
 
   const [user, setUser] = useState<AdminUser | null>(null);
+  const [activeYearLabel, setActiveYearLabel] = useState<string>("2570");
   const [loading, setLoading] = useState(!isLoginPage);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -58,6 +59,15 @@ export default function AdminLayout({
         const adminUser = data.admin || data.user;
         if ((data.authenticated || data.success) && adminUser) {
           if (isMounted) setUser(adminUser);
+          // Fetch active academic year dynamically for sidebar display
+          fetch(apiUrl("/api/admin/settings"))
+            .then((r) => (r.ok ? r.json() : null))
+            .then((s) => {
+              if (isMounted && s?.success && s?.data?.activeYear?.year) {
+                setActiveYearLabel(s.data.activeYear.year);
+              }
+            })
+            .catch(() => {});
         } else {
           router.replace("/admin/login");
         }
@@ -200,8 +210,8 @@ export default function AdminLayout({
               <h1 className="font-semibold text-sm text-slate-900 leading-tight truncate">
                 วิทยาลัยสารพัดช่างน่าน
               </h1>
-              <p className="text-xs text-slate-500 mt-0.5 truncate">
-                งานทะเบียน · ปีการศึกษา 2570
+              <p className="text-xs text-slate-500 mt-0.5 truncate tabular-nums">
+                งานทะเบียน · ปีการศึกษา {activeYearLabel}
               </p>
             </div>
           </div>

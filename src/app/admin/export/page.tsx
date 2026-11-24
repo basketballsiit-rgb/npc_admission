@@ -28,6 +28,8 @@ interface Program {
 }
 
 export default function AdminExportPage() {
+  const [allYears, setAllYears] = useState<Array<{ id: string; year: string; isActive: boolean }>>([]);
+  const [selectedYearId, setSelectedYearId] = useState<string>("");
   const [rounds, setRounds] = useState<Round[]>([]);
   const [programs, setPrograms] = useState<Program[]>([]);
   const [loading, setLoading] = useState(true);
@@ -39,13 +41,32 @@ export default function AdminExportPage() {
 
   const [downloadingFormat, setDownloadingFormat] = useState<string | null>(null);
 
+  // Load academic years list once
+  useEffect(() => {
+    fetch(apiUrl("/api/admin/settings"))
+      .then((r) => (r.ok ? r.json() : null))
+      .then((s) => {
+        if (s?.success && s?.data) {
+          setAllYears(s.data.allYears || []);
+          if (s.data.activeYear?.id) {
+            setSelectedYearId(s.data.activeYear.id);
+          }
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  // Load rounds & programs scoped to selected Academic Year
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
+        const qs = selectedYearId
+          ? `?academicYearId=${encodeURIComponent(selectedYearId)}`
+          : "";
         const [rRes, pRes] = await Promise.all([
-          fetch(apiUrl("/api/rounds")),
-          fetch(apiUrl("/api/programs")),
+          fetch(apiUrl(`/api/rounds${qs}`)),
+          fetch(apiUrl(`/api/programs${qs}`)),
         ]);
         if (rRes.ok) {
           const rJson = await rRes.json();
@@ -63,11 +84,12 @@ export default function AdminExportPage() {
     };
 
     fetchData();
-  }, []);
+  }, [selectedYearId]);
 
   const handleDownload = (format: "xlsx" | "csv") => {
     setDownloadingFormat(format);
     const params = new URLSearchParams();
+    if (selectedYearId) params.set("academicYearId", selectedYearId);
     if (selectedRound) params.set("roundId", selectedRound);
     if (selectedProgram) params.set("programId", selectedProgram);
     if (selectedStatus) params.set("status", selectedStatus);
@@ -148,6 +170,30 @@ export default function AdminExportPage() {
             </h2>
 
             <div className="space-y-4 text-xs">
+              {/* Academic Year Selection */}
+              {allYears.length > 0 && (
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 mb-1.5 flex items-center gap-1">
+                    <Calendar className="w-3.5 h-3.5 text-slate-400" /> เลือกปีการศึกษา
+                  </label>
+                  <select
+                    value={selectedYearId}
+                    onChange={(e) => {
+                      setSelectedYearId(e.target.value);
+                      setSelectedRound("");
+                      setSelectedProgram("");
+                    }}
+                    className="w-full py-2.5 px-3 rounded-xl border border-slate-300 text-xs font-semibold text-[#162C63] focus:outline-none focus:border-[#1E3A8A] bg-white"
+                  >
+                    {allYears.map((y) => (
+                      <option key={y.id} value={y.id}>
+                        ปีการศึกษา {y.year} {y.isActive ? "(ปัจจุบัน)" : ""}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
               {/* Round Selection */}
               <div>
                 <label className="block text-[11px] font-bold text-slate-600 mb-1.5 flex items-center gap-1">

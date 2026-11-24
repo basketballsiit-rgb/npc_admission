@@ -18,6 +18,7 @@ export async function GET(request: Request) {
     }
 
     const { searchParams } = new URL(request.url);
+    const academicYearIdParam = searchParams.get("academicYearId");
     const roundId = searchParams.get("roundId");
     const level = searchParams.get("level");
     const programId = searchParams.get("programId");
@@ -26,8 +27,24 @@ export async function GET(request: Request) {
     const sortBy = searchParams.get("sortBy") || "createdAt"; // gpax | createdAt | name
     const sortOrder = searchParams.get("sortOrder") || "desc"; // asc | desc
 
+    const allYears = await prisma.academicYear.findMany({
+      orderBy: { year: "desc" },
+      select: { id: true, year: true, isActive: true },
+    });
+
+    let activeYear = academicYearIdParam
+      ? allYears.find((y) => y.id === academicYearIdParam) || null
+      : allYears.find((y) => y.isActive) || allYears[0] || null;
+
+    if (!activeYear && academicYearIdParam) {
+      activeYear = allYears.find((y) => y.isActive) || allYears[0] || null;
+    }
+
     const where: Record<string, any> = {};
 
+    if (activeYear) {
+      where.round = { academicYearId: activeYear.id };
+    }
     if (roundId) where.roundId = roundId;
     if (programId) where.programId = programId;
     if (status && status !== "ALL") where.status = status;
@@ -104,6 +121,8 @@ export async function GET(request: Request) {
 
     return NextResponse.json({
       success: true,
+      currentYear: activeYear,
+      allYears,
       total: formatted.length,
       data: formatted,
     });

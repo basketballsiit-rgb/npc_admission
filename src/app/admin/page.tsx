@@ -146,145 +146,124 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="space-y-6">
-      {/* Top Banner / Welcome */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200/80">
+      {/* Page Header */}
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-4 border-b border-slate-200">
         <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-black text-slate-900 tracking-tight">
-              ภาพรวมสถิติการรับสมัคร
-            </h1>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#1E3A8A] text-white">
-              ปีการศึกษา {data.academicYear}
-            </span>
-          </div>
-          <p className="text-xs text-slate-500 mt-1">
-            ระบบบริหารการรับสมัครนักเรียน นักศึกษาใหม่ วิทยาลัยสารพัดช่างน่าน
+          <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">
+            ภาพรวมสถิติการรับสมัคร
+          </h1>
+          <p className="text-sm text-slate-600 mt-1 tabular-nums">
+            ปีการศึกษา {data.academicYear} · ระบบบริหารการรับสมัครนักเรียน นักศึกษาใหม่ วิทยาลัยสารพัดช่างน่าน
           </p>
         </div>
         <div className="flex items-center gap-2">
           <button
+            type="button"
             onClick={fetchDashboard}
             title="รีเฟรชข้อมูล"
-            className="p-2 text-slate-600 hover:text-[#1E3A8A] bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition shadow-xs"
+            aria-label="รีเฟรชข้อมูล"
+            className="p-2 text-slate-600 hover:text-slate-900 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors cursor-pointer"
           >
-            <RefreshCw className="w-4 h-4" />
+            <RefreshCw className="w-4 h-4" strokeWidth={1.75} />
           </button>
           <Link
             href="/admin/export"
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs transition"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 text-sm font-medium rounded-lg transition-colors whitespace-nowrap"
           >
-            <FileSpreadsheet className="w-4 h-4" />
+            <FileSpreadsheet className="w-4 h-4 text-slate-500" strokeWidth={1.75} />
             <span>ส่งออก ศธ.02 / RMS</span>
           </Link>
           <Link
             href="/admin/applications"
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-[#1E3A8A] hover:bg-indigo-900 text-white text-xs font-bold rounded-xl shadow-xs transition"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-[#162C63] hover:bg-[#1E3A8A] text-white text-sm font-medium rounded-lg transition-colors whitespace-nowrap"
           >
-            <Users className="w-4 h-4" />
+            <Users className="w-4 h-4" strokeWidth={1.75} />
             <span>จัดการผู้สมัคร</span>
           </Link>
         </div>
       </div>
 
-      {/* 4 Summary Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Card 1: Total */}
-        <div className="p-5 bg-white rounded-2xl border border-slate-200/80 shadow-xs flex flex-col justify-between">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-500 uppercase">ยอดผู้สมัครทั้งหมด</span>
-            <div className="w-8 h-8 rounded-lg bg-blue-50 text-[#1E3A8A] flex items-center justify-center">
-              <Users className="w-4 h-4" />
-            </div>
+      {/* Unified 4-Column Metric Bar (No decorative icon tiles) */}
+      <div className="bg-white rounded-xl border border-slate-200 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-slate-200">
+        {/* Metric 1: Total */}
+        <div className="p-5 flex flex-col justify-between gap-3">
+          <span className="text-xs font-medium text-slate-500">ยอดผู้สมัครทั้งหมด</span>
+          <div className="text-3xl font-semibold text-slate-900 tabular-nums leading-none">
+            {summary.totalApplications}
           </div>
-          <div className="mt-3">
-            <div className="text-3xl font-black text-slate-900">{summary.totalApplications}</div>
-            <div className="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
-              <span>โควตา: <strong className="text-slate-800">{summary.quotaApplications}</strong></span>
-              <span>•</span>
-              <span>รอบปกติ: <strong className="text-slate-800">{summary.regularApplications}</strong></span>
-            </div>
+          <div className="flex items-center justify-between text-xs text-slate-600 pt-2 border-t border-slate-100 tabular-nums">
+            <span>โควตา {summary.quotaApplications}</span>
+            <span>รอบปกติ {summary.regularApplications}</span>
           </div>
         </div>
 
-        {/* Card 2: Levels */}
-        <div className="p-5 bg-white rounded-2xl border border-slate-200/80 shadow-xs flex flex-col justify-between">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-500 uppercase">แยกตามระดับชั้น</span>
-            <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
-              <GraduationCap className="w-4 h-4" />
-            </div>
+        {/* Metric 2: Levels */}
+        <div className="p-5 flex flex-col justify-between gap-3">
+          <span className="text-xs font-medium text-slate-500">แยกตามระดับชั้น</span>
+          <div className="text-3xl font-semibold text-slate-900 tabular-nums leading-none">
+            {summary.pvocApplications + summary.pvsApplications}
           </div>
-          <div className="mt-3">
-            <div className="text-3xl font-black text-slate-900">
-              {summary.pvocApplications + summary.pvsApplications}
-            </div>
-            <div className="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
-              <span>ปวช.: <strong className="text-slate-800">{summary.pvocApplications}</strong></span>
-              <span>•</span>
-              <span>ปวส.: <strong className="text-slate-800">{summary.pvsApplications}</strong></span>
-            </div>
+          <div className="flex items-center justify-between text-xs text-slate-600 pt-2 border-t border-slate-100 tabular-nums">
+            <span>ปวช. {summary.pvocApplications}</span>
+            <span>ปวส. {summary.pvsApplications}</span>
           </div>
         </div>
 
-        {/* Card 3: Selection Status */}
-        <div className="p-5 bg-white rounded-2xl border border-slate-200/80 shadow-xs flex flex-col justify-between">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-500 uppercase">สถานะการคัดเลือก</span>
-            <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
-              <CheckCircle2 className="w-4 h-4" />
-            </div>
+        {/* Metric 3: Selection Status */}
+        <div className="p-5 flex flex-col justify-between gap-3">
+          <span className="text-xs font-medium text-slate-500">ผ่านการคัดเลือก</span>
+          <div className="text-3xl font-semibold text-slate-900 tabular-nums leading-none">
+            {summary.approvedCount}
           </div>
-          <div className="mt-3">
-            <div className="text-3xl font-black text-emerald-600">{summary.approvedCount}</div>
-            <div className="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
-              <span className="text-amber-600">รอตรวจ: <strong>{summary.pendingCount}</strong></span>
-              <span>•</span>
-              <span className="text-rose-600">ไม่ผ่าน: <strong>{summary.rejectedCount}</strong></span>
-            </div>
+          <div className="flex items-center justify-between text-xs pt-2 border-t border-slate-100 tabular-nums">
+            <span className="text-amber-700">รอตรวจ {summary.pendingCount}</span>
+            <span className="text-slate-600">ไม่ผ่าน {summary.rejectedCount}</span>
           </div>
         </div>
 
-        {/* Card 4: Active Round Status */}
-        <div className="p-5 bg-white rounded-2xl border border-slate-200/80 shadow-xs flex flex-col justify-between">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-500 uppercase">รอบรับสมัครปัจจุบัน</span>
-            <div className="w-8 h-8 rounded-lg bg-indigo-50 text-[#1E3A8A] flex items-center justify-center">
-              <Calendar className="w-4 h-4" />
-            </div>
+        {/* Metric 4: Active Round Status */}
+        <div className="p-5 flex flex-col justify-between gap-3">
+          <span className="text-xs font-medium text-slate-500">รอบรับสมัครปัจจุบัน</span>
+          <div className="text-lg font-semibold text-slate-900 truncate leading-snug">
+            {activeRound?.name || "ไม่มีรอบเปิดรับสมัคร"}
           </div>
-          <div className="mt-3">
-            <div className="text-lg font-black text-slate-900 truncate">
-              {activeRound?.name || "ไม่มีรอบเปิดรับสมัคร"}
-            </div>
-            <div className="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
-              <span
-                className={`font-bold px-2 py-0.5 rounded-full ${
-                  activeRound?.status === "OPEN"
-                    ? "bg-emerald-100 text-emerald-800"
-                    : activeRound?.status === "UPCOMING"
-                    ? "bg-amber-100 text-amber-800"
-                    : "bg-slate-100 text-slate-600"
-                }`}
-              >
-                {activeRound?.status === "OPEN"
-                  ? "● กำลังเปิดรับสมัคร"
+          <div className="flex items-center justify-between text-xs pt-2 border-t border-slate-100">
+            <span
+              className={`inline-flex items-center gap-1.5 font-medium ${
+                activeRound?.status === "OPEN"
+                  ? "text-emerald-700"
                   : activeRound?.status === "UPCOMING"
-                  ? "เตรียมเปิดรับ"
-                  : "ปิดรับสมัครแล้ว"}
-              </span>
-              <Link href="/admin/settings" className="text-[#1E3A8A] font-bold hover:underline">
-                ตั้งค่า
-              </Link>
-            </div>
+                  ? "text-amber-700"
+                  : "text-slate-600"
+              }`}
+            >
+              <span
+                className={`w-1.5 h-1.5 rounded-full ${
+                  activeRound?.status === "OPEN"
+                    ? "bg-emerald-500"
+                    : activeRound?.status === "UPCOMING"
+                    ? "bg-amber-500"
+                    : "bg-slate-400"
+                }`}
+              />
+              {activeRound?.status === "OPEN"
+                ? "กำลังเปิดรับสมัคร"
+                : activeRound?.status === "UPCOMING"
+                ? "เตรียมเปิดรับ"
+                : "ปิดรับสมัครแล้ว"}
+            </span>
+            <Link href="/admin/settings" className="text-[#162C63] font-medium hover:underline">
+              ตั้งค่า
+            </Link>
           </div>
         </div>
       </div>
 
       {/* Program Quota Comparison Table */}
-      <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
-        <div className="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+        <div className="p-5 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h2 className="text-base font-black text-slate-900">
+            <h2 className="text-base font-semibold text-slate-900">
               สถิติยอดผู้สมัครเทียบจำนวนรับรายสาขาวิชา
             </h2>
             <p className="text-xs text-slate-500 mt-0.5">
@@ -293,14 +272,15 @@ export default function AdminDashboardPage() {
           </div>
 
           {/* Level Filter Tabs */}
-          <div className="inline-flex p-1 bg-slate-100 rounded-xl text-xs font-bold">
+          <div className="inline-flex p-1 bg-slate-100 rounded-lg border border-slate-200/80 text-xs font-medium self-start sm:self-auto">
             {(["ALL", "ปวช.", "ปวส."] as const).map((tab) => (
               <button
+                type="button"
                 key={tab}
                 onClick={() => setLevelFilter(tab)}
-                className={`px-3 py-1.5 rounded-lg transition-all ${
+                className={`px-3 py-1 rounded-md transition-colors cursor-pointer ${
                   levelFilter === tab
-                    ? "bg-white text-[#1E3A8A] shadow-xs"
+                    ? "bg-white text-[#162C63] shadow-2xs"
                     : "text-slate-600 hover:text-slate-900"
                 }`}
               >
@@ -311,68 +291,82 @@ export default function AdminDashboardPage() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse text-xs">
+          <table className="w-full text-left border-collapse text-sm">
             <thead>
-              <tr className="bg-slate-50/75 border-b border-slate-200/70 text-slate-600 font-bold">
-                <th className="py-3 px-4">รหัสสาขา (ศธ.02)</th>
-                <th className="py-3 px-3">ระดับ</th>
-                <th className="py-3 px-4">ชื่อสาขาวิชา</th>
-                <th className="py-3 px-3 text-center">โควตา</th>
-                <th className="py-3 px-3 text-center">รอบปกติ</th>
-                <th className="py-3 px-3 text-center text-amber-700">ทบยอด</th>
-                <th className="py-3 px-3 text-center font-black">เป้าหมายรับ</th>
-                <th className="py-3 px-3 text-center">ผู้สมัคร</th>
-                <th className="py-3 px-3 text-center text-emerald-700">อนุมัติแล้ว</th>
-                <th className="py-3 px-3 text-center">คงเหลือ</th>
-                <th className="py-3 px-4 text-center w-36">ความคืบหน้า</th>
-                <th className="py-3 px-4 text-center">จัดการ</th>
+              <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 text-xs font-medium">
+                <th className="py-3 px-4 whitespace-nowrap">รหัส</th>
+                <th className="py-3 px-3 whitespace-nowrap">ระดับ</th>
+                <th className="py-3 px-4 whitespace-nowrap">ชื่อสาขาวิชา</th>
+                <th className="py-3 px-3 text-right whitespace-nowrap">โควตา</th>
+                <th className="py-3 px-3 text-right whitespace-nowrap">รอบปกติ</th>
+                <th className="py-3 px-3 text-right whitespace-nowrap">ทบยอด</th>
+                <th className="py-3 px-3 text-right whitespace-nowrap">เป้าหมาย</th>
+                <th className="py-3 px-3 text-right whitespace-nowrap">สมัคร</th>
+                <th className="py-3 px-3 text-right whitespace-nowrap">อนุมัติ</th>
+                <th className="py-3 px-3 text-right whitespace-nowrap">คงเหลือ</th>
+                <th className="py-3 px-4 whitespace-nowrap w-36">ความคืบหน้า</th>
+                <th className="py-3 px-4 text-right whitespace-nowrap">จัดการ</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-100 text-xs sm:text-sm">
               {filteredPrograms.map((p) => {
                 const isOver = p.totalApplicants > p.targetSeats;
                 return (
-                  <tr key={p.id} className="hover:bg-slate-50/60 transition-colors">
-                    <td className="py-3 px-4 font-mono font-semibold text-slate-600">{p.code}</td>
-                    <td className="py-3 px-3">
+                  <tr key={p.id} className="hover:bg-slate-50/80 transition-colors">
+                    <td className="py-3 px-4 font-mono text-xs text-slate-600 tabular-nums whitespace-nowrap">
+                      {p.code}
+                    </td>
+                    <td className="py-3 px-3 whitespace-nowrap">
                       <span
-                        className={`px-2 py-0.5 rounded-md font-bold text-[10px] ${
+                        className={`px-2 py-0.5 rounded-md font-medium text-xs border ${
                           p.level === "ปวช."
-                            ? "bg-sky-50 text-sky-800 border border-sky-200/50"
-                            : "bg-indigo-50 text-indigo-800 border border-indigo-200/50"
+                            ? "bg-slate-50 text-slate-700 border-slate-200"
+                            : "bg-amber-50 text-amber-900 border-amber-200"
                         }`}
                       >
                         {p.level}
                       </span>
                     </td>
-                    <td className="py-3 px-4 font-bold text-slate-800">
+                    <td className="py-3 px-4 font-medium text-slate-900">
                       <div className="flex items-center gap-2">
                         <span>{p.name}</span>
                         {!p.isOpen && (
-                          <span className="text-[10px] font-semibold text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded">
+                          <span className="text-xs font-medium text-rose-700 bg-rose-50 border border-rose-200 px-1.5 py-0.5 rounded whitespace-nowrap">
                             ปิดรับ
                           </span>
                         )}
                       </div>
                     </td>
-                    <td className="py-3 px-3 text-center text-slate-600">{p.quotaSeats}</td>
-                    <td className="py-3 px-3 text-center text-slate-600">{p.regularSeats}</td>
-                    <td className="py-3 px-3 text-center font-bold text-amber-600">
+                    <td className="py-3 px-3 text-right text-slate-600 tabular-nums">{p.quotaSeats}</td>
+                    <td className="py-3 px-3 text-right text-slate-600 tabular-nums">{p.regularSeats}</td>
+                    <td
+                      className={`py-3 px-3 text-right tabular-nums ${
+                        p.rolloverSeats > 0 ? "font-medium text-amber-700" : "text-slate-400"
+                      }`}
+                    >
                       {p.rolloverSeats > 0 ? `+${p.rolloverSeats}` : "0"}
                     </td>
-                    <td className="py-3 px-3 text-center font-black text-slate-900 bg-slate-50/50">
+                    <td className="py-3 px-3 text-right font-semibold text-slate-900 bg-slate-50/60 tabular-nums">
                       {p.targetSeats}
                     </td>
-                    <td className="py-3 px-3 text-center font-bold text-[#1E3A8A]">
+                    <td
+                      className={`py-3 px-3 text-right tabular-nums ${
+                        p.totalApplicants > 0 ? "font-semibold text-[#162C63]" : "text-slate-500"
+                      }`}
+                    >
                       {p.totalApplicants}
                     </td>
-                    <td className="py-3 px-3 text-center font-bold text-emerald-600">
+                    <td
+                      className={`py-3 px-3 text-right tabular-nums ${
+                        p.approvedCount > 0 ? "font-semibold text-emerald-700" : "text-slate-500"
+                      }`}
+                    >
                       {p.approvedCount}
                     </td>
-                    <td className="py-3 px-3 text-center">
+                    <td className="py-3 px-3 text-right tabular-nums">
                       <span
-                        className={`font-bold ${
-                          p.remainingSeats === 0 ? "text-rose-600" : "text-slate-700"
+                        className={`font-medium ${
+                          p.remainingSeats === 0 ? "text-rose-700" : "text-slate-800"
                         }`}
                       >
                         {p.remainingSeats}
@@ -380,31 +374,31 @@ export default function AdminDashboardPage() {
                     </td>
                     <td className="py-3 px-4">
                       <div className="space-y-1">
-                        <div className="flex items-center justify-between text-[10px] font-semibold text-slate-500">
+                        <div className="flex items-center justify-between text-xs text-slate-600 tabular-nums">
                           <span>{p.percentFilled}%</span>
-                          {isOver && <span className="text-amber-600 font-bold">เกินเป้า</span>}
+                          {isOver && <span className="text-amber-700 font-medium">เกินเป้า</span>}
                         </div>
                         <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
                           <div
                             className={`h-full rounded-full ${
                               p.percentFilled >= 100
-                                ? "bg-emerald-500"
+                                ? "bg-emerald-600"
                                 : p.percentFilled >= 70
-                                ? "bg-[#1E3A8A]"
-                                : "bg-amber-400"
+                                ? "bg-amber-500"
+                                : "bg-[#162C63]"
                             }`}
                             style={{ width: `${Math.min(100, p.percentFilled)}%` }}
                           />
                         </div>
                       </div>
                     </td>
-                    <td className="py-3 px-4 text-center">
+                    <td className="py-3 px-4 text-right whitespace-nowrap">
                       <Link
                         href={`/admin/applications?programId=${p.id}`}
-                        className="inline-flex items-center gap-1 text-[11px] font-bold text-[#1E3A8A] hover:text-indigo-900 hover:underline"
+                        className="inline-flex items-center gap-1 text-xs font-medium text-[#162C63] hover:underline whitespace-nowrap"
                       >
                         <span>ดูรายชื่อ</span>
-                        <ArrowRight className="w-3 h-3" />
+                        <ArrowRight className="w-3.5 h-3.5 shrink-0" strokeWidth={1.75} />
                       </Link>
                     </td>
                   </tr>
@@ -416,62 +410,78 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* Recent Applications Section */}
-      <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-5 space-y-4">
-        <div className="flex items-center justify-between">
+      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+        <div className="p-5 border-b border-slate-200 flex items-center justify-between gap-3">
           <div>
-            <h3 className="text-base font-black text-slate-900">ใบสมัครล่าสุดในระบบ</h3>
-            <p className="text-xs text-slate-500">ผู้สมัครที่ลงทะเบียนเข้ามาล่าสุด 5 รายการ</p>
+            <h3 className="text-base font-semibold text-slate-900">ใบสมัครล่าสุดในระบบ</h3>
+            <p className="text-xs text-slate-500 mt-0.5">ผู้สมัครที่ลงทะเบียนเข้ามาล่าสุด 5 รายการ</p>
           </div>
           <Link
             href="/admin/applications"
-            className="text-xs font-bold text-[#1E3A8A] hover:underline flex items-center gap-1"
+            className="text-xs font-medium text-[#162C63] hover:underline inline-flex items-center gap-1 whitespace-nowrap"
           >
             <span>ดูทั้งหมด</span>
-            <ArrowRight className="w-3.5 h-3.5" />
+            <ArrowRight className="w-3.5 h-3.5" strokeWidth={1.75} />
           </Link>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
+          <table className="w-full text-left text-xs sm:text-sm border-collapse">
             <thead>
-              <tr className="bg-slate-50 border-b border-slate-200/70 text-slate-500 font-bold">
-                <th className="py-2.5 px-3">เลขที่ใบสมัคร</th>
-                <th className="py-2.5 px-3">ชื่อ-สกุล</th>
-                <th className="py-2.5 px-3">บัตรประชาชน</th>
-                <th className="py-2.5 px-3">สาขาวิชาที่เลือก</th>
-                <th className="py-2.5 px-3">รอบ</th>
-                <th className="py-2.5 px-3 text-center">GPAX</th>
-                <th className="py-2.5 px-3 text-center">สถานะ</th>
+              <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 text-xs font-medium">
+                <th className="py-3 px-4 whitespace-nowrap">เลขที่ใบสมัคร</th>
+                <th className="py-3 px-4 whitespace-nowrap">ชื่อ-สกุล</th>
+                <th className="py-3 px-4 whitespace-nowrap">บัตรประชาชน</th>
+                <th className="py-3 px-4 whitespace-nowrap">สาขาวิชาที่เลือก</th>
+                <th className="py-3 px-4 whitespace-nowrap">รอบ</th>
+                <th className="py-3 px-4 text-right whitespace-nowrap">GPAX</th>
+                <th className="py-3 px-4 text-right whitespace-nowrap">สถานะ</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {recentApplications.map((app) => (
-                <tr key={app.id} className="hover:bg-slate-50/50">
-                  <td className="py-3 px-3 font-mono font-bold text-[#1E3A8A]">{app.applicationNo}</td>
-                  <td className="py-3 px-3 font-semibold text-slate-800">{app.applicantName}</td>
-                  <td className="py-3 px-3 font-mono text-slate-500">{app.cidMasked}</td>
-                  <td className="py-3 px-3 text-slate-700">{app.program}</td>
-                  <td className="py-3 px-3 text-slate-500">{app.roundName}</td>
-                  <td className="py-3 px-3 text-center font-bold text-slate-900">{app.gpax.toFixed(2)}</td>
-                  <td className="py-3 px-3 text-center">
-                    <span
-                      className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                        app.status === "APPROVED"
-                          ? "bg-emerald-100 text-emerald-800"
-                          : app.status === "REJECTED"
-                          ? "bg-rose-100 text-rose-800"
-                          : "bg-amber-100 text-amber-800"
-                      }`}
-                    >
-                      {app.status === "APPROVED"
-                        ? "ผ่านการคัดเลือก"
-                        : app.status === "REJECTED"
-                        ? "ไม่ผ่าน"
-                        : "รอตรวจสอบ"}
-                    </span>
+              {recentApplications.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="py-10 px-4 text-center text-sm text-slate-500">
+                    ยังไม่มีรายการใบสมัครในรอบการรับสมัครปัจจุบัน
                   </td>
                 </tr>
-              ))}
+              ) : (
+                recentApplications.map((app) => (
+                  <tr key={app.id} className="hover:bg-slate-50/80 transition-colors">
+                    <td className="py-3 px-4 font-mono text-xs font-medium text-[#162C63] tabular-nums whitespace-nowrap">
+                      {app.applicationNo}
+                    </td>
+                    <td className="py-3 px-4 font-medium text-slate-900 whitespace-nowrap">
+                      {app.applicantName}
+                    </td>
+                    <td className="py-3 px-4 font-mono text-xs text-slate-500 tabular-nums whitespace-nowrap">
+                      {app.cidMasked}
+                    </td>
+                    <td className="py-3 px-4 text-slate-700">{app.program}</td>
+                    <td className="py-3 px-4 text-slate-600 whitespace-nowrap">{app.roundName}</td>
+                    <td className="py-3 px-4 text-right font-medium text-slate-900 tabular-nums">
+                      {app.gpax.toFixed(2)}
+                    </td>
+                    <td className="py-3 px-4 text-right whitespace-nowrap">
+                      <span
+                        className={`inline-block px-2 py-0.5 rounded-md text-xs font-medium border ${
+                          app.status === "APPROVED"
+                            ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                            : app.status === "REJECTED"
+                            ? "bg-rose-50 text-rose-800 border-rose-200"
+                            : "bg-amber-50 text-amber-800 border-amber-200"
+                        }`}
+                      >
+                        {app.status === "APPROVED"
+                          ? "ผ่านการคัดเลือก"
+                          : app.status === "REJECTED"
+                          ? "ไม่ผ่าน"
+                          : "รอตรวจสอบ"}
+                      </span>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

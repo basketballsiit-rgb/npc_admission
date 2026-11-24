@@ -18,6 +18,7 @@ import {
   Calendar,
   Compass,
   Coins,
+  BarChart3,
 } from "lucide-react";
 
 interface AdminUser {
@@ -112,6 +113,12 @@ export default function AdminLayout({
       href: "/admin",
       icon: LayoutDashboard,
       active: pathname === "/admin",
+    },
+    {
+      name: "สถิติรายปี & สาขาวิชา",
+      href: "/admin/analytics",
+      icon: BarChart3,
+      active: pathname.startsWith("/admin/analytics"),
     },
     {
       name: "จัดการรายชื่อผู้สมัคร",

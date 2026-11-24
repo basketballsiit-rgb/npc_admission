@@ -85,12 +85,31 @@ jobs:
           echo "Using PM2 command: $PM2_CMD"
           $PM2_CMD delete npc_admission 2>/dev/null || true
           fuser -k 3007/tcp 2>/dev/null || true
-          sleep 1
+          sleep 2
           $PM2_CMD start ecosystem.config.js
           $PM2_CMD save
 
-          # รอให้ Next.js เริ่มต้นการทำงาน
-          sleep 5
+          # รอให้ Next.js เริ่มต้นการทำงานและตรวจสอบพอร์ต 3007
+          READY=0
+          for i in 1 2 3 4 5 6; do
+            sleep 3
+            if curl -sf --connect-timeout 3 http://127.0.0.1:3007/npc_admission > /dev/null 2>&1; then
+              READY=1
+              echo "✅ Next.js is responding on port 3007 (attempt $i)"
+              break
+            fi
+            echo "⏳ Waiting for port 3007 (attempt $i)..."
+          done
+
+          if [ "$READY" -ne 1 ]; then
+            echo "⚠️ Port 3007 not ready via ecosystem.config.js, restarting with direct npm start..."
+            $PM2_CMD delete npc_admission 2>/dev/null || true
+            fuser -k 3007/tcp 2>/dev/null || true
+            sleep 1
+            PORT=3007 NODE_ENV=production NEXT_PUBLIC_BASE_PATH=/npc_admission $PM2_CMD start npm --name npc_admission -- start
+            $PM2_CMD save
+            sleep 5
+          fi
 
           echo "=== PM2 STATUS ==="
           $PM2_CMD status

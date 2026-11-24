@@ -2,8 +2,8 @@ module.exports = {
   apps: [
     {
       name: "npc_admission",
-      script: "./node_modules/next/dist/bin/next",
-      args: "start -p 3007 -H 127.0.0.1",
+      script: "/var/www/npc_admission/node_modules/next/dist/bin/next",
+      args: "start -p 3007",
       cwd: "/var/www/npc_admission",
       exec_mode: "fork",
       instances: 1,

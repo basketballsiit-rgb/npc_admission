@@ -3,21 +3,14 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { apiUrl } from "@/lib/basepath";
+import AdminDashboardCharts from "@/components/AdminDashboardCharts";
 import {
   Users,
-  CheckCircle2,
-  Clock,
-  XCircle,
   FileSpreadsheet,
-  Settings,
   ArrowRight,
-  TrendingUp,
-  Building2,
-  Layers,
-  GraduationCap,
-  Calendar,
   AlertCircle,
   RefreshCw,
+  ArrowUpDown,
 } from "lucide-react";
 
 interface DashboardData {
@@ -78,6 +71,9 @@ export default function AdminDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [levelFilter, setLevelFilter] = useState<"ALL" | "ปวช." | "ปวส.">("ALL");
+  const [sortBy, setSortBy] = useState<"code" | "targetSeats" | "totalApplicants" | "remainingSeats" | "percentFilled">("code");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
+  const [lastUpdated, setLastUpdated] = useState<string>("");
 
   const fetchDashboard = async () => {
     try {
@@ -90,6 +86,13 @@ export default function AdminDashboardPage() {
       const json = await res.json();
       if (json.success) {
         setData(json.data);
+        setLastUpdated(
+          new Date().toLocaleTimeString("th-TH", {
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+          })
+        );
       } else {
         throw new Error(json.error || "เกิดข้อผิดพลาด");
       }
@@ -136,11 +139,28 @@ export default function AdminDashboardPage() {
 
   const { summary, rounds, programsComparison, recentApplications } = data;
 
-  const filteredPrograms = programsComparison.filter((p) => {
-    if (levelFilter === "ALL") return true;
-    if (levelFilter === "ปวส.") return p.level.includes("ปวส");
-    return p.level === levelFilter;
-  });
+  const filteredPrograms = programsComparison
+    .filter((p) => {
+      if (levelFilter === "ALL") return true;
+      if (levelFilter === "ปวส.") return p.level.includes("ปวส");
+      return p.level === levelFilter;
+    })
+    .sort((a, b) => {
+      const mul = sortDir === "asc" ? 1 : -1;
+      if (sortBy === "code") return a.code.localeCompare(b.code) * mul;
+      return ((a[sortBy] as number) - (b[sortBy] as number)) * mul;
+    });
+
+  const handleSort = (
+    col: "code" | "targetSeats" | "totalApplicants" | "remainingSeats" | "percentFilled"
+  ) => {
+    if (sortBy === col) {
+      setSortDir((prev) => (prev === "asc" ? "desc" : "asc"));
+    } else {
+      setSortBy(col);
+      setSortDir(col === "code" ? "asc" : "desc");
+    }
+  };
 
   const activeRound = rounds.find((r) => r.status === "OPEN") || rounds[0];
 
@@ -183,83 +203,15 @@ export default function AdminDashboardPage() {
         </div>
       </div>
 
-      {/* Unified 4-Column Metric Bar (No decorative icon tiles) */}
-      <div className="bg-white rounded-xl border border-slate-200 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-slate-200">
-        {/* Metric 1: Total */}
-        <div className="p-5 flex flex-col justify-between gap-3">
-          <span className="text-xs font-medium text-slate-500">ยอดผู้สมัครทั้งหมด</span>
-          <div className="text-3xl font-semibold text-slate-900 tabular-nums leading-none">
-            {summary.totalApplications}
-          </div>
-          <div className="flex items-center justify-between text-xs text-slate-600 pt-2 border-t border-slate-100 tabular-nums">
-            <span>โควตา {summary.quotaApplications}</span>
-            <span>รอบปกติ {summary.regularApplications}</span>
-          </div>
-        </div>
+      {/* BAND 1, 2 & 3: Interactive Inline SVG Analytics Charts */}
+      <AdminDashboardCharts
+        summary={summary}
+        programs={filteredPrograms}
+        activeRound={activeRound}
+        levelFilter={levelFilter}
+      />
 
-        {/* Metric 2: Levels */}
-        <div className="p-5 flex flex-col justify-between gap-3">
-          <span className="text-xs font-medium text-slate-500">แยกตามระดับชั้น</span>
-          <div className="text-3xl font-semibold text-slate-900 tabular-nums leading-none">
-            {summary.pvocApplications + summary.pvsApplications}
-          </div>
-          <div className="flex items-center justify-between text-xs text-slate-600 pt-2 border-t border-slate-100 tabular-nums">
-            <span>ปวช. {summary.pvocApplications}</span>
-            <span>ปวส. {summary.pvsApplications}</span>
-          </div>
-        </div>
-
-        {/* Metric 3: Selection Status */}
-        <div className="p-5 flex flex-col justify-between gap-3">
-          <span className="text-xs font-medium text-slate-500">ผ่านการคัดเลือก</span>
-          <div className="text-3xl font-semibold text-slate-900 tabular-nums leading-none">
-            {summary.approvedCount}
-          </div>
-          <div className="flex items-center justify-between text-xs pt-2 border-t border-slate-100 tabular-nums">
-            <span className="text-amber-700">รอตรวจ {summary.pendingCount}</span>
-            <span className="text-slate-600">ไม่ผ่าน {summary.rejectedCount}</span>
-          </div>
-        </div>
-
-        {/* Metric 4: Active Round Status */}
-        <div className="p-5 flex flex-col justify-between gap-3">
-          <span className="text-xs font-medium text-slate-500">รอบรับสมัครปัจจุบัน</span>
-          <div className="text-lg font-semibold text-slate-900 truncate leading-snug">
-            {activeRound?.name || "ไม่มีรอบเปิดรับสมัคร"}
-          </div>
-          <div className="flex items-center justify-between text-xs pt-2 border-t border-slate-100">
-            <span
-              className={`inline-flex items-center gap-1.5 font-medium ${
-                activeRound?.status === "OPEN"
-                  ? "text-emerald-700"
-                  : activeRound?.status === "UPCOMING"
-                  ? "text-amber-700"
-                  : "text-slate-600"
-              }`}
-            >
-              <span
-                className={`w-1.5 h-1.5 rounded-full ${
-                  activeRound?.status === "OPEN"
-                    ? "bg-emerald-500"
-                    : activeRound?.status === "UPCOMING"
-                    ? "bg-amber-500"
-                    : "bg-slate-400"
-                }`}
-              />
-              {activeRound?.status === "OPEN"
-                ? "กำลังเปิดรับสมัคร"
-                : activeRound?.status === "UPCOMING"
-                ? "เตรียมเปิดรับ"
-                : "ปิดรับสมัครแล้ว"}
-            </span>
-            <Link href="/admin/settings" className="text-[#162C63] font-medium hover:underline">
-              ตั้งค่า
-            </Link>
-          </div>
-        </div>
-      </div>
-
-      {/* Program Quota Comparison Table */}
+      {/* BAND 4: Program Quota Comparison Table (Sortable) */}
       <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
         <div className="p-5 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
@@ -267,7 +219,7 @@ export default function AdminDashboardPage() {
               สถิติยอดผู้สมัครเทียบจำนวนรับรายสาขาวิชา
             </h2>
             <p className="text-xs text-slate-500 mt-0.5">
-              เปรียบเทียบจำนวนผู้สมัครกับโควตารับจริง และยอดคงเหลือที่ยังรับได้
+              เปรียบเทียบจำนวนผู้สมัครกับโควตารับจริง และยอดคงเหลือ (คลิกหัวคอลัมน์เพื่อเรียงลำดับ)
             </p>
           </div>
 
@@ -290,22 +242,90 @@ export default function AdminDashboardPage() {
           </div>
         </div>
 
-        <div className="overflow-x-auto">
+        <div className="relative overflow-x-auto">
           <table className="w-full text-left border-collapse text-sm">
+            <caption className="sr-only">
+              ตารางสถิติยอดผู้สมัครเทียบจำนวนรับรายสาขาวิชา ปีการศึกษา {data.academicYear}
+            </caption>
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 text-xs font-medium">
-                <th className="py-3 px-4 whitespace-nowrap">รหัส</th>
-                <th className="py-3 px-3 whitespace-nowrap">ระดับ</th>
-                <th className="py-3 px-4 whitespace-nowrap">ชื่อสาขาวิชา</th>
-                <th className="py-3 px-3 text-right whitespace-nowrap">โควตา</th>
-                <th className="py-3 px-3 text-right whitespace-nowrap">รอบปกติ</th>
-                <th className="py-3 px-3 text-right whitespace-nowrap">ทบยอด</th>
-                <th className="py-3 px-3 text-right whitespace-nowrap">เป้าหมาย</th>
-                <th className="py-3 px-3 text-right whitespace-nowrap">สมัคร</th>
-                <th className="py-3 px-3 text-right whitespace-nowrap">อนุมัติ</th>
-                <th className="py-3 px-3 text-right whitespace-nowrap">คงเหลือ</th>
-                <th className="py-3 px-4 whitespace-nowrap w-36">ความคืบหน้า</th>
-                <th className="py-3 px-4 text-right whitespace-nowrap">จัดการ</th>
+                <th
+                  scope="col"
+                  aria-sort={sortBy === "code" ? (sortDir === "asc" ? "ascending" : "descending") : "none"}
+                  className="py-3 px-4 whitespace-nowrap"
+                >
+                  <button
+                    type="button"
+                    onClick={() => handleSort("code")}
+                    className="inline-flex items-center gap-1 hover:text-slate-900 cursor-pointer"
+                  >
+                    <span>รหัส</span>
+                    <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                  </button>
+                </th>
+                <th scope="col" className="py-3 px-3 whitespace-nowrap">ระดับ</th>
+                <th scope="col" className="py-3 px-4 whitespace-nowrap">ชื่อสาขาวิชา</th>
+                <th scope="col" className="py-3 px-3 text-right whitespace-nowrap hidden md:table-cell">โควตา</th>
+                <th scope="col" className="py-3 px-3 text-right whitespace-nowrap hidden md:table-cell">รอบปกติ</th>
+                <th scope="col" className="py-3 px-3 text-right whitespace-nowrap hidden lg:table-cell">ทบยอด</th>
+                <th
+                  scope="col"
+                  aria-sort={sortBy === "targetSeats" ? (sortDir === "asc" ? "ascending" : "descending") : "none"}
+                  className="py-3 px-3 text-right whitespace-nowrap"
+                >
+                  <button
+                    type="button"
+                    onClick={() => handleSort("targetSeats")}
+                    className="inline-flex items-center gap-1 hover:text-slate-900 cursor-pointer"
+                  >
+                    <span>เป้าหมาย</span>
+                    <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                  </button>
+                </th>
+                <th
+                  scope="col"
+                  aria-sort={sortBy === "totalApplicants" ? (sortDir === "asc" ? "ascending" : "descending") : "none"}
+                  className="py-3 px-3 text-right whitespace-nowrap"
+                >
+                  <button
+                    type="button"
+                    onClick={() => handleSort("totalApplicants")}
+                    className="inline-flex items-center gap-1 hover:text-slate-900 cursor-pointer"
+                  >
+                    <span>สมัคร</span>
+                    <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                  </button>
+                </th>
+                <th scope="col" className="py-3 px-3 text-right whitespace-nowrap hidden sm:table-cell">อนุมัติ</th>
+                <th
+                  scope="col"
+                  aria-sort={sortBy === "remainingSeats" ? (sortDir === "asc" ? "ascending" : "descending") : "none"}
+                  className="py-3 px-3 text-right whitespace-nowrap"
+                >
+                  <button
+                    type="button"
+                    onClick={() => handleSort("remainingSeats")}
+                    className="inline-flex items-center gap-1 hover:text-slate-900 cursor-pointer"
+                  >
+                    <span>คงเหลือ</span>
+                    <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                  </button>
+                </th>
+                <th
+                  scope="col"
+                  aria-sort={sortBy === "percentFilled" ? (sortDir === "asc" ? "ascending" : "descending") : "none"}
+                  className="py-3 px-4 whitespace-nowrap w-36 hidden sm:table-cell"
+                >
+                  <button
+                    type="button"
+                    onClick={() => handleSort("percentFilled")}
+                    className="inline-flex items-center gap-1 hover:text-slate-900 cursor-pointer"
+                  >
+                    <span>ความคืบหน้า</span>
+                    <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                  </button>
+                </th>
+                <th scope="col" className="py-3 px-4 text-right whitespace-nowrap">จัดการ</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-xs sm:text-sm">
@@ -337,10 +357,10 @@ export default function AdminDashboardPage() {
                         )}
                       </div>
                     </td>
-                    <td className="py-3 px-3 text-right text-slate-600 tabular-nums">{p.quotaSeats}</td>
-                    <td className="py-3 px-3 text-right text-slate-600 tabular-nums">{p.regularSeats}</td>
+                    <td className="py-3 px-3 text-right text-slate-600 tabular-nums hidden md:table-cell">{p.quotaSeats}</td>
+                    <td className="py-3 px-3 text-right text-slate-600 tabular-nums hidden md:table-cell">{p.regularSeats}</td>
                     <td
-                      className={`py-3 px-3 text-right tabular-nums ${
+                      className={`py-3 px-3 text-right tabular-nums hidden lg:table-cell ${
                         p.rolloverSeats > 0 ? "font-medium text-amber-700" : "text-slate-400"
                       }`}
                     >
@@ -357,7 +377,7 @@ export default function AdminDashboardPage() {
                       {p.totalApplicants}
                     </td>
                     <td
-                      className={`py-3 px-3 text-right tabular-nums ${
+                      className={`py-3 px-3 text-right tabular-nums hidden sm:table-cell ${
                         p.approvedCount > 0 ? "font-semibold text-emerald-700" : "text-slate-500"
                       }`}
                     >
@@ -372,7 +392,7 @@ export default function AdminDashboardPage() {
                         {p.remainingSeats}
                       </span>
                     </td>
-                    <td className="py-3 px-4">
+                    <td className="py-3 px-4 hidden sm:table-cell">
                       <div className="space-y-1">
                         <div className="flex items-center justify-between text-xs text-slate-600 tabular-nums">
                           <span>{p.percentFilled}%</span>
@@ -425,17 +445,18 @@ export default function AdminDashboardPage() {
           </Link>
         </div>
 
-        <div className="overflow-x-auto">
+        <div className="relative overflow-x-auto">
           <table className="w-full text-left text-xs sm:text-sm border-collapse">
+            <caption className="sr-only">รายการใบสมัครล่าสุด 5 รายการ</caption>
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 text-xs font-medium">
-                <th className="py-3 px-4 whitespace-nowrap">เลขที่ใบสมัคร</th>
-                <th className="py-3 px-4 whitespace-nowrap">ชื่อ-สกุล</th>
-                <th className="py-3 px-4 whitespace-nowrap">บัตรประชาชน</th>
-                <th className="py-3 px-4 whitespace-nowrap">สาขาวิชาที่เลือก</th>
-                <th className="py-3 px-4 whitespace-nowrap">รอบ</th>
-                <th className="py-3 px-4 text-right whitespace-nowrap">GPAX</th>
-                <th className="py-3 px-4 text-right whitespace-nowrap">สถานะ</th>
+                <th scope="col" className="py-3 px-4 whitespace-nowrap">เลขที่ใบสมัคร</th>
+                <th scope="col" className="py-3 px-4 whitespace-nowrap">ชื่อ-สกุล</th>
+                <th scope="col" className="py-3 px-4 whitespace-nowrap hidden md:table-cell">บัตรประชาชน</th>
+                <th scope="col" className="py-3 px-4 whitespace-nowrap">สาขาวิชาที่เลือก</th>
+                <th scope="col" className="py-3 px-4 whitespace-nowrap hidden lg:table-cell">รอบ</th>
+                <th scope="col" className="py-3 px-4 text-right whitespace-nowrap hidden sm:table-cell">GPAX</th>
+                <th scope="col" className="py-3 px-4 text-right whitespace-nowrap">สถานะ</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -454,12 +475,12 @@ export default function AdminDashboardPage() {
                     <td className="py-3 px-4 font-medium text-slate-900 whitespace-nowrap">
                       {app.applicantName}
                     </td>
-                    <td className="py-3 px-4 font-mono text-xs text-slate-500 tabular-nums whitespace-nowrap">
+                    <td className="py-3 px-4 font-mono text-xs text-slate-500 tabular-nums whitespace-nowrap hidden md:table-cell">
                       {app.cidMasked}
                     </td>
                     <td className="py-3 px-4 text-slate-700">{app.program}</td>
-                    <td className="py-3 px-4 text-slate-600 whitespace-nowrap">{app.roundName}</td>
-                    <td className="py-3 px-4 text-right font-medium text-slate-900 tabular-nums">
+                    <td className="py-3 px-4 text-slate-600 whitespace-nowrap hidden lg:table-cell">{app.roundName}</td>
+                    <td className="py-3 px-4 text-right font-medium text-slate-900 tabular-nums hidden sm:table-cell">
                       {app.gpax.toFixed(2)}
                     </td>
                     <td className="py-3 px-4 text-right whitespace-nowrap">
@@ -486,6 +507,12 @@ export default function AdminDashboardPage() {
           </table>
         </div>
       </div>
+
+      {/* BAND 5: Purposeful Cadence Footer Line */}
+      <footer className="pt-2 pb-4 border-t border-slate-200/80 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500 tabular-nums">
+        <span>ระบบบริหารการรับสมัครนักเรียน นักศึกษาใหม่ วิทยาลัยสารพัดช่างน่าน</span>
+        <span>{lastUpdated ? `อัปเดตข้อมูลล่าสุดเวลา ${lastUpdated} น.` : "ข้อมูลเรียลไทม์จากฐานข้อมูลระบบ"}</span>
+      </footer>
     </div>
   );
 }

@@ -225,7 +225,7 @@ export default function AdminExpensesPage() {
                 <input
                   type="number"
                   min="0"
-                  step="50"
+                  step="1"
                   value={pvcAmount}
                   onChange={(e) => setPvcAmount(parseFloat(e.target.value) || 0)}
                   className="w-full pl-4 pr-12 py-3 rounded-2xl border-2 border-slate-200 focus:border-emerald-500 focus:outline-hidden font-mono font-black text-lg text-slate-900"
@@ -279,7 +279,7 @@ export default function AdminExpensesPage() {
                 <input
                   type="number"
                   min="0"
-                  step="50"
+                  step="1"
                   value={pvsAmount}
                   onChange={(e) => setPvsAmount(parseFloat(e.target.value) || 0)}
                   className="w-full pl-4 pr-12 py-3 rounded-2xl border-2 border-slate-200 focus:border-blue-500 focus:outline-hidden font-mono font-black text-lg text-slate-900"
@@ -330,7 +330,7 @@ export default function AdminExpensesPage() {
                 <input
                   type="number"
                   min="0"
-                  step="50"
+                  step="1"
                   value={pvsDualAmount}
                   onChange={(e) => setPvsDualAmount(parseFloat(e.target.value) || 0)}
                   className="w-full pl-4 pr-12 py-3 rounded-2xl border-2 border-slate-200 focus:border-purple-500 focus:outline-hidden font-mono font-black text-lg text-slate-900"

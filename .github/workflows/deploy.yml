@@ -83,7 +83,10 @@ jobs:
           fi
 
           echo "Using PM2 command: $PM2_CMD"
-          $PM2_CMD restart npc_admission 2>/dev/null || $PM2_CMD start ecosystem.config.js
+          $PM2_CMD delete npc_admission 2>/dev/null || true
+          fuser -k 3007/tcp 2>/dev/null || true
+          sleep 1
+          $PM2_CMD start ecosystem.config.js
           $PM2_CMD save
 
           # รอให้ Next.js เริ่มต้นการทำงาน

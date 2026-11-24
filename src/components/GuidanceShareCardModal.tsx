@@ -56,6 +56,7 @@ export default function GuidanceShareCardModal({
   const [exporting, setExporting] = useState(false);
   const [shareSuccess, setShareSuccess] = useState<string | null>(null);
   const [exportError, setExportError] = useState<string | null>(null);
+  const [uploadedShareUrl, setUploadedShareUrl] = useState<string | null>(null);
 
   // Map Department to Mascot Type
   const getMascotType = (): MascotType => {
@@ -198,9 +199,10 @@ export default function GuidanceShareCardModal({
       : `https://service.npc.ac.th/npc_admission/apply?level=${encodeURIComponent(selectedLevel)}&code=${encodeURIComponent(selectedCode)}`;
 
   const lineShareText = `ผลแนะแนวของ ${studentName}: เหมาะกับ "${programName}" วิทยาลัยสารพัดช่างน่าน (ตรงใจ ${topScorePct}%)`;
-  const lineShareUrl = `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(shareApplyUrl)}&text=${encodeURIComponent(lineShareText)}`;
+  const effectiveLineShareTarget = uploadedShareUrl || shareApplyUrl;
+  const lineShareUrl = `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(effectiveLineShareTarget)}&text=${encodeURIComponent(lineShareText)}`;
 
-  // Web Share API (Mobile Native) + Clipboard/Download Fallback (Desktop Windows/macOS)
+  // Web Share API (Mobile Native) + Server OG Card Upload + Clipboard/LINE Share (Desktop)
   const handleQuickShare = async () => {
     if (!cardRef.current) return;
     try {
@@ -242,7 +244,36 @@ export default function GuidanceShareCardModal({
         return;
       }
 
-      // Desktop / non-file-share path: copy PNG image to clipboard + download PNG file
+      // Desktop path:
+      // 1) Upload generated PNG to server so LINE crawler displays the actual card image via og:image
+      let hostedShareUrl: string | null = null;
+      try {
+        const uploadRes = await fetch(apiUrl("/api/guidance/card-image"), {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            imageDataUrl: dataUrl,
+            studentName,
+            programName,
+            topScorePct,
+            selectedLevel,
+            selectedCode,
+          }),
+        });
+        const uploadJson = await uploadRes.json();
+        if (uploadRes.ok && uploadJson.success && uploadJson.sharePath) {
+          const origin =
+            typeof window !== "undefined"
+              ? window.location.origin
+              : "https://service.npc.ac.th";
+          hostedShareUrl = `${origin}${apiUrl(uploadJson.sharePath)}`;
+          setUploadedShareUrl(hostedShareUrl);
+        }
+      } catch (uploadErr) {
+        console.warn("Could not upload card for OG preview:", uploadErr);
+      }
+
+      // 2) Copy PNG image to clipboard so user can also Ctrl+V directly into LINE PC chat
       let copiedToClipboard = false;
       if (
         typeof navigator !== "undefined" &&
@@ -259,7 +290,7 @@ export default function GuidanceShareCardModal({
         }
       }
 
-      // Also save PNG file to Downloads so user can attach/drag directly into LINE PC
+      // 3) Save PNG file as backup
       const link = document.createElement("a");
       link.download = `npc-career-card-${selectedCode}.png`;
       link.href = dataUrl;
@@ -267,8 +298,12 @@ export default function GuidanceShareCardModal({
 
       recordShareAction();
       setShareSuccess(
-        copiedToClipboard
-          ? "คัดลอกรูปการ์ดและบันทึกไฟล์ .PNG แล้ว — กด Ctrl + V เพื่อวางส่งในแชท LINE ได้ทันที"
+        hostedShareUrl
+          ? copiedToClipboard
+            ? "สร้างลิงก์แชร์พร้อมรูปการ์ดแล้ว! กดปุ่มสีเขียวด้านล่างเพื่อแชร์เข้า LINE หรือกด Ctrl + V วางรูปในแชท LINE PC ได้ทันที"
+            : "สร้างลิงก์แชร์พร้อมรูปการ์ดและบันทึกไฟล์ .PNG แล้ว! กดปุ่มสีเขียวด้านล่างเพื่อแชร์การ์ดภาพเข้า LINE ได้ทันที"
+          : copiedToClipboard
+          ? "คัดลอกรูปการ์ดและบันทึกไฟล์ .PNG แล้ว — กด Ctrl + V เพื่อวางส่งในแชท LINE PC ได้ทันที"
           : "บันทึกไฟล์รูปการ์ด .PNG เรียบร้อยแล้ว — สามารถลากไฟล์ส่งเข้าแชท LINE ได้ทันที"
       );
     } catch (err) {
@@ -338,7 +373,10 @@ export default function GuidanceShareCardModal({
                   id="share-card-student-name"
                   type="text"
                   value={studentName}
-                  onChange={(e) => setStudentName(e.target.value)}
+                  onChange={(e) => {
+                    setStudentName(e.target.value);
+                    setUploadedShareUrl(null);
+                  }}
                   placeholder="เช่น น้องบาส, นายสมชาย"
                   className="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-xl text-sm font-semibold text-slate-900 focus:outline-hidden focus:border-[#1E3A8A] focus:ring-2 focus:ring-[#1E3A8A]/15 bg-white"
                 />
@@ -382,10 +420,10 @@ export default function GuidanceShareCardModal({
                   href={lineShareUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center gap-1.5 w-full py-2 px-3 rounded-lg bg-[#06C755] hover:bg-[#05b34c] text-white font-semibold text-xs transition-colors"
+                  className="inline-flex items-center justify-center gap-1.5 w-full py-2.5 px-3 rounded-lg bg-[#06C755] hover:bg-[#05b34c] text-white font-semibold text-xs transition-colors"
                 >
                   <Share2 className="w-3.5 h-3.5" />
-                  <span>เปิดหน้าต่างแชร์ลิงก์ผ่าน LINE</span>
+                  <span>แชร์การ์ดภาพนี้เข้า LINE</span>
                 </a>
               </div>
             )}

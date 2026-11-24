@@ -267,42 +267,32 @@ export default function GuidanceQuizPage() {
         {step === "welcome" && (
           <div className="max-w-2xl mx-auto space-y-6 animate-fadeIn">
             {/* Hero Card */}
-            <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-md relative overflow-hidden">
-              {/* Decorative Accent */}
-              <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-br from-amber-100/50 to-blue-100/30 rounded-bl-full pointer-events-none -z-0" />
-
-              <div className="relative z-10 space-y-4">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-[#1E3A8A] text-xs font-bold">
-                  <Compass className="w-4 h-4 text-amber-500 animate-pulse" />
-                  <span>ค้นพบตัวตนที่ใช่ สายอาชีพที่ชอบ</span>
-                </div>
-
-                <h1 className="text-2xl sm:text-3xl font-black text-slate-900 leading-tight">
-                  แบบประเมินค้นหาสายเรียนและสาขาที่ใช่
-                  <br />
-                  <span className="text-[#1E3A8A]">วิทยาลัยสารพัดช่างน่าน</span>
+            <div className="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200/90 shadow-xs">
+              <div className="space-y-4">
+                <h1 className="text-2xl sm:text-3xl font-semibold text-slate-900 leading-tight">
+                  แบบประเมินค้นหาสายเรียนและสาขาวิชา
+                  <span className="block text-[#162C63] mt-1">วิทยาลัยสารพัดช่างน่าน</span>
                 </h1>
 
-                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                  ยังลังเลว่าจะต่อสายไหนดี? ช่างยนต์ ช่างไฟ อิเล็กทรอนิกส์ ไอที การบัญชี หรือการตลาด? 
-                  เพียงตอบคำถามสั้นๆ 12 ข้อ (ใช้เวลาเพียง 1 นาที) ระบบจะวิเคราะห์ความถนัด จุดแข็ง 
-                  และคำนวณกราฟใยแมงมุม (Radar Chart) พร้อมแนะนำรหัสสาขาและอาชีพในอนาคตให้อัตโนมัติทันที
+                <p className="text-sm text-slate-600 leading-relaxed">
+                  ยังไม่แน่ใจว่าจะเรียนต่อสาขาไหนดีระหว่าง ช่างยนต์ ไฟฟ้ากำลัง อิเล็กทรอนิกส์ เทคโนโลยีสารสนเทศ การบัญชี หรือการตลาด?
+                  ตอบคำถามสั้นๆ 12 ข้อ (ใช้เวลาประมาณ 1 นาที) เพื่อวิเคราะห์ความถนัดและดูผลกราฟใยแมงมุมทั้ง 6 แผนกวิชาทันที
                 </p>
 
                 {/* PDPA & Feature Highlights */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-                  <div className="flex items-start gap-2.5 p-3 rounded-2xl bg-slate-50 border border-slate-100 text-xs">
-                    <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                  <div className="flex items-start gap-2.5 p-3.5 rounded-xl bg-slate-50 border border-slate-200/70 text-xs">
+                    <ShieldCheck className="w-4 h-4 text-emerald-700 shrink-0 mt-0.5" strokeWidth={1.75} />
                     <div>
-                      <strong className="text-slate-800">ปลอดภัย 100%</strong>
-                      <p className="text-slate-500 text-[11px]">ไม่เก็บเลขบัตรประชาชน หรือข้อมูลระบุตัวตน</p>
+                      <strong className="text-slate-900 font-semibold">ไม่เก็บข้อมูลส่วนบุคคล</strong>
+                      <p className="text-slate-600 text-xs mt-0.5">ไม่ขอเลขบัตรประชาชนหรือข้อมูลระบุตัวตน</p>
                     </div>
                   </div>
-                  <div className="flex items-start gap-2.5 p-3 rounded-2xl bg-slate-50 border border-slate-100 text-xs">
-                    <Sparkles className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                  <div className="flex items-start gap-2.5 p-3.5 rounded-xl bg-slate-50 border border-slate-200/70 text-xs">
+                    <Compass className="w-4 h-4 text-[#162C63] shrink-0 mt-0.5" strokeWidth={1.75} />
                     <div>
-                      <strong className="text-slate-800">กราฟใยแมงมุม 6 แผนก</strong>
-                      <p className="text-slate-500 text-[11px]">เห็นมิติความถนัดและสัดส่วนสายอาชีพ vs สายสามัญ</p>
+                      <strong className="text-slate-900 font-semibold">กราฟใยแมงมุม 6 แผนกวิชา</strong>
+                      <p className="text-slate-600 text-xs mt-0.5">แสดงสัดส่วนความถนัดสายอาชีพเทียบกับสายสามัญ</p>
                     </div>
                   </div>
                 </div>

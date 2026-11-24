@@ -11,13 +11,10 @@ import {
   Calendar,
   ClipboardCheck,
   Search,
-  Sparkles,
   ArrowRight,
   CheckCircle2,
-  Users,
   Briefcase,
   Award,
-  Layers,
   ChevronRight,
   ShieldCheck,
   Building,
@@ -57,75 +54,26 @@ interface RoundItem {
   canApply: boolean;
 }
 
-function getProgramTheme(name: string, level: string) {
+function getProgramMeta(name: string) {
   if (name.includes("ยนต์") || name.includes("เครื่องกล")) {
-    return {
-      category: "ช่างอุตสาหกรรม (ยานยนต์)",
-      borderTop: "border-t-blue-600",
-      categoryBadge: "bg-blue-50 text-blue-700 border-blue-200/80",
-      iconBg: "bg-blue-100/80 text-blue-700",
-      progressBg: "bg-blue-600",
-      icon: Wrench,
-    };
+    return { category: "ช่างอุตสาหกรรม (ยานยนต์)", icon: Wrench };
   }
   if (name.includes("ไฟฟ้า")) {
-    return {
-      category: "ช่างอุตสาหกรรม (ไฟฟ้า)",
-      borderTop: "border-t-amber-500",
-      categoryBadge: "bg-amber-50 text-amber-800 border-amber-200/80",
-      iconBg: "bg-amber-100/80 text-amber-600",
-      progressBg: "bg-amber-500",
-      icon: Zap,
-    };
+    return { category: "ช่างอุตสาหกรรม (ไฟฟ้า)", icon: Zap };
   }
   if (name.includes("อิเล็กทรอนิกส์")) {
-    return {
-      category: "ช่างอุตสาหกรรม (อิเล็กทรอนิกส์)",
-      borderTop: "border-t-cyan-600",
-      categoryBadge: "bg-cyan-50 text-cyan-800 border-cyan-200/80",
-      iconBg: "bg-cyan-100/80 text-cyan-600",
-      progressBg: "bg-cyan-600",
-      icon: Cpu,
-    };
+    return { category: "ช่างอุตสาหกรรม (อิเล็กทรอนิกส์)", icon: Cpu };
   }
   if (name.includes("บัญชี")) {
-    return {
-      category: "บริหารธุรกิจ (การบัญชี)",
-      borderTop: "border-t-emerald-600",
-      categoryBadge: "bg-emerald-50 text-emerald-800 border-emerald-200/80",
-      iconBg: "bg-emerald-100/80 text-emerald-700",
-      progressBg: "bg-emerald-600",
-      icon: Calculator,
-    };
+    return { category: "บริหารธุรกิจ (การบัญชี)", icon: Calculator };
   }
   if (name.includes("ตลาด")) {
-    return {
-      category: "บริหารธุรกิจ (การตลาด)",
-      borderTop: "border-t-purple-600",
-      categoryBadge: "bg-purple-50 text-purple-800 border-purple-200/80",
-      iconBg: "bg-purple-100/80 text-purple-700",
-      progressBg: "bg-purple-600",
-      icon: TrendingUp,
-    };
+    return { category: "บริหารธุรกิจ (การตลาด)", icon: TrendingUp };
   }
   if (name.includes("สารสนเทศ") || name.includes("คอมพิวเตอร์") || name.includes("ดิจิทัล")) {
-    return {
-      category: "เทคโนโลยีสารสนเทศ",
-      borderTop: "border-t-indigo-600",
-      categoryBadge: "bg-indigo-50 text-indigo-800 border-indigo-200/80",
-      iconBg: "bg-indigo-100/80 text-indigo-700",
-      progressBg: "bg-indigo-600",
-      icon: Laptop,
-    };
+    return { category: "เทคโนโลยีสารสนเทศ", icon: Laptop };
   }
-  return {
-    category: "วิชาชีพเฉพาะทาง",
-    borderTop: "border-t-[#1E3A8A]",
-    categoryBadge: "bg-slate-50 text-slate-700 border-slate-200",
-    iconBg: "bg-slate-100 text-slate-700",
-    progressBg: "bg-[#1E3A8A]",
-    icon: GraduationCap,
-  };
+  return { category: "วิชาชีพเฉพาะทาง", icon: GraduationCap };
 }
 
 export default function Home() {
@@ -165,155 +113,174 @@ export default function Home() {
     return p.level === activeTab;
   });
 
+  const totalRemaining = programs.reduce(
+    (sum, p) => sum + (p.currentRoundRemainingSeats || 0),
+    0
+  );
+
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex flex-col font-sans text-slate-800">
+    <div className="min-h-screen bg-[#F7F8FA] flex flex-col font-sans text-slate-800">
       <Navbar />
 
-      {/* Main Hero & Admission Banner */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-indigo-950 via-[#1E3A8A] to-[#1e293b] text-white pt-10 pb-16 sm:pb-24">
-        {/* Decorative background grid pattern */}
-        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none" />
+      {/* Hero: Asymmetric split grounded in Nan Polytechnic College navy & warm brass */}
+      <section className="bg-[#162C63] text-white border-b border-white/10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+            {/* Left: Institutional headline & focused actions */}
+            <div className="lg:col-span-7 space-y-6 text-left">
+              <div className="inline-flex items-center gap-2 text-xs sm:text-sm text-amber-200 font-medium">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" />
+                <span>
+                  {openRound
+                    ? `เปิดรับสมัคร ${openRound.name} ปีการศึกษา 2570`
+                    : "ระบบรับสมัครนักเรียน นักศึกษาใหม่ ปีการศึกษา 2570"}
+                </span>
+              </div>
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col items-center text-center max-w-3xl mx-auto space-y-6">
-            {/* Round Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs sm:text-sm font-medium text-amber-300">
-              <Sparkles className="w-4 h-4 text-[#F59E0B]" />
-              <span>
-                {openRound
-                  ? `เปิดรับสมัครแล้ว: ${openRound.name} ปีการศึกษา 2570`
-                  : "ระบบรับสมัครนักเรียน นักศึกษาใหม่ ปีการศึกษา 2570"}
-              </span>
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-[1.2] text-white">
+                รับสมัครนักเรียน นักศึกษาใหม่
+                <span className="block text-amber-300 mt-1">
+                  วิทยาลัยสารพัดช่างน่าน
+                </span>
+              </h1>
+
+              <p className="text-sm sm:text-base text-slate-200 leading-relaxed max-w-2xl">
+                เปิดรับสมัครระดับประกาศนียบัตรวิชาชีพ (ปวช.) และประกาศนียบัตรวิชาชีพชั้นสูง (ปวส.)
+                ประจำปีการศึกษา 2570 ยื่นใบสมัครออนไลน์ได้ใน 3 ขั้นตอนโดยไม่ต้องแนบเอกสารล่วงหน้า
+              </p>
+
+              {/* One primary CTA + one secondary CTA */}
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-1">
+                <Link
+                  href="/apply"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-950 font-semibold text-sm sm:text-base transition-colors"
+                >
+                  <ClipboardCheck className="w-4 h-4" strokeWidth={1.75} />
+                  <span>สมัครเรียนออนไลน์</span>
+                  <ArrowRight className="w-4 h-4" strokeWidth={1.75} />
+                </Link>
+
+                <Link
+                  href="/guidance"
+                  className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-white/10 hover:bg-white/15 text-white font-medium text-sm sm:text-base border border-white/20 transition-colors"
+                >
+                  <Compass className="w-4 h-4 text-amber-300" strokeWidth={1.75} />
+                  <span>แบบทดสอบค้นหาสาขาที่ใช่</span>
+                </Link>
+              </div>
+
+              {/* Quiet tertiary link */}
+              <div className="pt-1 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs sm:text-sm text-slate-300">
+                <Link
+                  href="/status"
+                  className="inline-flex items-center gap-1.5 text-white hover:text-amber-300 underline underline-offset-4 decoration-white/30 transition-colors"
+                >
+                  <Search className="w-3.5 h-3.5" strokeWidth={1.75} />
+                  <span>ตรวจสอบสถานะหรือแก้ไขใบสมัคร</span>
+                </Link>
+                <span className="inline-flex items-center gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" strokeWidth={1.75} />
+                  <span>ปวช. เรียนฟรีตามนโยบายรัฐ</span>
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <ShieldCheck className="w-3.5 h-3.5 text-amber-300" strokeWidth={1.75} />
+                  <span>คุ้มครองข้อมูลตาม PDPA</span>
+                </span>
+              </div>
             </div>
 
-            {/* Title */}
-            <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight">
-              ก้าวสู่อนาคตวิชาชีพที่มั่นคง
-              <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-amber-400 to-amber-200">
-                วิทยาลัยสารพัดช่างน่าน
-              </span>
-            </h1>
+            {/* Right: Live Round Summary & Countdown Panel */}
+            <div className="lg:col-span-5">
+              <div className="bg-[#112350] border border-white/15 rounded-2xl p-5 sm:p-6 space-y-5">
+                <div className="flex items-center justify-between gap-2 pb-4 border-b border-white/10">
+                  <div>
+                    <p className="text-xs text-slate-300">สถานะรอบรับสมัครปัจจุบัน</p>
+                    <p className="text-base font-semibold text-white mt-0.5">
+                      {openRound ? openRound.name : "ปีการศึกษา 2570"}
+                    </p>
+                  </div>
+                  <span className="px-2.5 py-1 rounded-md bg-emerald-500/20 text-emerald-200 border border-emerald-400/30 text-xs font-medium shrink-0">
+                    {openRound?.canApply ? "เปิดรับสมัคร" : "ติดตามกำหนดการ"}
+                  </span>
+                </div>
 
-            <p className="text-sm sm:text-base text-slate-200 leading-relaxed max-w-3xl">
-              เปิดรับสมัครนักเรียน นักศึกษาใหม่ ระดับประกาศนียบัตรวิชาชีพ (ปวช.) และประกาศนียบัตรวิชาชีพชั้นสูง&nbsp;(ปวส.)
-              <br className="hidden sm:inline" />
-              {" "}ประจำปีการศึกษา 2570 สมัครง่ายใน 3 ขั้นตอน ไม่ต้องแนบเอกสารล่วงหน้า
-            </p>
+                {openRound && openRound.endAt && (
+                  <CountdownTimer
+                    targetDate={openRound.endAt}
+                    roundName={openRound.name}
+                  />
+                )}
 
-            {/* Live Countdown Timer */}
-            {openRound && openRound.endAt && (
-              <div className="pt-2">
-                <CountdownTimer
-                  targetDate={openRound.endAt}
-                  roundName={openRound.name}
-                />
-              </div>
-            )}
-
-            {/* Primary CTA Buttons */}
-            <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto pt-4">
-              <Link
-                href="/apply"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-7 py-3.5 rounded-2xl bg-gradient-to-r from-[#F59E0B] to-amber-500 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold text-sm sm:text-base shadow-lg shadow-amber-500/25 hover:shadow-amber-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all"
-              >
-                <ClipboardCheck className="w-5 h-5 text-slate-950" />
-                <span>สมัครเรียนออนไลน์</span>
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-
-              <Link
-                href="/guidance"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-sm sm:text-base border border-amber-300/40 backdrop-blur-md transition-all hover:border-amber-300 hover:scale-[1.02] shadow-sm"
-              >
-                <Compass className="w-5 h-5 text-amber-400 animate-pulse" />
-                <span>ค้นหาสายเรียนที่ใช่ (1 นาที)</span>
-              </Link>
-
-              <Link
-                href="/status"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3.5 rounded-2xl bg-white/5 hover:bg-white/15 text-slate-200 font-semibold text-sm sm:text-base border border-white/20 backdrop-blur-md transition-all hover:border-white/40"
-              >
-                <Search className="w-4 h-4 text-slate-300" />
-                <span>ตรวจสอบสถานะ</span>
-              </Link>
-            </div>
-
-            {/* Trust Badges */}
-            <div className="pt-4 flex flex-wrap items-center justify-center gap-6 text-xs text-slate-300">
-              <div className="flex items-center gap-1.5">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                <span>เรียนฟรีตามนโยบายรัฐ (ปวช.)</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <ShieldCheck className="w-4 h-4 text-amber-400" />
-                <span>ข้อมูลปลอดภัยตามมาตรฐาน PDPA</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <Briefcase className="w-4 h-4 text-sky-400" />
-                <span>ระบบทวิภาคี มีรายได้ระหว่างเรียน</span>
+                <div className="grid grid-cols-2 gap-3 pt-1 text-left">
+                  <div className="bg-white/5 border border-white/10 rounded-xl p-3.5">
+                    <p className="text-xs text-slate-300">สาขาที่เปิดรับ</p>
+                    <p className="text-2xl font-semibold text-white tabular-nums mt-1">
+                      {programs.length || 12}
+                      <span className="text-xs font-normal text-slate-300 ml-1">สาขา</span>
+                    </p>
+                  </div>
+                  <div className="bg-white/5 border border-white/10 rounded-xl p-3.5">
+                    <p className="text-xs text-slate-300">ที่นั่งคงเหลือรวม</p>
+                    <p className="text-2xl font-semibold text-amber-300 tabular-nums mt-1">
+                      {loading ? "—" : totalRemaining}
+                      <span className="text-xs font-normal text-slate-300 ml-1">ที่นั่ง</span>
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Program Quotas Section */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 -mt-8 sm:-mt-12 z-20 pb-16 space-y-8">
-        {/* Prominent Guidance Banner Card */}
-        <div className="bg-gradient-to-r from-blue-900 via-[#1E3A8A] to-indigo-950 rounded-3xl p-6 sm:p-7 shadow-lg border border-blue-400/30 text-white flex flex-col md:flex-row items-center justify-between gap-5 relative overflow-hidden">
-          <div className="absolute right-0 top-0 bottom-0 w-72 bg-[radial-gradient(#F59E0B_1px,transparent_1px)] [background-size:12px_12px] opacity-20 pointer-events-none" />
-          <div className="flex items-center gap-4 relative z-10">
-            <div className="w-14 h-14 rounded-2xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-400 shrink-0 shadow-inner">
-              <Compass className="w-8 h-8" />
+      {/* Main Content */}
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12 space-y-10">
+        {/* Guidance Callout: Quiet warm institutional strip */}
+        <section className="bg-[#FAF8F3] rounded-2xl p-6 border border-amber-200/80 flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
+          <div className="flex items-start gap-4">
+            <div className="w-11 h-11 rounded-xl bg-[#162C63] text-amber-300 flex items-center justify-center shrink-0">
+              <Compass className="w-5 h-5" strokeWidth={1.75} />
             </div>
             <div>
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-400/20 text-amber-300 text-[11px] font-bold mb-1 border border-amber-400/30">
-                <Sparkles className="w-3 h-3 text-amber-400" />
-                <span>Career & Major Discovery Quiz</span>
-              </div>
-              <h3 className="text-lg sm:text-xl font-black">
-                ยังไม่แน่ใจว่าจะเรียนสาขาไหนดี?
-              </h3>
-              <p className="text-xs sm:text-sm text-blue-100 mt-0.5">
-                ทำแบบประเมินความถนัด 12 ข้อ ค้นพบสายอาชีพที่ใช่ พร้อมวิเคราะห์กราฟใยแมงมุม 6 แผนกวิชาทันที
+              <h2 className="text-lg font-semibold text-slate-900 leading-snug">
+                ยังไม่แน่ใจว่าจะเลือกเรียนสาขาไหนดี?
+              </h2>
+              <p className="text-sm text-slate-600 mt-1 leading-relaxed">
+                ทำแบบประเมินความถนัด 12 ข้อ เพื่อวิเคราะห์ความเหมาะสมจากกราฟใยแมงมุมทั้ง 6 แผนกวิชา ใช้เวลาประมาณ 1 นาที
               </p>
             </div>
           </div>
           <Link
             href="/guidance"
-            className="w-full md:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-sm shadow-md hover:shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98] shrink-0 relative z-10"
+            className="w-full md:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg bg-[#162C63] hover:bg-[#1E3A8A] text-white font-medium text-sm transition-colors shrink-0"
           >
-            <span>ค้นหาสายเรียนและสาขาที่ใช่ใน 1 นาที (ฟรี)</span>
-            <ArrowRight className="w-4 h-4" />
+            <span>เริ่มทำแบบประเมินความถนัด</span>
+            <ArrowRight className="w-4 h-4" strokeWidth={1.75} />
           </Link>
-        </div>
-        {/* Filter and Tab Header Card */}
-        <div className="bg-slate-50/75 rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-200/90 space-y-6">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200/70 pb-6">
+        </section>
+
+        {/* Program Quotas Section */}
+        <section className="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200/90 space-y-6">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-200 pb-6">
             <div>
-              <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#1E3A8A] uppercase tracking-wider mb-1">
-                <Layers className="w-4 h-4 text-[#F59E0B]" />
-                แผนการรับสมัครนักศึกษาใหม่
-              </div>
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-                สาขาวิชาที่เปิดรับสมัคร ประจำปีการศึกษา 2570
+              <h2 className="text-2xl font-semibold text-slate-900 tracking-tight">
+                สาขาวิชาที่เปิดรับสมัคร ปีการศึกษา 2570
               </h2>
-              <p className="text-xs sm:text-sm text-slate-500 mt-1">
+              <p className="text-sm text-slate-600 mt-1">
                 {openRound
-                  ? `รอบปัจจุบัน: ${openRound.name} (ข้อมูลยอดรับและที่นั่งคงเหลือคำนวณแบบเรียลไทม์)`
-                  : "แสดงจำนวนที่นั่งและยอดผู้สมัคร"}
+                  ? `รอบปัจจุบัน: ${openRound.name} — แสดงยอดผู้สมัครและที่นั่งคงเหลือตามจริง`
+                  : "แสดงจำนวนที่นั่งและยอดผู้สมัครแยกตามสาขาวิชา"}
               </p>
             </div>
 
             {/* Level Filter Tabs */}
-            <div className="inline-flex p-1.5 rounded-2xl bg-white border border-slate-200 shadow-2xs self-start md:self-auto">
+            <div className="inline-flex p-1 rounded-xl bg-slate-100 border border-slate-200/80 self-start md:self-auto">
               <button
                 type="button"
                 onClick={() => setActiveTab("ALL")}
-                className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
+                className={`px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-colors cursor-pointer ${
                   activeTab === "ALL"
-                    ? "bg-[#1E3A8A] text-white shadow-xs"
+                    ? "bg-white text-[#162C63] shadow-2xs"
                     : "text-slate-600 hover:text-slate-900"
                 }`}
               >
@@ -322,9 +289,9 @@ export default function Home() {
               <button
                 type="button"
                 onClick={() => setActiveTab("ปวช.")}
-                className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
+                className={`px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-colors cursor-pointer ${
                   activeTab === "ปวช."
-                    ? "bg-[#1E3A8A] text-white shadow-xs"
+                    ? "bg-white text-[#162C63] shadow-2xs"
                     : "text-slate-600 hover:text-slate-900"
                 }`}
               >
@@ -333,9 +300,9 @@ export default function Home() {
               <button
                 type="button"
                 onClick={() => setActiveTab("ปวส.")}
-                className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
+                className={`px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-colors cursor-pointer ${
                   activeTab === "ปวส."
-                    ? "bg-[#1E3A8A] text-white shadow-xs"
+                    ? "bg-white text-[#162C63] shadow-2xs"
                     : "text-slate-600 hover:text-slate-900"
                 }`}
               >
@@ -346,9 +313,9 @@ export default function Home() {
 
           {/* Programs Grid */}
           {loading ? (
-            <div className="py-20 text-center space-y-3">
-              <div className="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto" />
-              <p className="text-sm text-slate-500">กำลังโหลดข้อมูลสาขาวิชาและจำนวนที่นั่ง...</p>
+            <div className="py-16 text-center space-y-3">
+              <div className="w-8 h-8 border-2 border-[#162C63] border-t-transparent rounded-full animate-spin mx-auto" />
+              <p className="text-sm text-slate-500">กำลังโหลดข้อมูลสาขาวิชาและจำนวนที่นั่ง</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -360,63 +327,63 @@ export default function Home() {
                   100,
                   Math.round((applicants / (targetSeats || 1)) * 100)
                 );
-                const theme = getProgramTheme(prog.name, prog.level);
-                const CategoryIcon = theme.icon;
+                const meta = getProgramMeta(prog.name);
+                const CategoryIcon = meta.icon;
 
                 return (
-                  <div
+                  <article
                     key={prog.id}
-                    className={`bg-white rounded-2xl border border-slate-200 hover:border-slate-300 p-5 shadow-xs hover:shadow-xl hover:-translate-y-1.5 transition-all duration-200 flex flex-col justify-between group relative overflow-hidden border-t-4 ${theme.borderTop}`}
+                    className="bg-white rounded-xl border border-slate-200 hover:border-slate-300 p-5 transition-colors flex flex-col justify-between gap-4"
                   >
-                    <div className="space-y-3.5">
-                      {/* Top row with Category Icon, Level badge & Program code */}
+                    <div className="space-y-4">
+                      {/* Header: Level badge & Official VOC code */}
                       <div className="flex items-center justify-between gap-2">
                         <div className="flex items-center gap-2">
-                          <div
-                            className={`w-8 h-8 rounded-xl ${theme.iconBg} flex items-center justify-center flex-shrink-0 shadow-xs`}
-                          >
-                            <CategoryIcon className="w-4 h-4" />
+                          <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center shrink-0">
+                            <CategoryIcon className="w-4 h-4" strokeWidth={1.75} />
                           </div>
                           <span
-                            className={`px-2.5 py-0.5 rounded-lg text-xs font-bold ${
+                            className={`px-2 py-0.5 rounded-md text-xs font-medium border ${
                               prog.level === "ปวช."
-                                ? "bg-sky-50 text-sky-800 border border-sky-200"
-                                : "bg-purple-50 text-purple-800 border border-purple-200"
+                                ? "bg-slate-50 text-slate-700 border-slate-200"
+                                : "bg-amber-50 text-amber-900 border-amber-200"
                             }`}
                           >
                             ระดับ {prog.level}
                           </span>
                         </div>
-                        <span className="font-mono text-[11px] font-semibold text-slate-500 bg-slate-50 px-2 py-0.5 rounded-md border border-slate-200">
+                        <span className="font-mono text-xs text-slate-500 tabular-nums">
                           รหัส {prog.code}
                         </span>
                       </div>
 
-                      {/* Category tag & Program Title */}
+                      {/* Title & Category */}
                       <div>
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">
-                          กลุ่มวิชา: {theme.category}
-                        </span>
-                        <h3 className="font-black text-slate-900 text-base leading-snug group-hover:text-[#1E3A8A] transition-colors">
+                        <p className="text-xs text-slate-500 mb-1">{meta.category}</p>
+                        <h3 className="font-semibold text-slate-900 text-base leading-snug">
                           {prog.name}
                         </h3>
                       </div>
 
-                      {/* Quota breakdown tags */}
-                      <div className="grid grid-cols-3 gap-2 text-center text-xs py-2.5 px-2 bg-slate-50/90 rounded-xl border border-slate-200/70">
-                        <div className="p-1">
-                          <p className="text-slate-400 text-[10px] font-medium">เป้าหมาย</p>
-                          <p className="font-bold text-slate-700 text-sm">{targetSeats}</p>
+                      {/* Quota Numbers */}
+                      <div className="grid grid-cols-3 gap-2 text-center py-2.5 px-2 bg-slate-50 rounded-lg border border-slate-200/70 tabular-nums">
+                        <div>
+                          <p className="text-xs text-slate-500">เป้าหมาย</p>
+                          <p className="font-semibold text-slate-800 text-sm mt-0.5">
+                            {targetSeats}
+                          </p>
                         </div>
-                        <div className="p-1 border-x border-slate-200">
-                          <p className="text-slate-400 text-[10px] font-medium">สมัครแล้ว</p>
-                          <p className="font-black text-[#1E3A8A] text-sm">{applicants}</p>
+                        <div className="border-x border-slate-200">
+                          <p className="text-xs text-slate-500">สมัครแล้ว</p>
+                          <p className="font-semibold text-[#162C63] text-sm mt-0.5">
+                            {applicants}
+                          </p>
                         </div>
-                        <div className="p-1">
-                          <p className="text-slate-400 text-[10px] font-medium">คงเหลือ</p>
+                        <div>
+                          <p className="text-xs text-slate-500">คงเหลือ</p>
                           <p
-                            className={`font-black text-sm ${
-                              remaining > 0 ? "text-emerald-600" : "text-rose-600"
+                            className={`font-semibold text-sm mt-0.5 ${
+                              remaining > 0 ? "text-emerald-700" : "text-rose-700"
                             }`}
                           >
                             {remaining}
@@ -425,19 +392,21 @@ export default function Home() {
                       </div>
 
                       {/* Progress bar */}
-                      <div className="space-y-1">
-                        <div className="flex justify-between text-[11px] font-medium text-slate-500">
+                      <div className="space-y-1.5">
+                        <div className="flex justify-between text-xs text-slate-500">
                           <span>สัดส่วนการสมัคร</span>
-                          <span className="font-mono font-bold text-slate-700">{percentFilled}%</span>
+                          <span className="font-mono font-medium text-slate-700 tabular-nums">
+                            {percentFilled}%
+                          </span>
                         </div>
-                        <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                        <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
                           <div
-                            className={`h-2 rounded-full transition-all duration-500 ${
+                            className={`h-1.5 rounded-full transition-[width] duration-300 ${
                               percentFilled >= 90
-                                ? "bg-rose-500"
-                                : percentFilled >= 60
+                                ? "bg-rose-600"
+                                : percentFilled >= 70
                                 ? "bg-amber-500"
-                                : theme.progressBg
+                                : "bg-[#162C63]"
                             }`}
                             style={{ width: `${percentFilled}%` }}
                           />
@@ -446,59 +415,59 @@ export default function Home() {
                     </div>
 
                     {/* Action Button */}
-                    <div className="pt-4 mt-2 border-t border-slate-100">
+                    <div className="pt-3 border-t border-slate-100">
                       <Link
                         href={`/apply?programId=${prog.id}&level=${encodeURIComponent(
                           prog.level
                         )}`}
-                        className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#1E3A8A] hover:bg-indigo-900 text-white text-xs sm:text-sm font-bold shadow-md shadow-indigo-950/15 hover:shadow-lg transition-all group-hover:scale-[1.01]"
+                        className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg bg-[#162C63] hover:bg-[#1E3A8A] text-white text-sm font-medium transition-colors"
                       >
                         <span>สมัครสาขานี้</span>
-                        <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                        <ChevronRight className="w-4 h-4" strokeWidth={1.75} />
                       </Link>
                     </div>
-                  </div>
+                  </article>
                 );
               })}
             </div>
           )}
-        </div>
+        </section>
 
-        {/* Admission Rounds Schedule Timeline */}
-        <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-200/80 space-y-6">
-          <div className="flex items-center gap-2.5">
-            <Calendar className="w-6 h-6 text-[#1E3A8A]" />
+        {/* Admission Rounds Schedule */}
+        <section className="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200/90 space-y-6">
+          <div className="flex items-start gap-3">
+            <Calendar className="w-5 h-5 text-[#162C63] mt-0.5 shrink-0" strokeWidth={1.75} />
             <div>
-              <h3 className="text-xl font-bold text-slate-900">
+              <h2 className="text-xl font-semibold text-slate-900">
                 กำหนดการรับสมัคร ประจำปีการศึกษา 2570
-              </h3>
-              <p className="text-xs text-slate-500">
+              </h2>
+              <p className="text-sm text-slate-600 mt-0.5">
                 วิทยาลัยสารพัดช่างน่านเปิดรับสมัคร 2 รอบหลัก
               </p>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             {rounds.map((round, idx) => (
               <div
                 key={round.id}
-                className={`p-6 rounded-2xl border transition-all ${
+                className={`p-6 rounded-xl border ${
                   round.canApply
-                    ? "bg-gradient-to-br from-indigo-50/60 to-white border-indigo-200 shadow-sm ring-1 ring-indigo-200"
-                    : "bg-slate-50 border-slate-200"
+                    ? "bg-[#F8FAFC] border-[#162C63]/30"
+                    : "bg-slate-50/70 border-slate-200"
                 }`}
               >
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-xs font-bold text-[#1E3A8A] uppercase tracking-wider">
+                <div className="flex items-center justify-between gap-2 mb-3">
+                  <span className="text-xs font-semibold text-[#162C63]">
                     รอบที่ {idx + 1}
                   </span>
                   <span
-                    className={`px-3 py-1 rounded-full text-xs font-bold ${
+                    className={`px-2.5 py-0.5 rounded-md text-xs font-medium border ${
                       round.status === "OPEN"
-                        ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
+                        ? "bg-emerald-50 text-emerald-800 border-emerald-200"
                         : round.status === "UPCOMING"
-                        ? "bg-amber-100 text-amber-800 border border-amber-300"
-                        : "bg-slate-200 text-slate-600"
+                        ? "bg-amber-50 text-amber-800 border-amber-200"
+                        : "bg-slate-100 text-slate-600 border-slate-200"
                     }`}
                   >
                     {round.status === "OPEN"
@@ -509,19 +478,19 @@ export default function Home() {
                   </span>
                 </div>
 
-                <h4 className="text-lg font-bold text-slate-900 mb-4">{round.name}</h4>
+                <h3 className="text-base font-semibold text-slate-900 mb-4">{round.name}</h3>
 
-                <div className="space-y-2.5 text-xs text-slate-600 border-t border-slate-200/70 pt-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-slate-500">ระยะเวลารับสมัคร:</span>
-                    <span className="font-semibold text-slate-800">
+                <div className="space-y-2 text-sm text-slate-600 border-t border-slate-200/80 pt-4 tabular-nums">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-slate-500">ระยะเวลารับสมัคร</span>
+                    <span className="font-medium text-slate-900">
                       {new Date(round.startAt).toLocaleDateString("th-TH")} –{" "}
                       {new Date(round.endAt).toLocaleDateString("th-TH")}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-slate-500">วันประกาศผลการคัดเลือก:</span>
-                    <span className="font-semibold text-amber-700">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-slate-500">ประกาศผลการคัดเลือก</span>
+                    <span className="font-medium text-amber-800">
                       {new Date(round.announceAt).toLocaleDateString("th-TH")}
                     </span>
                   </div>
@@ -531,53 +500,53 @@ export default function Home() {
                   <div className="mt-5">
                     <Link
                       href="/apply"
-                      className="inline-flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-[#1E3A8A] hover:bg-indigo-900 text-white text-xs font-bold transition-colors"
+                      className="inline-flex items-center justify-center gap-2 w-full py-2.5 rounded-lg bg-[#162C63] hover:bg-[#1E3A8A] text-white text-sm font-medium transition-colors"
                     >
                       <span>ยื่นใบสมัครรอบนี้</span>
-                      <ArrowRight className="w-4 h-4" />
+                      <ArrowRight className="w-4 h-4" strokeWidth={1.75} />
                     </Link>
                   </div>
                 )}
               </div>
             ))}
           </div>
-        </div>
+        </section>
 
-        {/* Benefits & Info Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs space-y-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-50 text-[#1E3A8A] flex items-center justify-center">
-              <Award className="w-5 h-5 text-[#F59E0B]" />
+        {/* Institutional Benefits: Quiet hairline-divided strip instead of 3-card AI template */}
+        <section className="bg-white rounded-2xl border border-slate-200/90 divide-y md:divide-y-0 md:divide-x divide-slate-200 grid grid-cols-1 md:grid-cols-3">
+          <div className="p-6 space-y-2">
+            <div className="flex items-center gap-2 text-slate-900">
+              <Award className="w-4 h-4 text-[#162C63] shrink-0" strokeWidth={1.75} />
+              <h3 className="font-semibold text-sm sm:text-base">เรียนฟรีตามนโยบายรัฐ</h3>
             </div>
-            <h4 className="font-bold text-slate-900 text-base">เรียนฟรีตามนโยบายรัฐ</h4>
-            <p className="text-xs text-slate-600 leading-relaxed">
+            <p className="text-sm text-slate-600 leading-relaxed">
               ผู้เข้าศึกษาระดับ ปวช. ได้รับการสนับสนุนค่าเล่าเรียน หนังสือเรียน อุปกรณ์การเรียน
               และเครื่องแบบนักเรียนตามเกณฑ์ที่ สอศ. กำหนด
             </p>
           </div>
 
-          <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs space-y-3">
-            <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
-              <Briefcase className="w-5 h-5 text-indigo-600" />
+          <div className="p-6 space-y-2">
+            <div className="flex items-center gap-2 text-slate-900">
+              <Briefcase className="w-4 h-4 text-[#162C63] shrink-0" strokeWidth={1.75} />
+              <h3 className="font-semibold text-sm sm:text-base">ระบบทวิภาคี มีรายได้ระหว่างเรียน</h3>
             </div>
-            <h4 className="font-bold text-slate-900 text-base">ระบบทวิภาคี รายได้ระหว่างเรียน</h4>
-            <p className="text-xs text-slate-600 leading-relaxed">
-              ร่วมมือกับสถานประกอบการชั้นนำทั้งในจังหวัดน่านและทั่วประเทศ ฝึกงานจริง
-              มีเบี้ยเลี้ยงและโอกาสได้รับการบรรจุงานทันทีหลังจบการศึกษา
+            <p className="text-sm text-slate-600 leading-relaxed">
+              ร่วมมือกับสถานประกอบการในจังหวัดน่านและทั่วประเทศ ฝึกงานจริง
+              มีเบี้ยเลี้ยงและโอกาสบรรจุงานทันทีหลังสำเร็จการศึกษา
             </p>
           </div>
 
-          <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs space-y-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-              <Building className="w-5 h-5 text-emerald-600" />
+          <div className="p-6 space-y-2">
+            <div className="flex items-center gap-2 text-slate-900">
+              <Building className="w-4 h-4 text-[#162C63] shrink-0" strokeWidth={1.75} />
+              <h3 className="font-semibold text-sm sm:text-base">ห้องปฏิบัติการมาตรฐานอุตสาหกรรม</h3>
             </div>
-            <h4 className="font-bold text-slate-900 text-base">เครื่องมือและห้องปฏิบัติการทันสมัย</h4>
-            <p className="text-xs text-slate-600 leading-relaxed">
-              จัดการเรียนการสอนโดยเน้นปฏิบัติจริง (Hands-on Practice) ห้องปฏิบัติการคอมพิวเตอร์
-              ศูนย์ซ่อมยานยนต์ และเครื่องมือไฟฟ้าอิเล็กทรอนิกส์มาตรฐานอุตสาหกรรม
+            <p className="text-sm text-slate-600 leading-relaxed">
+              จัดการเรียนการสอนเน้นลงมือปฏิบัติจริง ทั้งศูนย์ซ่อมยานยนต์ไฟฟ้า
+              ห้องปฏิบัติการคอมพิวเตอร์ และเครื่องมือไฟฟ้าอิเล็กทรอนิกส์ครบชุด
             </p>
           </div>
-        </div>
+        </section>
       </main>
 
       <Footer />

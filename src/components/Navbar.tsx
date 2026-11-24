@@ -31,14 +31,14 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-18">
           {/* Logo & College Brand */}
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="relative w-12 h-12 rounded-full overflow-hidden shadow-md shadow-slate-900/15 border-2 border-amber-400/90 group-hover:scale-105 transition-transform flex-shrink-0 bg-white">
+          <Link href="/" className="flex items-center gap-3">
+            <div className="relative w-11 h-11 rounded-full overflow-hidden border border-slate-200 flex-shrink-0 bg-white">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={assetUrl("/npc-logo.jpg")}
                 alt="ตราสัญลักษณ์ วิทยาลัยสารพัดช่างน่าน"
-                width={48}
-                height={48}
+                width={44}
+                height={44}
                 className="w-full h-full object-cover"
                 onError={(e) => {
                   const el = e.currentTarget;
@@ -50,11 +50,11 @@ export default function Navbar() {
               />
             </div>
             <div>
-              <div className="flex items-center gap-1.5">
-                <span className="font-extrabold text-slate-900 text-base sm:text-lg tracking-tight">
+              <div className="flex items-center gap-2">
+                <span className="font-semibold text-slate-900 text-base tracking-tight">
                   NPC Admission
                 </span>
-                <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300">
+                <span className="text-xs font-medium px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 border border-slate-200 tabular-nums">
                   2570
                 </span>
               </div>
@@ -86,15 +86,15 @@ export default function Navbar() {
             })}
           </nav>
 
-          {/* Officer Login Button */}
-          <div className="hidden sm:flex items-center gap-3">
+          {/* Officer Login Link */}
+          <div className="hidden sm:flex items-center">
             <Link
               href="/admin/login"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-700 hover:text-[#1E3A8A] bg-slate-100/80 hover:bg-slate-200/80 border border-slate-200 rounded-lg transition-colors"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-slate-600 hover:text-[#162C63] transition-colors"
               title="สำหรับเจ้าหน้าที่งานทะเบียนและอาจารย์ที่ปรึกษา"
             >
-              <Lock className="w-3.5 h-3.5 text-slate-600" />
-              <span>เข้าสู่ระบบสำหรับเจ้าหน้าที่</span>
+              <Lock className="w-3.5 h-3.5 text-slate-500" strokeWidth={1.75} />
+              <span>สำหรับเจ้าหน้าที่</span>
             </Link>
           </div>
 

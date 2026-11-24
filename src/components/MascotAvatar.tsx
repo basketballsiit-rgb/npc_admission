@@ -115,12 +115,12 @@ const MASCOT_CONFIG: Record<
     title: "ยอดนักการตลาดดิจิทัล & ครีเอเตอร์",
     subTitle: "Digital Growth Marketer",
     imageFile: "/images/mascots/mkt.png",
-    gradient: "from-pink-500 via-rose-500 to-amber-500",
-    ringColor: "border-pink-300",
-    shadowColor: "shadow-pink-500/30",
+    gradient: "from-rose-700 via-rose-800 to-slate-900",
+    ringColor: "border-rose-200/80",
+    shadowColor: "shadow-slate-900/20",
     icon: TrendingUp,
-    iconColor: "text-pink-100",
-    accentGlow: "bg-pink-400/25",
+    iconColor: "text-rose-100",
+    accentGlow: "bg-transparent",
   },
   academic: {
     title: "ยอดนักวิชาการ & การวิจัย",
@@ -161,34 +161,25 @@ export default function MascotAvatar({
 
   return (
     <div className={`relative flex flex-col items-center ${className}`}>
-      {/* Outer 3D Aura Sphere */}
+      {/* Outer Avatar Frame */}
       <div
-        className={`relative ${sizeStyles[size]} rounded-3xl p-1 bg-gradient-to-tr ${cfg.gradient} border-2 ${cfg.ringColor} shadow-xl ${cfg.shadowColor} flex items-center justify-center overflow-hidden transition-transform duration-300`}
+        className={`relative ${sizeStyles[size]} rounded-2xl p-1 bg-gradient-to-tr ${cfg.gradient} border ${cfg.ringColor} shadow-sm flex items-center justify-center overflow-hidden`}
       >
-        {/* Soft 3D Lighting Highlight */}
-        <div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-white/35 to-transparent rounded-t-3xl pointer-events-none" />
-        <div
-          className={`absolute inset-0 ${cfg.accentGlow} blur-md pointer-events-none`}
-        />
-
-        {/* Content: Image or 3D Fallback Icon */}
+        {/* Content: Image or Fallback Icon */}
         {!imgError ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={assetUrl(cfg.imageFile)}
             alt={cfg.title}
-            className="w-full h-full object-contain relative z-10 drop-shadow-md"
+            className="w-full h-full object-contain relative z-10"
             onError={() => setImgError(true)}
           />
         ) : (
-          <div className="w-full h-full rounded-2xl bg-slate-900/40 backdrop-blur-xs flex flex-col items-center justify-center relative z-10 border border-white/20">
-            <div className="relative">
-              <IconComponent className={`${iconSizes[size]} ${cfg.iconColor} drop-shadow-md`} />
-              <Sparkles className="w-3.5 h-3.5 text-amber-300 absolute -top-1 -right-1 animate-pulse" />
-            </div>
+          <div className="w-full h-full rounded-xl bg-slate-900/40 flex flex-col items-center justify-center relative z-10 border border-white/15">
+            <IconComponent className={`${iconSizes[size]} ${cfg.iconColor}`} strokeWidth={1.75} />
             {size !== "sm" && (
-              <span className="text-xs font-bold text-white/90 uppercase tracking-wider mt-1">
-                3D NPC
+              <span className="text-xs font-medium text-white/90 mt-1">
+                NPC
               </span>
             )}
           </div>

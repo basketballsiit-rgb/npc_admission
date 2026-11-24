@@ -192,7 +192,15 @@ export default function GuidanceShareCardModal({
     }
   };
 
-  // Web Share API
+  const shareApplyUrl =
+    typeof window !== "undefined"
+      ? `${window.location.origin}${apiUrl(`/apply?level=${encodeURIComponent(selectedLevel)}&code=${encodeURIComponent(selectedCode)}`)}`
+      : `https://service.npc.ac.th/npc_admission/apply?level=${encodeURIComponent(selectedLevel)}&code=${encodeURIComponent(selectedCode)}`;
+
+  const lineShareText = `ผลแนะแนวของ ${studentName}: เหมาะกับ "${programName}" วิทยาลัยสารพัดช่างน่าน (ตรงใจ ${topScorePct}%)`;
+  const lineShareUrl = `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(shareApplyUrl)}&text=${encodeURIComponent(lineShareText)}`;
+
+  // Web Share API (Mobile Native) + Clipboard/Download Fallback (Desktop Windows/macOS)
   const handleQuickShare = async () => {
     if (!cardRef.current) return;
     try {
@@ -212,21 +220,61 @@ export default function GuidanceShareCardModal({
         type: "image/png",
       });
 
-      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+      // Only invoke navigator.share with files on mobile devices; Windows desktop Chrome/Edge
+      // frequently opens an empty Windows Share Sheet that silently resolves without sharing.
+      const isMobileDevice =
+        typeof navigator !== "undefined" &&
+        /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+      if (
+        isMobileDevice &&
+        navigator.share &&
+        navigator.canShare &&
+        navigator.canShare({ files: [file] })
+      ) {
         await navigator.share({
           title: `ผลการค้นพบสายอาชีพที่ใช่ - ${programName}`,
-          text: `ฉันค้นพบสาขาที่ใช่แล้ว! "${programName}" วิทยาลัยสารพัดช่างน่าน`,
+          text: lineShareText,
           files: [file],
         });
         recordShareAction();
         setShareSuccess("แชร์รูปภาพสำเร็จ!");
-      } else {
-        handleDownloadImage();
+        return;
       }
+
+      // Desktop / non-file-share path: copy PNG image to clipboard + download PNG file
+      let copiedToClipboard = false;
+      if (
+        typeof navigator !== "undefined" &&
+        navigator.clipboard &&
+        typeof ClipboardItem !== "undefined"
+      ) {
+        try {
+          await navigator.clipboard.write([
+            new ClipboardItem({ "image/png": blob }),
+          ]);
+          copiedToClipboard = true;
+        } catch (clipErr) {
+          console.warn("Clipboard image copy unavailable:", clipErr);
+        }
+      }
+
+      // Also save PNG file to Downloads so user can attach/drag directly into LINE PC
+      const link = document.createElement("a");
+      link.download = `npc-career-card-${selectedCode}.png`;
+      link.href = dataUrl;
+      link.click();
+
+      recordShareAction();
+      setShareSuccess(
+        copiedToClipboard
+          ? "คัดลอกรูปการ์ดและบันทึกไฟล์ .PNG แล้ว — กด Ctrl + V เพื่อวางส่งในแชท LINE ได้ทันที"
+          : "บันทึกไฟล์รูปการ์ด .PNG เรียบร้อยแล้ว — สามารถลากไฟล์ส่งเข้าแชท LINE ได้ทันที"
+      );
     } catch (err) {
       if ((err as Error)?.name !== "AbortError") {
         console.error("Share failed:", err);
-        setExportError("เบราว์เซอร์นี้ไม่รองรับการแชร์ตรง กรุณากดปุ่มดาวน์โหลดรูปภาพแทน");
+        setExportError("ไม่สามารถแชร์รูปภาพได้ กรุณากดปุ่มดาวน์โหลดรูปภาพ (.PNG) แทน");
       }
     } finally {
       setExporting(false);
@@ -325,9 +373,20 @@ export default function GuidanceShareCardModal({
             </div>
 
             {shareSuccess && (
-              <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs font-medium rounded-xl flex items-center gap-2 animate-fadeIn">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>{shareSuccess}</span>
+              <div className="p-3.5 bg-emerald-50 border border-emerald-200 text-emerald-950 text-xs font-medium rounded-xl space-y-2.5 animate-fadeIn">
+                <div className="flex items-start gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                  <span className="leading-relaxed">{shareSuccess}</span>
+                </div>
+                <a
+                  href={lineShareUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-1.5 w-full py-2 px-3 rounded-lg bg-[#06C755] hover:bg-[#05b34c] text-white font-semibold text-xs transition-colors"
+                >
+                  <Share2 className="w-3.5 h-3.5" />
+                  <span>เปิดหน้าต่างแชร์ลิงก์ผ่าน LINE</span>
+                </a>
               </div>
             )}
 

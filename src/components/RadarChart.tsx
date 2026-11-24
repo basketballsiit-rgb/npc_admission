@@ -27,11 +27,11 @@ export default function RadarChart({
   const [hoveredKey, setHoveredKey] = useState<DepartmentKey | null>(null);
 
   const isCyber = theme === "cyber";
-  const viewBoxW = isCyber ? 280 : 440;
-  const viewBoxH = isCyber ? 220 : 440;
+  const viewBoxW = isCyber ? 324 : 440;
+  const viewBoxH = isCyber ? 228 : 440;
   const centerX = viewBoxW / 2;
   const centerY = viewBoxH / 2;
-  const radius = isCyber ? 68 : 115;
+  const radius = isCyber ? 62 : 115;
 
   // Concentric levels (3, 6, 9, 12, 15)
   const levels = [0.2, 0.4, 0.6, 0.8, 1.0];

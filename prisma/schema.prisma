@@ -139,12 +139,13 @@ model GuidanceAssessmentLog {
   @@map("guidance_assessment_logs")
 }
 
-// 7. รายการค่าใช้จ่ายเบื้องต้นแรกเข้า (ปรับแก้และจัดการได้ตามปีการศึกษาและระดับชั้น)
+// 7. รายการค่าใช้จ่ายเบื้องต้นแรกเข้า (ปรับแก้และจัดการได้ตามปีการศึกษา รอบรับสมัคร ระดับชั้น และสาขาวิชา)
 model InitialExpenseItem {
   id             String   @id @default(cuid())
   academicYearId String
+  roundType      String   @default("QUOTA") // "QUOTA" (รอบโควตาพิเศษ - ยอดรวม) | "REGULAR" (รอบปกติ - แยกรายสาขาและรายการ)
   level          String   // "ปวช." | "ปวส." | "ปวส.ทวิภาคี"
-  programCode    String?  // รหัสสาขาเฉพาะ เช่น "20143" (หากเว้นว่าง null คือใช้กับทุกสาขาในระดับนั้น)
+  programCode    String?  // รหัสสาขาเฉพาะ เช่น "20101", "30101" (null = ใช้กับระดับชั้นในรอบโควตา)
   itemName       String   // เช่น "ค่าบำรุงการศึกษา", "ค่าชุดฝึกปฏิบัติการวิชาชีพ"
   amount         Float    // จำนวนเงินเป็นบาท (0 = ฟรีตามนโยบายรัฐ)
   note           String?  // หมายเหตุ เช่น "ฟรีตามนโยบายเรียนฟรี 15 ปี", "ชำระวันมอบตัว"
@@ -156,6 +157,7 @@ model InitialExpenseItem {
   academicYear AcademicYear @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
 
   @@index([academicYearId])
+  @@index([roundType])
   @@index([level])
   @@index([programCode])
   @@map("initial_expense_items")

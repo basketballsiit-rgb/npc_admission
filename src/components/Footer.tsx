@@ -18,12 +18,13 @@ export default function Footer() {
                   width={40}
                   height={40}
                   className="w-full h-full object-cover"
-                  onError={(e) => {
-                    const el = e.currentTarget;
-                    if (!el.src.includes("/npc_admission")) {
-                      el.src = "/npc_admission/npc-logo.jpg";
-                    }
-                  }}
+                onError={(e) => {
+                  const el = e.currentTarget;
+                  el.onerror = null;
+                  if (!el.src.includes("/npc_admission")) {
+                    el.src = "/npc_admission/npc-logo.jpg";
+                  }
+                }}
                 />
               </div>
               <span className="font-bold text-white text-base">วิทยาลัยสารพัดช่างน่าน</span>
@@ -90,12 +91,12 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-slate-800/80 mt-8 pt-6 flex flex-col sm:flex-row items-center justify-between text-[11px] text-slate-500 gap-2">
+        <div className="border-t border-slate-800/80 mt-8 pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-400 gap-2">
           <p>© 2570 วิทยาลัยสารพัดช่างน่าน (Nan Polytechnic College). สงวนลิขสิทธิ์.</p>
           <p className="flex items-center gap-2">
             <span>NPC E-Service Admission Portal</span>
-            <span>•</span>
-            <span className="text-slate-400">ระบบฐานข้อมูล สอศ. (ศธ.02 Compatible)</span>
+            <span>·</span>
+            <span>ระบบฐานข้อมูล สอศ. (ศธ.02)</span>
           </p>
         </div>
       </div>
